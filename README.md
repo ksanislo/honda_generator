@@ -1,2 +1,2 @@
 # honda_generator
-Honda EU2200i Generator component for Home Assistant
+Honda EU2200i Generator integration for Home Assistant
