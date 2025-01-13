@@ -10,7 +10,7 @@
   "iot_class": "local_polling",
   "integration_type": "device",
   "requirements": [],
-  "single_config_entry": false,
+  "single_config_entry": true,
   "ssdp": [],
   "version": "1.0.0",
   "zeroconf": [],

@@ -90,16 +90,16 @@ class API:
                 _LOGGER.debug("Connecting")
                 try:
                     self._client = await self._client_stack.enter_async_context(BleakClient(self._ble_device, timeout=30))
+                    await self._client.pair()
+                    await self._client.write_gatt_char(UNLOCK_PROTECT_CHARACTERISTIC_UUID, bytearray([0x01])+self.pwd.encode())
                 except asyncio.TimeoutError as exc:
                     _LOGGER.debug("Timeout on connect", exc_info=True)
                     raise APIConnectionError("Timeout on connect") from exc
                 except BleakError as exc:
                     _LOGGER.debug("Error on connect", exc_info=True)
-                    raise APIAuthError("Error connecting to api. Invalid username or password.") from exc
+                    raise APIAuthError("Error connecting. Invalid password or pairing mode timed out.") from exc
             else:
                 _LOGGER.debug("Connection reused")
-            await self._client.pair()
-            await self._client.write_gatt_char(UNLOCK_PROTECT_CHARACTERISTIC_UUID, bytearray([0x01])+self.pwd.encode())
 
             self.connected = True
             return True
