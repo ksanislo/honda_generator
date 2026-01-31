@@ -1,0 +1,6 @@
+[lint]
+# Ignore rules that conflict with interface requirements or readability preferences
+ignore = [
+    "ARG002",  # Unused method argument - often required by interfaces/protocols
+    "SIM102",  # Nested if statements - sometimes more readable with comments
+]

@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Cihaz zaten yapılandırılmış",
+      "reconfigure_successful": "Yeniden yapılandırma başarılı"
+    },
+    "error": {
+      "cannot_connect": "Bağlantı başarısız",
+      "invalid_auth": "Geçersiz kimlik doğrulama",
+      "unknown": "Beklenmeyen hata",
+      "detectonly": "Yalnızca otomatik cihaz algılama desteklenir."
+    },
+    "step": {
+      "user": {
+        "description": "Honda jeneratörünüzün Bluetooth şifresini girin (varsayılan 00000000).",
+        "data": {
+          "password": "Şifre"
+        }
+      },
+      "reconfigure": {
+        "description": "Honda jeneratörünüzün Bluetooth şifresini güncelleyin.",
+        "data": {
+          "password": "Şifre"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Tarama aralığı (saniye)"
+        },
+        "description": "Honda jeneratör ayarlarını yapılandırın.",
+        "title": "Honda Jeneratör Seçenekleri"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Çalışma Saatleri"
+      },
+      "output_current": {
+        "name": "Çıkış Akımı"
+      },
+      "output_power": {
+        "name": "Çıkış Gücü"
+      },
+      "engine_event": {
+        "name": "Motor Olayı",
+        "state": {
+          "no_event": "Olay Yok",
+          "engine_start": "Motor Başlatma",
+          "engine_stop": "Motor Durdurma",
+          "error": "Hata",
+          "voltage_drop": "Gerilim Düşüşü"
+        }
+      },
+      "engine_error": {
+        "name": "Motor Hatası",
+        "state": {
+          "no_error": "Hata Yok",
+          "co_detected": "CO Algılandı",
+          "stop_failure": "Durdurma Hatası",
+          "continuous_restarting": "Sürekli Yeniden Başlatma",
+          "starting_circuit_fault": "Marş Devresi Arızası"
+        }
+      },
+      "output_voltage": {
+        "name": "Çıkış Gerilimi"
+      },
+      "fuel_level": {
+        "name": "Yakıt Seviyesi"
+      },
+      "fuel_remaining_time": {
+        "name": "Kalan Yakıt Süresi"
+      },
+      "fuel_level_ml": {
+        "name": "Yakıt Seviyesi"
+      },
+      "fuel_gauge_level": {
+        "name": "Yakıt Göstergesi Seviyesi"
+      },
+      "output_voltage_setting": {
+        "name": "Çıkış Gerilimi Ayarı"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO Modu"
+      },
+      "engine_status": {
+        "name": "Motor Durumu"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Motoru Durdur"
+      },
+      "start_engine": {
+        "name": "Motoru Çalıştır"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO Modu"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Motoru durdur",
+      "description": "Jeneratör motorunu durdurur."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Motoru kontrol et",
+    "c_02": "Yakıtı kontrol et",
+    "c_03": "İnvertörü kontrol et",
+    "c_04": "Yükü kontrol et",
+    "c_05": "Çıkış akımı yüksek",
+    "c_06": "Aşırı akım algılandı (köle)",
+    "c_07": "Aşırı gerilim algılandı (köle)",
+    "c_08": "Kısa devre aşırı akım (köle)",
+    "c_09": "CO sensörünü kontrol et",
+    "c_10": "CO algılandı",
+    "c_2a": "Aşırı hız",
+    "c_a2": "Kontrol ünitesini kontrol et",
+    "e_00": "Marş arızası",
+    "e_01": "Marş takıldı",
+    "e_02": "Akü gerilim arızası",
+    "e_03": "Düşük yağ",
+    "e_04": "Yağ sensörü arızası",
+    "e_05": "Aşırı ısınma",
+    "e_06": "Jeneratör darbe arızası",
+    "e_07": "Anormal devir",
+    "e_0a": "Marş hatası",
+    "e_0b": "Marş devresi",
+    "e_10": "Ateşleme arızası",
+    "e_11": "İnvertör iletişimi (ana)",
+    "e_12": "İnvertör arızası",
+    "e_13": "İnvertör DC arızası",
+    "e_15": "İnvertör aşırı akım",
+    "e_16": "İnvertör aşırı yük",
+    "e_17": "İnvertör gerilim arızası",
+    "e_19": "Çıkış aşırı gerilimi",
+    "e_1a": "Aşırı yük kapatma",
+    "e_1b": "Toprak arızası",
+    "e_1c": "İnvertör iletişimi",
+    "e_1e": "İnvertör aşırı ısınma",
+    "e_20": "İnvertör-GCU iletişimi (köle)",
+    "e_21": "İnvertör iletişimi (köle)",
+    "e_22": "Aşırı akım kapatma (köle)",
+    "e_23": "Aşırı gerilim kapatma (köle)",
+    "e_25": "Güç modülü aşırı ısınma (köle)",
+    "e_26": "A/D giriş arızası (köle)",
+    "e_27": "FET açık devre (köle)",
+    "e_29": "FET kısa devre (köle)",
+    "e_2a": "Diyot kısa devre (köle)",
+    "e_2b": "SCR kısa devre (köle)",
+    "e_2c": "İnvertör bellek arızası (köle)",
+    "e_2e": "Kısa devre aşırı akım (köle)",
+    "e_50": "CO alarmı",
+    "e_51": "Atmosferik basınç sensörü",
+    "e_52": "Yüksek CO algılandı",
+    "e_53": "CO sensör hatası",
+    "e_56": "CO kalibrasyon hatası",
+    "e_57": "CO kapatma",
+    "e_70": "BT ünitesi iletişimi",
+    "e_71": "BT bağlantı hatası",
+    "e_72": "BT iletişim hatası",
+    "e_73": "BT modül hatası"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert",
+      "reconfigure_successful": "Neukonfiguration erfolgreich"
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "invalid_auth": "Ungültige Authentifizierung",
+      "unknown": "Unerwarteter Fehler",
+      "detectonly": "Nur automatische Geräteerkennung wird unterstützt."
+    },
+    "step": {
+      "user": {
+        "description": "Geben Sie das Bluetooth-Passwort für Ihren Honda-Generator ein (Standard ist 00000000).",
+        "data": {
+          "password": "Passwort"
+        }
+      },
+      "reconfigure": {
+        "description": "Aktualisieren Sie das Bluetooth-Passwort für Ihren Honda-Generator.",
+        "data": {
+          "password": "Passwort"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Abrufintervall (Sekunden)"
+        },
+        "description": "Honda-Generator-Einstellungen konfigurieren.",
+        "title": "Honda-Generator-Optionen"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Betriebsstunden"
+      },
+      "output_current": {
+        "name": "Ausgangsstrom"
+      },
+      "output_power": {
+        "name": "Ausgangsleistung"
+      },
+      "engine_event": {
+        "name": "Motor-Ereignis",
+        "state": {
+          "no_event": "Kein Ereignis",
+          "engine_start": "Motorstart",
+          "engine_stop": "Motorstopp",
+          "error": "Fehler",
+          "voltage_drop": "Spannungsabfall"
+        }
+      },
+      "engine_error": {
+        "name": "Motor-Fehler",
+        "state": {
+          "no_error": "Kein Fehler",
+          "co_detected": "CO erkannt",
+          "stop_failure": "Stoppfehler",
+          "continuous_restarting": "Kontinuierlicher Neustart",
+          "starting_circuit_fault": "Startkreisfehler"
+        }
+      },
+      "output_voltage": {
+        "name": "Ausgangsspannung"
+      },
+      "fuel_level": {
+        "name": "Kraftstoffstand"
+      },
+      "fuel_remaining_time": {
+        "name": "Verbleibende Kraftstoffzeit"
+      },
+      "fuel_level_ml": {
+        "name": "Kraftstoffstand"
+      },
+      "fuel_gauge_level": {
+        "name": "Tankanzeigestand"
+      },
+      "output_voltage_setting": {
+        "name": "Ausgangsspannungs-Einstellung"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO-Modus"
+      },
+      "engine_status": {
+        "name": "Motor-Status"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Motor stoppen"
+      },
+      "start_engine": {
+        "name": "Motor starten"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO-Modus"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Motor stoppen",
+      "description": "Stoppt den Generator-Motor."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Motor prüfen",
+    "c_02": "Kraftstoff prüfen",
+    "c_03": "Wechselrichter prüfen",
+    "c_04": "Last prüfen",
+    "c_05": "Ausgangsstrom hoch",
+    "c_06": "Überstrom erkannt (Slave)",
+    "c_07": "Überspannung erkannt (Slave)",
+    "c_08": "Kurzschluss-Überstrom erkannt (Slave)",
+    "c_09": "CO-Sensor prüfen",
+    "c_10": "CO erkannt",
+    "c_2a": "Überdrehzahl",
+    "c_a2": "Steuergerät prüfen",
+    "e_00": "Starterfehler",
+    "e_01": "Starter blockiert",
+    "e_02": "Batteriespannungsfehler",
+    "e_03": "Niedriger Ölstand",
+    "e_04": "Ölsensorfehler",
+    "e_05": "Überhitzung",
+    "e_06": "Generatorimpulsfehler",
+    "e_07": "Drehzahl abnormal",
+    "e_0a": "Starterversagen",
+    "e_0b": "Startkreis",
+    "e_10": "Zündungsfehler",
+    "e_11": "Wechselrichter-Komm. (Master)",
+    "e_12": "Wechselrichterfehler",
+    "e_13": "Wechselrichter-DC-Fehler",
+    "e_15": "Wechselrichter-Überstrom",
+    "e_16": "Wechselrichter-Überlast",
+    "e_17": "Wechselrichter-Spannungsfehler",
+    "e_19": "Ausgangüberspannung",
+    "e_1a": "Überlastabschaltung",
+    "e_1b": "Erdungsfehler",
+    "e_1c": "Wechselrichter-Kommunikation",
+    "e_1e": "Wechselrichter-Überhitzung",
+    "e_20": "Wechselrichter-GCU-Komm. (Slave)",
+    "e_21": "Wechselrichter-Komm. (Slave)",
+    "e_22": "Überstromabschaltung (Slave)",
+    "e_23": "Überspannungsabschaltung (Slave)",
+    "e_25": "Leistungsmodul-Überhitzung (Slave)",
+    "e_26": "A/D-Eingangsfehler (Slave)",
+    "e_27": "FET offener Stromkreis (Slave)",
+    "e_29": "FET Kurzschluss (Slave)",
+    "e_2a": "Dioden-Kurzschluss (Slave)",
+    "e_2b": "SCR-Kurzschluss (Slave)",
+    "e_2c": "Wechselrichter-Speicherfehler (Slave)",
+    "e_2e": "Kurzschluss-Überstrom (Slave)",
+    "e_50": "CO-Warnung",
+    "e_51": "Atmosphärendrucksensor",
+    "e_52": "CO-Wert hoch",
+    "e_53": "CO-Sensorfehler",
+    "e_56": "CO-Kalibrierungsfehler",
+    "e_57": "CO-Abschaltung",
+    "e_70": "BT-Einheit-Kommunikation",
+    "e_71": "BT-Verbindungsfehler",
+    "e_72": "BT-Kommunikationsfehler",
+    "e_73": "BT-Modulfehler"
+  }
+}

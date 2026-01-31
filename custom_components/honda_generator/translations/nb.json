@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Enheten er allerede konfigurert",
+      "reconfigure_successful": "Rekonfigurering vellykket"
+    },
+    "error": {
+      "cannot_connect": "Tilkobling mislyktes",
+      "invalid_auth": "Ugyldig autentisering",
+      "unknown": "Uventet feil",
+      "detectonly": "Kun automatisk enhetsdeteksjon støttes."
+    },
+    "step": {
+      "user": {
+        "description": "Skriv inn Bluetooth-passordet for Honda-generatoren din (standard er 00000000).",
+        "data": {
+          "password": "Passord"
+        }
+      },
+      "reconfigure": {
+        "description": "Oppdater Bluetooth-passordet for Honda-generatoren din.",
+        "data": {
+          "password": "Passord"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Skanneintervall (sekunder)"
+        },
+        "description": "Konfigurer Honda-generatorinnstillinger.",
+        "title": "Honda-generatoralternativer"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Driftstimer"
+      },
+      "output_current": {
+        "name": "Utgangsstrøm"
+      },
+      "output_power": {
+        "name": "Utgangseffekt"
+      },
+      "engine_event": {
+        "name": "Motorhendelse",
+        "state": {
+          "no_event": "Ingen hendelse",
+          "engine_start": "Motorstart",
+          "engine_stop": "Motorstopp",
+          "error": "Feil",
+          "voltage_drop": "Spenningsfall"
+        }
+      },
+      "engine_error": {
+        "name": "Motorfeil",
+        "state": {
+          "no_error": "Ingen feil",
+          "co_detected": "CO oppdaget",
+          "stop_failure": "Stoppfeil",
+          "continuous_restarting": "Kontinuerlig omstart",
+          "starting_circuit_fault": "Startkretsfeil"
+        }
+      },
+      "output_voltage": {
+        "name": "Utgangsspenning"
+      },
+      "fuel_level": {
+        "name": "Drivstoffnivå"
+      },
+      "fuel_remaining_time": {
+        "name": "Gjenværende drivstofftid"
+      },
+      "fuel_level_ml": {
+        "name": "Drivstoffnivå"
+      },
+      "fuel_gauge_level": {
+        "name": "Drivstoffmålernivå"
+      },
+      "output_voltage_setting": {
+        "name": "Utgangsspenningsinnstilling"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO-modus"
+      },
+      "engine_status": {
+        "name": "Motorstatus"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Stopp motor"
+      },
+      "start_engine": {
+        "name": "Start motor"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO-modus"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Stopp motor",
+      "description": "Stopper generatormotoren."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Sjekk motor",
+    "c_02": "Sjekk drivstoff",
+    "c_03": "Sjekk inverter",
+    "c_04": "Sjekk belastning",
+    "c_05": "Utgangsstrøm høy",
+    "c_06": "Overstrøm oppdaget (slave)",
+    "c_07": "Overspenning oppdaget (slave)",
+    "c_08": "Kortslutning overstrøm (slave)",
+    "c_09": "Sjekk CO-sensor",
+    "c_10": "CO oppdaget",
+    "c_2a": "Overhastighet",
+    "c_a2": "Sjekk kontrollenhet",
+    "e_00": "Startmotorfeil",
+    "e_01": "Startmotor fastklemt",
+    "e_02": "Batterispenningsfeil",
+    "e_03": "Lav olje",
+    "e_04": "Oljesensorfeil",
+    "e_05": "Overoppheting",
+    "e_06": "Generatorpulsfeil",
+    "e_07": "Unormalt turtall",
+    "e_0a": "Startfeil",
+    "e_0b": "Startkrets",
+    "e_10": "Tenningsfeil",
+    "e_11": "Inverter komm. (master)",
+    "e_12": "Inverterfeil",
+    "e_13": "Inverter DC-feil",
+    "e_15": "Inverter overstrøm",
+    "e_16": "Inverter overbelastning",
+    "e_17": "Inverter spenningsfeil",
+    "e_19": "Utgang overspenning",
+    "e_1a": "Overbelastningsavslutning",
+    "e_1b": "Jordfeil",
+    "e_1c": "Inverterkommunikasjon",
+    "e_1e": "Inverter overoppheting",
+    "e_20": "Inverter-GCU komm. (slave)",
+    "e_21": "Inverter komm. (slave)",
+    "e_22": "Overstrømsavslutning (slave)",
+    "e_23": "Overspenningsavslutning (slave)",
+    "e_25": "Effektmodul overoppheting (slave)",
+    "e_26": "A/D-inngangsfeil (slave)",
+    "e_27": "FET åpen krets (slave)",
+    "e_29": "FET kortslutning (slave)",
+    "e_2a": "Diode kortslutning (slave)",
+    "e_2b": "SCR kortslutning (slave)",
+    "e_2c": "Inverter minnefeil (slave)",
+    "e_2e": "Kortslutning overstrøm (slave)",
+    "e_50": "CO-alarm",
+    "e_51": "Atmosfærisk trykksensor",
+    "e_52": "Høy CO oppdaget",
+    "e_53": "CO-sensorfeil",
+    "e_56": "CO-kalibreringsfeil",
+    "e_57": "CO-avslutning",
+    "e_70": "BT-enhet kommunikasjon",
+    "e_71": "BT-tilkoblingsfeil",
+    "e_72": "BT-kommunikasjonsfeil",
+    "e_73": "BT-modulfeil"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "设备已配置",
+      "reconfigure_successful": "重新配置成功"
+    },
+    "error": {
+      "cannot_connect": "连接失败",
+      "invalid_auth": "身份验证无效",
+      "unknown": "意外错误",
+      "detectonly": "仅支持自动设备检测。"
+    },
+    "step": {
+      "user": {
+        "description": "输入您的本田发电机的蓝牙密码（默认为 00000000）。",
+        "data": {
+          "password": "密码"
+        }
+      },
+      "reconfigure": {
+        "description": "更新您的本田发电机的蓝牙密码。",
+        "data": {
+          "password": "密码"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "扫描间隔（秒）"
+        },
+        "description": "配置本田发电机设置。",
+        "title": "本田发电机选项"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "运行小时数"
+      },
+      "output_current": {
+        "name": "输出电流"
+      },
+      "output_power": {
+        "name": "输出功率"
+      },
+      "engine_event": {
+        "name": "发动机事件",
+        "state": {
+          "no_event": "无事件",
+          "engine_start": "发动机启动",
+          "engine_stop": "发动机停止",
+          "error": "错误",
+          "voltage_drop": "电压下降"
+        }
+      },
+      "engine_error": {
+        "name": "发动机错误",
+        "state": {
+          "no_error": "无错误",
+          "co_detected": "检测到CO",
+          "stop_failure": "停止失败",
+          "continuous_restarting": "持续重启",
+          "starting_circuit_fault": "启动电路故障"
+        }
+      },
+      "output_voltage": {
+        "name": "输出电压"
+      },
+      "fuel_level": {
+        "name": "燃油液位"
+      },
+      "fuel_remaining_time": {
+        "name": "剩余燃油时间"
+      },
+      "fuel_level_ml": {
+        "name": "燃油液位"
+      },
+      "fuel_gauge_level": {
+        "name": "燃油表液位"
+      },
+      "output_voltage_setting": {
+        "name": "输出电压设置"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO 模式"
+      },
+      "engine_status": {
+        "name": "发动机状态"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "停止发动机"
+      },
+      "start_engine": {
+        "name": "启动发动机"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO 模式"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "停止发动机",
+      "description": "停止发电机发动机。"
+    }
+  },
+  "alert_codes": {
+    "c_01": "检查发动机",
+    "c_02": "检查燃油",
+    "c_03": "检查逆变器",
+    "c_04": "检查负载",
+    "c_05": "输出电流高",
+    "c_06": "过流检测（从机）",
+    "c_07": "过压检测（从机）",
+    "c_08": "短路过流检测（从机）",
+    "c_09": "检查CO传感器",
+    "c_10": "检测到CO",
+    "c_2a": "超速",
+    "c_a2": "检查控制单元",
+    "e_00": "启动器故障",
+    "e_01": "启动器卡住",
+    "e_02": "电池电压故障",
+    "e_03": "机油不足",
+    "e_04": "机油传感器故障",
+    "e_05": "过热",
+    "e_06": "发电机脉冲故障",
+    "e_07": "转速异常",
+    "e_0a": "启动失败",
+    "e_0b": "启动电路",
+    "e_10": "点火故障",
+    "e_11": "逆变器通信（主机）",
+    "e_12": "逆变器故障",
+    "e_13": "逆变器直流故障",
+    "e_15": "逆变器过流",
+    "e_16": "逆变器过载",
+    "e_17": "逆变器电压故障",
+    "e_19": "输出过压",
+    "e_1a": "过载关机",
+    "e_1b": "接地故障",
+    "e_1c": "逆变器通信",
+    "e_1e": "逆变器过热",
+    "e_20": "逆变器-GCU通信（从机）",
+    "e_21": "逆变器通信（从机）",
+    "e_22": "过流关机（从机）",
+    "e_23": "过压关机（从机）",
+    "e_25": "功率模块过热（从机）",
+    "e_26": "A/D输入故障（从机）",
+    "e_27": "FET开路（从机）",
+    "e_29": "FET短路（从机）",
+    "e_2a": "二极管短路（从机）",
+    "e_2b": "SCR短路（从机）",
+    "e_2c": "逆变器存储器故障（从机）",
+    "e_2e": "短路过流（从机）",
+    "e_50": "CO警报",
+    "e_51": "大气压传感器",
+    "e_52": "检测到高CO",
+    "e_53": "CO传感器错误",
+    "e_56": "CO校准错误",
+    "e_57": "CO关机",
+    "e_70": "BT单元通信",
+    "e_71": "BT连接错误",
+    "e_72": "BT通信错误",
+    "e_73": "BT模块错误"
+  }
+}

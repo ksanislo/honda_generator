@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured",
+      "reconfigure_successful": "Reconfiguration successful"
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error",
+      "detectonly": "Only automatic device detection is supported."
+    },
+    "step": {
+      "user": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "description": "Update the Bluetooth password for your Honda generator.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan Interval (seconds)"
+        },
+        "description": "Configure Honda Generator settings.",
+        "title": "Honda Generator Options"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Runtime Hours"
+      },
+      "output_current": {
+        "name": "Output Current"
+      },
+      "output_power": {
+        "name": "Output Power"
+      },
+      "engine_event": {
+        "name": "Engine Event",
+        "state": {
+          "no_event": "No Event",
+          "engine_start": "Engine Start",
+          "engine_stop": "Engine Stop",
+          "error": "Error",
+          "voltage_drop": "Voltage Drop"
+        }
+      },
+      "engine_error": {
+        "name": "Engine Error",
+        "state": {
+          "no_error": "No Error",
+          "co_detected": "CO Detected",
+          "stop_failure": "Stop Failure",
+          "continuous_restarting": "Continuous Restarting",
+          "starting_circuit_fault": "Starting Circuit Fault"
+        }
+      },
+      "output_voltage": {
+        "name": "Output Voltage"
+      },
+      "fuel_level": {
+        "name": "Fuel Level"
+      },
+      "fuel_remaining_time": {
+        "name": "Fuel Remaining Time"
+      },
+      "fuel_level_ml": {
+        "name": "Fuel Level"
+      },
+      "fuel_gauge_level": {
+        "name": "Fuel Gauge Level"
+      },
+      "output_voltage_setting": {
+        "name": "Output Voltage Setting"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO Mode"
+      },
+      "engine_status": {
+        "name": "Engine Status"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Stop Engine"
+      },
+      "start_engine": {
+        "name": "Start Engine"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO Mode"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Stop engine",
+      "description": "Stops the generator engine."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Check engine",
+    "c_02": "Check fuel",
+    "c_03": "Check inverter",
+    "c_04": "Check load",
+    "c_05": "Output current high",
+    "c_06": "Overcurrent detect (slave)",
+    "c_07": "Overvoltage detect (slave)",
+    "c_08": "Short overcurrent detect (slave)",
+    "c_09": "Check CO sensor",
+    "c_10": "CO detected",
+    "c_2a": "Overspeed",
+    "c_a2": "Control unit check",
+    "e_00": "Starter fault",
+    "e_01": "Starter stuck on",
+    "e_02": "Battery voltage fault",
+    "e_03": "Low oil",
+    "e_04": "Oil sensor fault",
+    "e_05": "Overheat",
+    "e_06": "Generator pulse fault",
+    "e_07": "RPM abnormal",
+    "e_0a": "Starter failure",
+    "e_0b": "Starter circuit",
+    "e_10": "Ignition fault",
+    "e_11": "Inverter comm (master)",
+    "e_12": "Inverter fault",
+    "e_13": "Inverter DC fault",
+    "e_15": "Inverter overcurrent",
+    "e_16": "Inverter overload",
+    "e_17": "Inverter voltage fault",
+    "e_19": "Output overvoltage",
+    "e_1a": "Overload shutdown",
+    "e_1b": "Ground fault",
+    "e_1c": "Inverter communication",
+    "e_1e": "Inverter overheat",
+    "e_20": "Inverter-GCU comm (slave)",
+    "e_21": "Inverter comm (slave)",
+    "e_22": "Overcurrent shutdown (slave)",
+    "e_23": "Overvoltage shutdown (slave)",
+    "e_25": "Power module overheat (slave)",
+    "e_26": "A/D input fault (slave)",
+    "e_27": "FET open circuit (slave)",
+    "e_29": "FET short circuit (slave)",
+    "e_2a": "Diode short (slave)",
+    "e_2b": "SCR short (slave)",
+    "e_2c": "Inverter memory fault (slave)",
+    "e_2e": "Short-circuit overcurrent (slave)",
+    "e_50": "CO alert",
+    "e_51": "Atmospheric pressure sensor",
+    "e_52": "CO detected high",
+    "e_53": "CO sensor error",
+    "e_56": "CO calibration error",
+    "e_57": "CO shutdown",
+    "e_70": "BT unit communication",
+    "e_71": "BT connection error",
+    "e_72": "BT communication error",
+    "e_73": "BT module error"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Enheden er allerede konfigureret",
+      "reconfigure_successful": "Omkonfigurering lykkedes"
+    },
+    "error": {
+      "cannot_connect": "Forbindelse mislykkedes",
+      "invalid_auth": "Ugyldig godkendelse",
+      "unknown": "Uventet fejl",
+      "detectonly": "Kun automatisk enhedsregistrering understøttes."
+    },
+    "step": {
+      "user": {
+        "description": "Indtast Bluetooth-adgangskoden til din Honda-generator (standard er 00000000).",
+        "data": {
+          "password": "Adgangskode"
+        }
+      },
+      "reconfigure": {
+        "description": "Opdater Bluetooth-adgangskoden til din Honda-generator.",
+        "data": {
+          "password": "Adgangskode"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scanningsinterval (sekunder)"
+        },
+        "description": "Konfigurer Honda-generatorindstillinger.",
+        "title": "Honda-generatorindstillinger"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Driftstimer"
+      },
+      "output_current": {
+        "name": "Udgangsstrøm"
+      },
+      "output_power": {
+        "name": "Udgangseffekt"
+      },
+      "engine_event": {
+        "name": "Motorhændelse",
+        "state": {
+          "no_event": "Ingen hændelse",
+          "engine_start": "Motorstart",
+          "engine_stop": "Motorstop",
+          "error": "Fejl",
+          "voltage_drop": "Spændingsfald"
+        }
+      },
+      "engine_error": {
+        "name": "Motorfejl",
+        "state": {
+          "no_error": "Ingen fejl",
+          "co_detected": "CO registreret",
+          "stop_failure": "Stopfejl",
+          "continuous_restarting": "Kontinuerlig genstart",
+          "starting_circuit_fault": "Startkredsløbsfejl"
+        }
+      },
+      "output_voltage": {
+        "name": "Udgangsspænding"
+      },
+      "fuel_level": {
+        "name": "Brændstofniveau"
+      },
+      "fuel_remaining_time": {
+        "name": "Resterende brændstoftid"
+      },
+      "fuel_level_ml": {
+        "name": "Brændstofniveau"
+      },
+      "fuel_gauge_level": {
+        "name": "Brændstofmålerniveau"
+      },
+      "output_voltage_setting": {
+        "name": "Udgangsspændingsindstilling"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO-tilstand"
+      },
+      "engine_status": {
+        "name": "Motorstatus"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Stop motor"
+      },
+      "start_engine": {
+        "name": "Start motor"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO-tilstand"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Stop motor",
+      "description": "Stopper generatormotoren."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Kontroller motor",
+    "c_02": "Kontroller brændstof",
+    "c_03": "Kontroller inverter",
+    "c_04": "Kontroller belastning",
+    "c_05": "Udgangsstrøm høj",
+    "c_06": "Overstrøm registreret (slave)",
+    "c_07": "Overspænding registreret (slave)",
+    "c_08": "Kortslutning overstrøm (slave)",
+    "c_09": "Kontroller CO-sensor",
+    "c_10": "CO registreret",
+    "c_2a": "Overhastighed",
+    "c_a2": "Kontroller styreenhed",
+    "e_00": "Startmotorfejl",
+    "e_01": "Startmotor fastklemt",
+    "e_02": "Batterispændingsfejl",
+    "e_03": "Lav olie",
+    "e_04": "Oliesensorfejl",
+    "e_05": "Overophedning",
+    "e_06": "Generatorpulsfejl",
+    "e_07": "Unormalt omdrejningstal",
+    "e_0a": "Startfejl",
+    "e_0b": "Startkredsløb",
+    "e_10": "Tændingsfejl",
+    "e_11": "Inverter komm. (master)",
+    "e_12": "Inverterfejl",
+    "e_13": "Inverter DC-fejl",
+    "e_15": "Inverter overstrøm",
+    "e_16": "Inverter overbelastning",
+    "e_17": "Inverter spændingsfejl",
+    "e_19": "Udgang overspænding",
+    "e_1a": "Overbelastningsnedlukning",
+    "e_1b": "Jordfejl",
+    "e_1c": "Inverterkommunikation",
+    "e_1e": "Inverter overophedning",
+    "e_20": "Inverter-GCU komm. (slave)",
+    "e_21": "Inverter komm. (slave)",
+    "e_22": "Overstrømsnedlukning (slave)",
+    "e_23": "Overspændingsnedlukning (slave)",
+    "e_25": "Effektmodul overophedning (slave)",
+    "e_26": "A/D-inputfejl (slave)",
+    "e_27": "FET åbent kredsløb (slave)",
+    "e_29": "FET kortslutning (slave)",
+    "e_2a": "Diode kortslutning (slave)",
+    "e_2b": "SCR kortslutning (slave)",
+    "e_2c": "Inverter hukommelsesfejl (slave)",
+    "e_2e": "Kortslutning overstrøm (slave)",
+    "e_50": "CO-alarm",
+    "e_51": "Atmosfærisk tryksensor",
+    "e_52": "Høj CO registreret",
+    "e_53": "CO-sensorfejl",
+    "e_56": "CO-kalibreringsfejl",
+    "e_57": "CO-nedlukning",
+    "e_70": "BT-enhed kommunikation",
+    "e_71": "BT-forbindelsesfejl",
+    "e_72": "BT-kommunikationsfejl",
+    "e_73": "BT-modulfejl"
+  }
+}

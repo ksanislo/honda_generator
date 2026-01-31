@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "L'appareil est déjà configuré",
+      "reconfigure_successful": "Reconfiguration réussie"
+    },
+    "error": {
+      "cannot_connect": "Échec de la connexion",
+      "invalid_auth": "Authentification invalide",
+      "unknown": "Erreur inattendue",
+      "detectonly": "Seule la détection automatique des appareils est prise en charge."
+    },
+    "step": {
+      "user": {
+        "description": "Entrez le mot de passe Bluetooth de votre générateur Honda (par défaut 00000000).",
+        "data": {
+          "password": "Mot de passe"
+        }
+      },
+      "reconfigure": {
+        "description": "Mettez à jour le mot de passe Bluetooth de votre générateur Honda.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalle d'analyse (secondes)"
+        },
+        "description": "Configurer les paramètres du générateur Honda.",
+        "title": "Options du générateur Honda"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Heures de fonctionnement"
+      },
+      "output_current": {
+        "name": "Courant de sortie"
+      },
+      "output_power": {
+        "name": "Puissance de sortie"
+      },
+      "engine_event": {
+        "name": "Événement moteur",
+        "state": {
+          "no_event": "Aucun événement",
+          "engine_start": "Démarrage moteur",
+          "engine_stop": "Arrêt moteur",
+          "error": "Erreur",
+          "voltage_drop": "Chute de tension"
+        }
+      },
+      "engine_error": {
+        "name": "Erreur moteur",
+        "state": {
+          "no_error": "Aucune erreur",
+          "co_detected": "CO détecté",
+          "stop_failure": "Échec d'arrêt",
+          "continuous_restarting": "Redémarrage continu",
+          "starting_circuit_fault": "Défaut circuit démarrage"
+        }
+      },
+      "output_voltage": {
+        "name": "Tension de sortie"
+      },
+      "fuel_level": {
+        "name": "Niveau de carburant"
+      },
+      "fuel_remaining_time": {
+        "name": "Temps de carburant restant"
+      },
+      "fuel_level_ml": {
+        "name": "Niveau de carburant"
+      },
+      "fuel_gauge_level": {
+        "name": "Niveau de la jauge de carburant"
+      },
+      "output_voltage_setting": {
+        "name": "Réglage de la tension de sortie"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "Mode ECO"
+      },
+      "engine_status": {
+        "name": "État du moteur"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Arrêter le moteur"
+      },
+      "start_engine": {
+        "name": "Démarrer le moteur"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "Mode ECO"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Arrêter le moteur",
+      "description": "Arrête le moteur du générateur."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Vérifier moteur",
+    "c_02": "Vérifier carburant",
+    "c_03": "Vérifier onduleur",
+    "c_04": "Vérifier charge",
+    "c_05": "Courant de sortie élevé",
+    "c_06": "Surintensité détectée (esclave)",
+    "c_07": "Surtension détectée (esclave)",
+    "c_08": "Court-circuit surintensité (esclave)",
+    "c_09": "Vérifier capteur CO",
+    "c_10": "CO détecté",
+    "c_2a": "Survitesse",
+    "c_a2": "Vérifier unité de contrôle",
+    "e_00": "Défaut démarreur",
+    "e_01": "Démarreur bloqué",
+    "e_02": "Défaut tension batterie",
+    "e_03": "Niveau huile bas",
+    "e_04": "Défaut capteur huile",
+    "e_05": "Surchauffe",
+    "e_06": "Défaut impulsion générateur",
+    "e_07": "Régime anormal",
+    "e_0a": "Échec démarreur",
+    "e_0b": "Circuit démarreur",
+    "e_10": "Défaut allumage",
+    "e_11": "Comm. onduleur (maître)",
+    "e_12": "Défaut onduleur",
+    "e_13": "Défaut CC onduleur",
+    "e_15": "Surintensité onduleur",
+    "e_16": "Surcharge onduleur",
+    "e_17": "Défaut tension onduleur",
+    "e_19": "Surtension sortie",
+    "e_1a": "Arrêt surcharge",
+    "e_1b": "Défaut terre",
+    "e_1c": "Communication onduleur",
+    "e_1e": "Surchauffe onduleur",
+    "e_20": "Comm. onduleur-GCU (esclave)",
+    "e_21": "Comm. onduleur (esclave)",
+    "e_22": "Arrêt surintensité (esclave)",
+    "e_23": "Arrêt surtension (esclave)",
+    "e_25": "Surchauffe module puissance (esclave)",
+    "e_26": "Défaut entrée A/N (esclave)",
+    "e_27": "Circuit ouvert FET (esclave)",
+    "e_29": "Court-circuit FET (esclave)",
+    "e_2a": "Court-circuit diode (esclave)",
+    "e_2b": "Court-circuit SCR (esclave)",
+    "e_2c": "Défaut mémoire onduleur (esclave)",
+    "e_2e": "Court-circuit surintensité (esclave)",
+    "e_50": "Alerte CO",
+    "e_51": "Capteur pression atmosphérique",
+    "e_52": "CO élevé détecté",
+    "e_53": "Erreur capteur CO",
+    "e_56": "Erreur calibration CO",
+    "e_57": "Arrêt CO",
+    "e_70": "Communication unité BT",
+    "e_71": "Erreur connexion BT",
+    "e_72": "Erreur communication BT",
+    "e_73": "Erreur module BT"
+  }
+}

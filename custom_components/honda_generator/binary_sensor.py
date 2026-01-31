@@ -1,0 +1,244 @@
+"""Honda Generator binary sensors."""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
+
+from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
+    BinarySensorEntity,
+    BinarySensorEntityDescription,
+)
+from homeassistant.const import EntityCategory
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
+
+from .api import DeviceType, get_model_spec
+from .codes import AlertCode, get_fault_codes, get_warning_codes
+from .const import DOMAIN
+from .entity import HondaGeneratorEntity
+
+if TYPE_CHECKING:
+    from . import HondaGeneratorConfigEntry
+    from .coordinator import HondaGeneratorCoordinator
+
+_LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class HondaGeneratorBinarySensorEntityDescription(BinarySensorEntityDescription):
+    """Describes a Honda Generator binary sensor entity."""
+
+    device_type: DeviceType
+    false_when_unavailable: bool = False
+    icon_on: str | None = None
+    icon_off: str | None = None
+
+
+BINARY_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorBinarySensorEntityDescription, ...] = (
+    HondaGeneratorBinarySensorEntityDescription(
+        key="eco_mode",
+        translation_key="eco_mode",
+        device_type=DeviceType.ECO_MODE,
+        icon_on="mdi:leaf",
+        icon_off="mdi:leaf-off",
+    ),
+    HondaGeneratorBinarySensorEntityDescription(
+        key="engine_status",
+        translation_key="engine_status",
+        device_type=DeviceType.ENGINE_RUNNING,
+        device_class=BinarySensorDeviceClass.RUNNING,
+        false_when_unavailable=True,
+        icon_on="mdi:engine",
+        icon_off="mdi:engine-off",
+    ),
+)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: HondaGeneratorConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the binary sensors."""
+    coordinator = config_entry.runtime_data.coordinator
+
+    # Check if model has ECO control (switch) - if so, skip ECO binary sensor
+    model_spec = get_model_spec(coordinator.data.model) if coordinator.data else None
+    has_eco_control = model_spec and model_spec.eco_control
+
+    entities: list[BinarySensorEntity] = [
+        HondaGeneratorBinarySensor(coordinator, description)
+        for description in BINARY_SENSOR_DESCRIPTIONS
+        if not (description.device_type == DeviceType.ECO_MODE and has_eco_control)
+    ]
+
+    # Model-specific warning sensors
+    for alert_code in get_warning_codes(coordinator.data.model):
+        entities.append(
+            HondaGeneratorAlertBinarySensor(coordinator, alert_code, is_fault=False)
+        )
+
+    # Model-specific fault sensors
+    for alert_code in get_fault_codes(coordinator.data.model):
+        entities.append(
+            HondaGeneratorAlertBinarySensor(coordinator, alert_code, is_fault=True)
+        )
+
+    async_add_entities(entities)
+
+
+class HondaGeneratorBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
+    """Honda Generator binary sensor entity."""
+
+    entity_description: HondaGeneratorBinarySensorEntityDescription
+
+    def __init__(
+        self,
+        coordinator: HondaGeneratorCoordinator,
+        description: HondaGeneratorBinarySensorEntityDescription,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = (
+            f"{DOMAIN}-{coordinator.data.controller_name}_{description.key}"
+        )
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        self.async_write_ha_state()
+
+    def _get_device_state(self) -> bool:
+        """Get the current device state from coordinator."""
+        device = self.coordinator.get_device_by_id(
+            self.entity_description.device_type, 1
+        )
+        return bool(device.state) if device else False
+
+    @property
+    def is_on(self) -> bool:
+        """Return if the binary sensor is on."""
+        if self.coordinator.last_update_success:
+            return self._get_device_state()
+        if self.entity_description.false_when_unavailable:
+            return False
+        return self._get_device_state()
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        if self.entity_description.false_when_unavailable:
+            return True
+        return super().available
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon based on state."""
+        desc = self.entity_description
+        if desc.icon_on and desc.icon_off:
+            return desc.icon_on if self.is_on else desc.icon_off
+        return None
+
+
+class HondaGeneratorAlertBinarySensor(
+    HondaGeneratorEntity, RestoreEntity, BinarySensorEntity
+):
+    """Binary sensor for a model-specific warning or fault code."""
+
+    def __init__(
+        self,
+        coordinator: HondaGeneratorCoordinator,
+        alert_code: AlertCode,
+        is_fault: bool,
+    ) -> None:
+        """Initialize the alert binary sensor."""
+        super().__init__(coordinator)
+        self._alert_code = alert_code
+        self._is_fault = is_fault
+        prefix = "fault" if is_fault else "warning"
+        self._attr_unique_id = (
+            f"{DOMAIN}-{coordinator.data.controller_name}_{prefix}_{alert_code.code}"
+        )
+        # Use description if available, otherwise fall back to code
+        if alert_code.description:
+            self._attr_name = f"{alert_code.description} ({alert_code.code})"
+        else:
+            self._attr_name = f"{prefix.title()} {alert_code.code}"
+        self._attr_device_class = BinarySensorDeviceClass.PROBLEM
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_entity_registry_enabled_default = False
+        self._restored_value: bool | None = None
+        self._restored_last_update: datetime | None = None
+
+    async def async_added_to_hass(self) -> None:
+        """Restore last state when added to hass."""
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is not None and last_state.state not in (
+            None,
+            "unknown",
+            "unavailable",
+        ):
+            self._restored_value = last_state.state == "on"
+            if last_state.attributes.get("last_update"):
+                try:
+                    self._restored_last_update = datetime.fromisoformat(
+                        last_state.attributes["last_update"]
+                    )
+                except (ValueError, TypeError):
+                    self._restored_last_update = None
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return if the binary sensor is on."""
+        if self.coordinator.last_update_success and self.coordinator.api:
+            if self._is_fault:
+                return self.coordinator.api.get_fault_bit(self._alert_code.bit)
+            return self.coordinator.api.get_warning_bit(self._alert_code.bit)
+        if self._restored_value is not None:
+            return self._restored_value
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Return True if we have any data (live or restored)."""
+        if self.coordinator.last_update_success:
+            return True
+        return self._restored_value is not None
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon."""
+        state = self.is_on
+        if self._is_fault:
+            return "mdi:alert-circle" if state else "mdi:check-circle"
+        return "mdi:alert" if state else "mdi:check-circle"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes."""
+        attrs: dict[str, Any] = {"code": self._alert_code.code}
+
+        if self.coordinator.last_update_success:
+            if self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = False
+        else:
+            if self._restored_last_update:
+                attrs["last_update"] = self._restored_last_update.isoformat()
+            elif self.coordinator.data and self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = True
+
+        return attrs

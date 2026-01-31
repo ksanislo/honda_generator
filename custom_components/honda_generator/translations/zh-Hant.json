@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "裝置已設定",
+      "reconfigure_successful": "重新設定成功"
+    },
+    "error": {
+      "cannot_connect": "連線失敗",
+      "invalid_auth": "身份驗證無效",
+      "unknown": "意外錯誤",
+      "detectonly": "僅支援自動裝置偵測。"
+    },
+    "step": {
+      "user": {
+        "description": "輸入您的本田發電機的藍牙密碼（預設為 00000000）。",
+        "data": {
+          "password": "密碼"
+        }
+      },
+      "reconfigure": {
+        "description": "更新您的本田發電機的藍牙密碼。",
+        "data": {
+          "password": "密碼"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "掃描間隔（秒）"
+        },
+        "description": "設定本田發電機設定。",
+        "title": "本田發電機選項"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "運轉小時數"
+      },
+      "output_current": {
+        "name": "輸出電流"
+      },
+      "output_power": {
+        "name": "輸出功率"
+      },
+      "engine_event": {
+        "name": "引擎事件",
+        "state": {
+          "no_event": "無事件",
+          "engine_start": "引擎啟動",
+          "engine_stop": "引擎停止",
+          "error": "錯誤",
+          "voltage_drop": "電壓下降"
+        }
+      },
+      "engine_error": {
+        "name": "引擎錯誤",
+        "state": {
+          "no_error": "無錯誤",
+          "co_detected": "偵測到CO",
+          "stop_failure": "停止失敗",
+          "continuous_restarting": "持續重啟",
+          "starting_circuit_fault": "啟動電路故障"
+        }
+      },
+      "output_voltage": {
+        "name": "輸出電壓"
+      },
+      "fuel_level": {
+        "name": "燃油液位"
+      },
+      "fuel_remaining_time": {
+        "name": "剩餘燃油時間"
+      },
+      "fuel_level_ml": {
+        "name": "燃油液位"
+      },
+      "fuel_gauge_level": {
+        "name": "燃油表液位"
+      },
+      "output_voltage_setting": {
+        "name": "輸出電壓設定"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO 模式"
+      },
+      "engine_status": {
+        "name": "引擎狀態"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "停止引擎"
+      },
+      "start_engine": {
+        "name": "啟動引擎"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO 模式"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "停止引擎",
+      "description": "停止發電機引擎。"
+    }
+  },
+  "alert_codes": {
+    "c_01": "檢查引擎",
+    "c_02": "檢查燃油",
+    "c_03": "檢查逆變器",
+    "c_04": "檢查負載",
+    "c_05": "輸出電流高",
+    "c_06": "過流偵測（從機）",
+    "c_07": "過壓偵測（從機）",
+    "c_08": "短路過流偵測（從機）",
+    "c_09": "檢查CO感測器",
+    "c_10": "偵測到CO",
+    "c_2a": "超速",
+    "c_a2": "檢查控制單元",
+    "e_00": "啟動器故障",
+    "e_01": "啟動器卡住",
+    "e_02": "電池電壓故障",
+    "e_03": "機油不足",
+    "e_04": "機油感測器故障",
+    "e_05": "過熱",
+    "e_06": "發電機脈衝故障",
+    "e_07": "轉速異常",
+    "e_0a": "啟動失敗",
+    "e_0b": "啟動電路",
+    "e_10": "點火故障",
+    "e_11": "逆變器通訊（主機）",
+    "e_12": "逆變器故障",
+    "e_13": "逆變器直流故障",
+    "e_15": "逆變器過流",
+    "e_16": "逆變器過載",
+    "e_17": "逆變器電壓故障",
+    "e_19": "輸出過壓",
+    "e_1a": "過載關機",
+    "e_1b": "接地故障",
+    "e_1c": "逆變器通訊",
+    "e_1e": "逆變器過熱",
+    "e_20": "逆變器-GCU通訊（從機）",
+    "e_21": "逆變器通訊（從機）",
+    "e_22": "過流關機（從機）",
+    "e_23": "過壓關機（從機）",
+    "e_25": "功率模組過熱（從機）",
+    "e_26": "A/D輸入故障（從機）",
+    "e_27": "FET開路（從機）",
+    "e_29": "FET短路（從機）",
+    "e_2a": "二極體短路（從機）",
+    "e_2b": "SCR短路（從機）",
+    "e_2c": "逆變器記憶體故障（從機）",
+    "e_2e": "短路過流（從機）",
+    "e_50": "CO警報",
+    "e_51": "大氣壓感測器",
+    "e_52": "偵測到高CO",
+    "e_53": "CO感測器錯誤",
+    "e_56": "CO校準錯誤",
+    "e_57": "CO關機",
+    "e_70": "BT單元通訊",
+    "e_71": "BT連線錯誤",
+    "e_72": "BT通訊錯誤",
+    "e_73": "BT模組錯誤"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Urządzenie jest już skonfigurowane",
+      "reconfigure_successful": "Ponowna konfiguracja zakończona pomyślnie"
+    },
+    "error": {
+      "cannot_connect": "Nie udało się połączyć",
+      "invalid_auth": "Nieprawidłowe uwierzytelnianie",
+      "unknown": "Nieoczekiwany błąd",
+      "detectonly": "Obsługiwane jest tylko automatyczne wykrywanie urządzeń."
+    },
+    "step": {
+      "user": {
+        "description": "Wprowadź hasło Bluetooth generatora Honda (domyślnie 00000000).",
+        "data": {
+          "password": "Hasło"
+        }
+      },
+      "reconfigure": {
+        "description": "Zaktualizuj hasło Bluetooth generatora Honda.",
+        "data": {
+          "password": "Hasło"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interwał skanowania (sekundy)"
+        },
+        "description": "Skonfiguruj ustawienia generatora Honda.",
+        "title": "Opcje generatora Honda"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Godziny pracy"
+      },
+      "output_current": {
+        "name": "Prąd wyjściowy"
+      },
+      "output_power": {
+        "name": "Moc wyjściowa"
+      },
+      "engine_event": {
+        "name": "Zdarzenie silnika",
+        "state": {
+          "no_event": "Brak zdarzenia",
+          "engine_start": "Start silnika",
+          "engine_stop": "Zatrzymanie silnika",
+          "error": "Błąd",
+          "voltage_drop": "Spadek napięcia"
+        }
+      },
+      "engine_error": {
+        "name": "Błąd silnika",
+        "state": {
+          "no_error": "Brak błędu",
+          "co_detected": "Wykryto CO",
+          "stop_failure": "Błąd zatrzymania",
+          "continuous_restarting": "Ciągłe restartowanie",
+          "starting_circuit_fault": "Usterka obwodu rozruchu"
+        }
+      },
+      "output_voltage": {
+        "name": "Napięcie wyjściowe"
+      },
+      "fuel_level": {
+        "name": "Poziom paliwa"
+      },
+      "fuel_remaining_time": {
+        "name": "Pozostały czas paliwa"
+      },
+      "fuel_level_ml": {
+        "name": "Poziom paliwa"
+      },
+      "fuel_gauge_level": {
+        "name": "Poziom wskaźnika paliwa"
+      },
+      "output_voltage_setting": {
+        "name": "Ustawienie napięcia wyjściowego"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "Tryb ECO"
+      },
+      "engine_status": {
+        "name": "Status silnika"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Zatrzymaj silnik"
+      },
+      "start_engine": {
+        "name": "Uruchom silnik"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "Tryb ECO"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Zatrzymaj silnik",
+      "description": "Zatrzymuje silnik generatora."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Sprawdź silnik",
+    "c_02": "Sprawdź paliwo",
+    "c_03": "Sprawdź falownik",
+    "c_04": "Sprawdź obciążenie",
+    "c_05": "Wysoki prąd wyjściowy",
+    "c_06": "Wykryto nadprąd (slave)",
+    "c_07": "Wykryto przepięcie (slave)",
+    "c_08": "Zwarcie nadprądowe (slave)",
+    "c_09": "Sprawdź czujnik CO",
+    "c_10": "Wykryto CO",
+    "c_2a": "Przekroczenie obrotów",
+    "c_a2": "Sprawdź jednostkę sterującą",
+    "e_00": "Usterka rozrusznika",
+    "e_01": "Rozrusznik zablokowany",
+    "e_02": "Usterka napięcia akumulatora",
+    "e_03": "Niski poziom oleju",
+    "e_04": "Usterka czujnika oleju",
+    "e_05": "Przegrzanie",
+    "e_06": "Usterka impulsu generatora",
+    "e_07": "Nieprawidłowe obroty",
+    "e_0a": "Awaria rozrusznika",
+    "e_0b": "Obwód rozrusznika",
+    "e_10": "Usterka zapłonu",
+    "e_11": "Komunikacja falownika (master)",
+    "e_12": "Usterka falownika",
+    "e_13": "Usterka DC falownika",
+    "e_15": "Nadprąd falownika",
+    "e_16": "Przeciążenie falownika",
+    "e_17": "Usterka napięcia falownika",
+    "e_19": "Przepięcie wyjściowe",
+    "e_1a": "Wyłączenie przeciążeniowe",
+    "e_1b": "Usterka uziemienia",
+    "e_1c": "Komunikacja falownika",
+    "e_1e": "Przegrzanie falownika",
+    "e_20": "Komunikacja falownik-GCU (slave)",
+    "e_21": "Komunikacja falownika (slave)",
+    "e_22": "Wyłączenie nadprądowe (slave)",
+    "e_23": "Wyłączenie przepięciowe (slave)",
+    "e_25": "Przegrzanie modułu mocy (slave)",
+    "e_26": "Usterka wejścia A/D (slave)",
+    "e_27": "Otwarty obwód FET (slave)",
+    "e_29": "Zwarcie FET (slave)",
+    "e_2a": "Zwarcie diody (slave)",
+    "e_2b": "Zwarcie SCR (slave)",
+    "e_2c": "Usterka pamięci falownika (slave)",
+    "e_2e": "Zwarcie nadprądowe (slave)",
+    "e_50": "Alarm CO",
+    "e_51": "Czujnik ciśnienia atmosferycznego",
+    "e_52": "Wysoki poziom CO",
+    "e_53": "Błąd czujnika CO",
+    "e_56": "Błąd kalibracji CO",
+    "e_57": "Wyłączenie CO",
+    "e_70": "Komunikacja jednostki BT",
+    "e_71": "Błąd połączenia BT",
+    "e_72": "Błąd komunikacji BT",
+    "e_73": "Błąd modułu BT"
+  }
+}

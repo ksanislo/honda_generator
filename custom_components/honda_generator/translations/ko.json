@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "장치가 이미 구성되어 있습니다",
+      "reconfigure_successful": "재구성 성공"
+    },
+    "error": {
+      "cannot_connect": "연결 실패",
+      "invalid_auth": "인증이 유효하지 않습니다",
+      "unknown": "예기치 않은 오류",
+      "detectonly": "자동 장치 감지만 지원됩니다."
+    },
+    "step": {
+      "user": {
+        "description": "Honda 발전기의 Bluetooth 비밀번호를 입력하세요 (기본값은 00000000).",
+        "data": {
+          "password": "비밀번호"
+        }
+      },
+      "reconfigure": {
+        "description": "Honda 발전기의 Bluetooth 비밀번호를 업데이트하세요.",
+        "data": {
+          "password": "비밀번호"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "스캔 간격 (초)"
+        },
+        "description": "Honda 발전기 설정을 구성합니다.",
+        "title": "Honda 발전기 옵션"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "가동 시간"
+      },
+      "output_current": {
+        "name": "출력 전류"
+      },
+      "output_power": {
+        "name": "출력 전력"
+      },
+      "engine_event": {
+        "name": "엔진 이벤트",
+        "state": {
+          "no_event": "이벤트 없음",
+          "engine_start": "엔진 시작",
+          "engine_stop": "엔진 정지",
+          "error": "오류",
+          "voltage_drop": "전압 강하"
+        }
+      },
+      "engine_error": {
+        "name": "엔진 오류",
+        "state": {
+          "no_error": "오류 없음",
+          "co_detected": "CO 감지됨",
+          "stop_failure": "정지 실패",
+          "continuous_restarting": "지속적 재시작",
+          "starting_circuit_fault": "시동 회로 고장"
+        }
+      },
+      "output_voltage": {
+        "name": "출력 전압"
+      },
+      "fuel_level": {
+        "name": "연료 수준"
+      },
+      "fuel_remaining_time": {
+        "name": "연료 잔여 시간"
+      },
+      "fuel_level_ml": {
+        "name": "연료 수준"
+      },
+      "fuel_gauge_level": {
+        "name": "연료 게이지 수준"
+      },
+      "output_voltage_setting": {
+        "name": "출력 전압 설정"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO 모드"
+      },
+      "engine_status": {
+        "name": "엔진 상태"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "엔진 정지"
+      },
+      "start_engine": {
+        "name": "엔진 시작"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO 모드"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "엔진 정지",
+      "description": "발전기 엔진을 정지합니다."
+    }
+  },
+  "alert_codes": {
+    "c_01": "엔진 점검",
+    "c_02": "연료 점검",
+    "c_03": "인버터 점검",
+    "c_04": "부하 점검",
+    "c_05": "출력 전류 높음",
+    "c_06": "과전류 감지 (슬레이브)",
+    "c_07": "과전압 감지 (슬레이브)",
+    "c_08": "단락 과전류 감지 (슬레이브)",
+    "c_09": "CO 센서 점검",
+    "c_10": "CO 감지됨",
+    "c_2a": "과속",
+    "c_a2": "제어 장치 점검",
+    "e_00": "스타터 고장",
+    "e_01": "스타터 고착",
+    "e_02": "배터리 전압 고장",
+    "e_03": "오일 부족",
+    "e_04": "오일 센서 고장",
+    "e_05": "과열",
+    "e_06": "발전기 펄스 고장",
+    "e_07": "RPM 이상",
+    "e_0a": "스타터 실패",
+    "e_0b": "스타터 회로",
+    "e_10": "점화 고장",
+    "e_11": "인버터 통신 (마스터)",
+    "e_12": "인버터 고장",
+    "e_13": "인버터 DC 고장",
+    "e_15": "인버터 과전류",
+    "e_16": "인버터 과부하",
+    "e_17": "인버터 전압 고장",
+    "e_19": "출력 과전압",
+    "e_1a": "과부하 차단",
+    "e_1b": "접지 고장",
+    "e_1c": "인버터 통신",
+    "e_1e": "인버터 과열",
+    "e_20": "인버터-GCU 통신 (슬레이브)",
+    "e_21": "인버터 통신 (슬레이브)",
+    "e_22": "과전류 차단 (슬레이브)",
+    "e_23": "과전압 차단 (슬레이브)",
+    "e_25": "전력 모듈 과열 (슬레이브)",
+    "e_26": "A/D 입력 고장 (슬레이브)",
+    "e_27": "FET 개방 회로 (슬레이브)",
+    "e_29": "FET 단락 (슬레이브)",
+    "e_2a": "다이오드 단락 (슬레이브)",
+    "e_2b": "SCR 단락 (슬레이브)",
+    "e_2c": "인버터 메모리 고장 (슬레이브)",
+    "e_2e": "단락 과전류 (슬레이브)",
+    "e_50": "CO 경고",
+    "e_51": "대기압 센서",
+    "e_52": "CO 높음 감지",
+    "e_53": "CO 센서 오류",
+    "e_56": "CO 교정 오류",
+    "e_57": "CO 차단",
+    "e_70": "BT 유닛 통신",
+    "e_71": "BT 연결 오류",
+    "e_72": "BT 통신 오류",
+    "e_73": "BT 모듈 오류"
+  }
+}

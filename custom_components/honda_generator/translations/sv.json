@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Enheten är redan konfigurerad",
+      "reconfigure_successful": "Omkonfigurering lyckades"
+    },
+    "error": {
+      "cannot_connect": "Anslutningen misslyckades",
+      "invalid_auth": "Ogiltig autentisering",
+      "unknown": "Oväntat fel",
+      "detectonly": "Endast automatisk enhetsdetektering stöds."
+    },
+    "step": {
+      "user": {
+        "description": "Ange Bluetooth-lösenordet för din Honda-generator (standard är 00000000).",
+        "data": {
+          "password": "Lösenord"
+        }
+      },
+      "reconfigure": {
+        "description": "Uppdatera Bluetooth-lösenordet för din Honda-generator.",
+        "data": {
+          "password": "Lösenord"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Skanningsintervall (sekunder)"
+        },
+        "description": "Konfigurera Honda-generatorinställningar.",
+        "title": "Honda-generatoralternativ"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Drifttimmar"
+      },
+      "output_current": {
+        "name": "Utgångsström"
+      },
+      "output_power": {
+        "name": "Utgångseffekt"
+      },
+      "engine_event": {
+        "name": "Motorhändelse",
+        "state": {
+          "no_event": "Ingen händelse",
+          "engine_start": "Motorstart",
+          "engine_stop": "Motorstopp",
+          "error": "Fel",
+          "voltage_drop": "Spänningsfall"
+        }
+      },
+      "engine_error": {
+        "name": "Motorfel",
+        "state": {
+          "no_error": "Inget fel",
+          "co_detected": "CO detekterat",
+          "stop_failure": "Stoppfel",
+          "continuous_restarting": "Kontinuerlig omstart",
+          "starting_circuit_fault": "Startkretsel"
+        }
+      },
+      "output_voltage": {
+        "name": "Utgångsspänning"
+      },
+      "fuel_level": {
+        "name": "Bränslenivå"
+      },
+      "fuel_remaining_time": {
+        "name": "Återstående bränsletid"
+      },
+      "fuel_level_ml": {
+        "name": "Bränslenivå"
+      },
+      "fuel_gauge_level": {
+        "name": "Bränslemätarnivå"
+      },
+      "output_voltage_setting": {
+        "name": "Utgångsspänningsinställning"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO-läge"
+      },
+      "engine_status": {
+        "name": "Motorstatus"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Stoppa motor"
+      },
+      "start_engine": {
+        "name": "Starta motor"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO-läge"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Stoppa motor",
+      "description": "Stoppar generatormotorn."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Kontrollera motor",
+    "c_02": "Kontrollera bränsle",
+    "c_03": "Kontrollera växelriktare",
+    "c_04": "Kontrollera last",
+    "c_05": "Utgångsström hög",
+    "c_06": "Överström detekterat (slav)",
+    "c_07": "Överspänning detekterat (slav)",
+    "c_08": "Kortslutning överström (slav)",
+    "c_09": "Kontrollera CO-sensor",
+    "c_10": "CO detekterat",
+    "c_2a": "Överhastighet",
+    "c_a2": "Kontrollera styrenhet",
+    "e_00": "Startmotorfel",
+    "e_01": "Startmotor fastnad",
+    "e_02": "Batterispänningsfel",
+    "e_03": "Låg oljenivå",
+    "e_04": "Oljesensorfel",
+    "e_05": "Överhettning",
+    "e_06": "Generatorpulsfel",
+    "e_07": "Onormalt varvtal",
+    "e_0a": "Startfel",
+    "e_0b": "Startkrets",
+    "e_10": "Tändningsfel",
+    "e_11": "Växelriktare komm. (master)",
+    "e_12": "Växelriktarfel",
+    "e_13": "Växelriktare DC-fel",
+    "e_15": "Växelriktare överström",
+    "e_16": "Växelriktare överbelastning",
+    "e_17": "Växelriktare spänningsfel",
+    "e_19": "Utgång överspänning",
+    "e_1a": "Överbelastningsavstängning",
+    "e_1b": "Jordfel",
+    "e_1c": "Växelriktarkommunikation",
+    "e_1e": "Växelriktare överhettning",
+    "e_20": "Växelriktare-GCU komm. (slav)",
+    "e_21": "Växelriktare komm. (slav)",
+    "e_22": "Överströmsavstängning (slav)",
+    "e_23": "Överspänningsavstängning (slav)",
+    "e_25": "Effektmodul överhettning (slav)",
+    "e_26": "A/D-ingångsfel (slav)",
+    "e_27": "FET öppen krets (slav)",
+    "e_29": "FET kortslutning (slav)",
+    "e_2a": "Diod kortslutning (slav)",
+    "e_2b": "SCR kortslutning (slav)",
+    "e_2c": "Växelriktare minnesfel (slav)",
+    "e_2e": "Kortslutning överström (slav)",
+    "e_50": "CO-larm",
+    "e_51": "Atmosfärstrycksensor",
+    "e_52": "Hög CO detekterat",
+    "e_53": "CO-sensorfel",
+    "e_56": "CO-kalibreringsfel",
+    "e_57": "CO-avstängning",
+    "e_70": "BT-enhet kommunikation",
+    "e_71": "BT-anslutningsfel",
+    "e_72": "BT-kommunikationsfel",
+    "e_73": "BT-modulfel"
+  }
+}

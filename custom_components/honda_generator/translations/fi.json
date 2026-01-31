@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Laite on jo määritetty",
+      "reconfigure_successful": "Uudelleenmääritys onnistui"
+    },
+    "error": {
+      "cannot_connect": "Yhteys epäonnistui",
+      "invalid_auth": "Virheellinen todennus",
+      "unknown": "Odottamaton virhe",
+      "detectonly": "Vain automaattinen laitteiden tunnistus on tuettu."
+    },
+    "step": {
+      "user": {
+        "description": "Anna Honda-generaattorisi Bluetooth-salasana (oletus on 00000000).",
+        "data": {
+          "password": "Salasana"
+        }
+      },
+      "reconfigure": {
+        "description": "Päivitä Honda-generaattorisi Bluetooth-salasana.",
+        "data": {
+          "password": "Salasana"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Skannausväli (sekuntia)"
+        },
+        "description": "Määritä Honda-generaattorin asetukset.",
+        "title": "Honda-generaattorin asetukset"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Käyttötunnit"
+      },
+      "output_current": {
+        "name": "Lähtövirta"
+      },
+      "output_power": {
+        "name": "Lähtöteho"
+      },
+      "engine_event": {
+        "name": "Moottorin tapahtuma",
+        "state": {
+          "no_event": "Ei tapahtumaa",
+          "engine_start": "Moottorin käynnistys",
+          "engine_stop": "Moottorin pysäytys",
+          "error": "Virhe",
+          "voltage_drop": "Jännitepudotus"
+        }
+      },
+      "engine_error": {
+        "name": "Moottorin virhe",
+        "state": {
+          "no_error": "Ei virhettä",
+          "co_detected": "CO havaittu",
+          "stop_failure": "Pysäytysvirhe",
+          "continuous_restarting": "Jatkuva uudelleenkäynnistys",
+          "starting_circuit_fault": "Käynnistyspiirin vika"
+        }
+      },
+      "output_voltage": {
+        "name": "Lähtöjännite"
+      },
+      "fuel_level": {
+        "name": "Polttoainetaso"
+      },
+      "fuel_remaining_time": {
+        "name": "Jäljellä oleva polttoaineaika"
+      },
+      "fuel_level_ml": {
+        "name": "Polttoainetaso"
+      },
+      "fuel_gauge_level": {
+        "name": "Polttoainemittarin taso"
+      },
+      "output_voltage_setting": {
+        "name": "Lähtöjänniteasetus"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "ECO-tila"
+      },
+      "engine_status": {
+        "name": "Moottorin tila"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Pysäytä moottori"
+      },
+      "start_engine": {
+        "name": "Käynnistä moottori"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "ECO-tila"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Pysäytä moottori",
+      "description": "Pysäyttää generaattorin moottorin."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Tarkista moottori",
+    "c_02": "Tarkista polttoaine",
+    "c_03": "Tarkista invertteri",
+    "c_04": "Tarkista kuorma",
+    "c_05": "Lähtövirta korkea",
+    "c_06": "Ylivirta havaittu (orja)",
+    "c_07": "Ylijännite havaittu (orja)",
+    "c_08": "Oikosulku ylivirta (orja)",
+    "c_09": "Tarkista CO-anturi",
+    "c_10": "CO havaittu",
+    "c_2a": "Ylinopeus",
+    "c_a2": "Tarkista ohjausyksikkö",
+    "e_00": "Käynnistinvika",
+    "e_01": "Käynnistin jumissa",
+    "e_02": "Akkujännitevika",
+    "e_03": "Öljy vähissä",
+    "e_04": "Öljyanturivika",
+    "e_05": "Ylikuumeneminen",
+    "e_06": "Generaattoripulssivika",
+    "e_07": "Kierrosluku epänormaali",
+    "e_0a": "Käynnistysvirhe",
+    "e_0b": "Käynnistyspiiri",
+    "e_10": "Sytytysvika",
+    "e_11": "Invertteri viesti (isäntä)",
+    "e_12": "Invertterivika",
+    "e_13": "Invertteri DC-vika",
+    "e_15": "Invertteri ylivirta",
+    "e_16": "Invertteri ylikuorma",
+    "e_17": "Invertteri jännitevika",
+    "e_19": "Lähtö ylijännite",
+    "e_1a": "Ylikuormasammutus",
+    "e_1b": "Maadoitusvika",
+    "e_1c": "Invertteri viestintä",
+    "e_1e": "Invertteri ylikuumeneminen",
+    "e_20": "Invertteri-GCU viesti (orja)",
+    "e_21": "Invertteri viesti (orja)",
+    "e_22": "Ylivirtasammutus (orja)",
+    "e_23": "Ylijännitesammutus (orja)",
+    "e_25": "Tehomoduuli ylikuumeneminen (orja)",
+    "e_26": "A/D-tulovika (orja)",
+    "e_27": "FET avoin piiri (orja)",
+    "e_29": "FET oikosulku (orja)",
+    "e_2a": "Diodi oikosulku (orja)",
+    "e_2b": "SCR oikosulku (orja)",
+    "e_2c": "Invertteri muistivika (orja)",
+    "e_2e": "Oikosulku ylivirta (orja)",
+    "e_50": "CO-hälytys",
+    "e_51": "Ilmanpaineanturi",
+    "e_52": "Korkea CO havaittu",
+    "e_53": "CO-anturivirhe",
+    "e_56": "CO-kalibrointivirhe",
+    "e_57": "CO-sammutus",
+    "e_70": "BT-yksikkö viestintä",
+    "e_71": "BT-yhteysvirhe",
+    "e_72": "BT-viestintävirhe",
+    "e_73": "BT-modulivirhe"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "domain": "honda_generator",
+  "name": "Honda Generator",
+  "bluetooth": [
+    {
+      "connectable": true,
+      "service_uuid": "066b0001-5d90-4939-a7ba-7b9222f53e81"
+    },
+    {
+      "connectable": true,
+      "service_uuid": "01b60001-875a-4c56-b8bf-5103cafaeec7"
+    }
+  ],
+  "codeowners": ["@ksanislo"],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://github.com/ksanislo/honda_generator",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/ksanislo/honda_generator/issues",
+  "requirements": ["bleak-retry-connector>=3.0.0"],
+  "single_config_entry": false,
+  "version": "0.10.0"
+}

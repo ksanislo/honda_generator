@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Zařízení je již nakonfigurováno",
+      "reconfigure_successful": "Překonfigurování bylo úspěšné"
+    },
+    "error": {
+      "cannot_connect": "Připojení se nezdařilo",
+      "invalid_auth": "Neplatné ověření",
+      "unknown": "Neočekávaná chyba",
+      "detectonly": "Je podporována pouze automatická detekce zařízení."
+    },
+    "step": {
+      "user": {
+        "description": "Zadejte Bluetooth heslo vašeho generátoru Honda (výchozí je 00000000).",
+        "data": {
+          "password": "Heslo"
+        }
+      },
+      "reconfigure": {
+        "description": "Aktualizujte Bluetooth heslo vašeho generátoru Honda.",
+        "data": {
+          "password": "Heslo"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interval skenování (sekundy)"
+        },
+        "description": "Nakonfigurujte nastavení generátoru Honda.",
+        "title": "Možnosti generátoru Honda"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Provozní hodiny"
+      },
+      "output_current": {
+        "name": "Výstupní proud"
+      },
+      "output_power": {
+        "name": "Výstupní výkon"
+      },
+      "engine_event": {
+        "name": "Událost motoru",
+        "state": {
+          "no_event": "Žádná událost",
+          "engine_start": "Start motoru",
+          "engine_stop": "Zastavení motoru",
+          "error": "Chyba",
+          "voltage_drop": "Pokles napětí"
+        }
+      },
+      "engine_error": {
+        "name": "Chyba motoru",
+        "state": {
+          "no_error": "Žádná chyba",
+          "co_detected": "CO detekováno",
+          "stop_failure": "Chyba zastavení",
+          "continuous_restarting": "Nepřetržitý restart",
+          "starting_circuit_fault": "Porucha startovacího obvodu"
+        }
+      },
+      "output_voltage": {
+        "name": "Výstupní napětí"
+      },
+      "fuel_level": {
+        "name": "Hladina paliva"
+      },
+      "fuel_remaining_time": {
+        "name": "Zbývající čas paliva"
+      },
+      "fuel_level_ml": {
+        "name": "Hladina paliva"
+      },
+      "fuel_gauge_level": {
+        "name": "Úroveň ukazatele paliva"
+      },
+      "output_voltage_setting": {
+        "name": "Nastavení výstupního napětí"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "Režim ECO"
+      },
+      "engine_status": {
+        "name": "Stav motoru"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Zastavit motor"
+      },
+      "start_engine": {
+        "name": "Spustit motor"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "Režim ECO"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Zastavit motor",
+      "description": "Zastaví motor generátoru."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Zkontrolujte motor",
+    "c_02": "Zkontrolujte palivo",
+    "c_03": "Zkontrolujte měnič",
+    "c_04": "Zkontrolujte zátěž",
+    "c_05": "Vysoký výstupní proud",
+    "c_06": "Detekován nadproud (slave)",
+    "c_07": "Detekováno přepětí (slave)",
+    "c_08": "Zkrat nadproud (slave)",
+    "c_09": "Zkontrolujte CO senzor",
+    "c_10": "CO detekováno",
+    "c_2a": "Překročení otáček",
+    "c_a2": "Zkontrolujte řídicí jednotku",
+    "e_00": "Porucha startéru",
+    "e_01": "Startér zablokován",
+    "e_02": "Porucha napětí baterie",
+    "e_03": "Nízká hladina oleje",
+    "e_04": "Porucha senzoru oleje",
+    "e_05": "Přehřátí",
+    "e_06": "Porucha pulzu generátoru",
+    "e_07": "Abnormální otáčky",
+    "e_0a": "Selhání startu",
+    "e_0b": "Startovací obvod",
+    "e_10": "Porucha zapalování",
+    "e_11": "Komunikace měniče (master)",
+    "e_12": "Porucha měniče",
+    "e_13": "Porucha DC měniče",
+    "e_15": "Nadproud měniče",
+    "e_16": "Přetížení měniče",
+    "e_17": "Porucha napětí měniče",
+    "e_19": "Výstupní přepětí",
+    "e_1a": "Vypnutí při přetížení",
+    "e_1b": "Zemní porucha",
+    "e_1c": "Komunikace měniče",
+    "e_1e": "Přehřátí měniče",
+    "e_20": "Komunikace měnič-GCU (slave)",
+    "e_21": "Komunikace měniče (slave)",
+    "e_22": "Vypnutí při nadproudu (slave)",
+    "e_23": "Vypnutí při přepětí (slave)",
+    "e_25": "Přehřátí výkonového modulu (slave)",
+    "e_26": "Porucha A/D vstupu (slave)",
+    "e_27": "FET otevřený obvod (slave)",
+    "e_29": "FET zkrat (slave)",
+    "e_2a": "Zkrat diody (slave)",
+    "e_2b": "Zkrat SCR (slave)",
+    "e_2c": "Porucha paměti měniče (slave)",
+    "e_2e": "Zkrat nadproud (slave)",
+    "e_50": "CO alarm",
+    "e_51": "Senzor atmosférického tlaku",
+    "e_52": "Detekováno vysoké CO",
+    "e_53": "Chyba CO senzoru",
+    "e_56": "Chyba kalibrace CO",
+    "e_57": "Vypnutí CO",
+    "e_70": "Komunikace BT jednotky",
+    "e_71": "Chyba připojení BT",
+    "e_72": "Chyba komunikace BT",
+    "e_73": "Chyba BT modulu"
+  }
+}

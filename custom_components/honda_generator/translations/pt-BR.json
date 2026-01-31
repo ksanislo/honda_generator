@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "O dispositivo já está configurado",
+      "reconfigure_successful": "Reconfiguração bem-sucedida"
+    },
+    "error": {
+      "cannot_connect": "Falha na conexão",
+      "invalid_auth": "Autenticação inválida",
+      "unknown": "Erro inesperado",
+      "detectonly": "Apenas a detecção automática de dispositivos é suportada."
+    },
+    "step": {
+      "user": {
+        "description": "Digite a senha Bluetooth do seu gerador Honda (o padrão é 00000000).",
+        "data": {
+          "password": "Senha"
+        }
+      },
+      "reconfigure": {
+        "description": "Atualize a senha Bluetooth do seu gerador Honda.",
+        "data": {
+          "password": "Senha"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalo de varredura (segundos)"
+        },
+        "description": "Configurar as configurações do gerador Honda.",
+        "title": "Opções do gerador Honda"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Horas de funcionamento"
+      },
+      "output_current": {
+        "name": "Corrente de saída"
+      },
+      "output_power": {
+        "name": "Potência de saída"
+      },
+      "engine_event": {
+        "name": "Evento do motor",
+        "state": {
+          "no_event": "Sem evento",
+          "engine_start": "Partida do motor",
+          "engine_stop": "Parada do motor",
+          "error": "Erro",
+          "voltage_drop": "Queda de tensão"
+        }
+      },
+      "engine_error": {
+        "name": "Erro do motor",
+        "state": {
+          "no_error": "Sem erro",
+          "co_detected": "CO detectado",
+          "stop_failure": "Falha de parada",
+          "continuous_restarting": "Reinício contínuo",
+          "starting_circuit_fault": "Falha circuito partida"
+        }
+      },
+      "output_voltage": {
+        "name": "Tensão de saída"
+      },
+      "fuel_level": {
+        "name": "Nível de combustível"
+      },
+      "fuel_remaining_time": {
+        "name": "Tempo restante de combustível"
+      },
+      "fuel_level_ml": {
+        "name": "Nível de combustível"
+      },
+      "fuel_gauge_level": {
+        "name": "Nível do indicador de combustível"
+      },
+      "output_voltage_setting": {
+        "name": "Configuração de tensão de saída"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "Modo ECO"
+      },
+      "engine_status": {
+        "name": "Status do motor"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Parar motor"
+      },
+      "start_engine": {
+        "name": "Iniciar motor"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "Modo ECO"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Parar motor",
+      "description": "Para o motor do gerador."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Verificar motor",
+    "c_02": "Verificar combustível",
+    "c_03": "Verificar inversor",
+    "c_04": "Verificar carga",
+    "c_05": "Corrente de saída alta",
+    "c_06": "Sobrecorrente detectada (escravo)",
+    "c_07": "Sobretensão detectada (escravo)",
+    "c_08": "Curto-circuito sobrecorrente (escravo)",
+    "c_09": "Verificar sensor CO",
+    "c_10": "CO detectado",
+    "c_2a": "Sobrevelocidade",
+    "c_a2": "Verificar unidade de controle",
+    "e_00": "Falha do motor de partida",
+    "e_01": "Motor de partida travado",
+    "e_02": "Falha tensão bateria",
+    "e_03": "Óleo baixo",
+    "e_04": "Falha sensor óleo",
+    "e_05": "Superaquecimento",
+    "e_06": "Falha pulso gerador",
+    "e_07": "RPM anormal",
+    "e_0a": "Falha partida",
+    "e_0b": "Circuito partida",
+    "e_10": "Falha ignição",
+    "e_11": "Comm. inversor (mestre)",
+    "e_12": "Falha inversor",
+    "e_13": "Falha CC inversor",
+    "e_15": "Sobrecorrente inversor",
+    "e_16": "Sobrecarga inversor",
+    "e_17": "Falha tensão inversor",
+    "e_19": "Sobretensão saída",
+    "e_1a": "Desligamento sobrecarga",
+    "e_1b": "Falha aterramento",
+    "e_1c": "Comunicação inversor",
+    "e_1e": "Superaquecimento inversor",
+    "e_20": "Comm. inversor-GCU (escravo)",
+    "e_21": "Comm. inversor (escravo)",
+    "e_22": "Desligamento sobrecorrente (escravo)",
+    "e_23": "Desligamento sobretensão (escravo)",
+    "e_25": "Superaquecimento módulo potência (escravo)",
+    "e_26": "Falha entrada A/D (escravo)",
+    "e_27": "Circuito aberto FET (escravo)",
+    "e_29": "Curto-circuito FET (escravo)",
+    "e_2a": "Curto-circuito diodo (escravo)",
+    "e_2b": "Curto-circuito SCR (escravo)",
+    "e_2c": "Falha memória inversor (escravo)",
+    "e_2e": "Curto-circuito sobrecorrente (escravo)",
+    "e_50": "Alerta CO",
+    "e_51": "Sensor pressão atmosférica",
+    "e_52": "CO alto detectado",
+    "e_53": "Erro sensor CO",
+    "e_56": "Erro calibração CO",
+    "e_57": "Desligamento CO",
+    "e_70": "Comunicação unidade BT",
+    "e_71": "Erro conexão BT",
+    "e_72": "Erro comunicação BT",
+    "e_73": "Erro módulo BT"
+  }
+}

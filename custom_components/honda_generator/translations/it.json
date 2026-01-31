@@ -1,0 +1,175 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Il dispositivo è già configurato",
+      "reconfigure_successful": "Riconfigurazione riuscita"
+    },
+    "error": {
+      "cannot_connect": "Connessione fallita",
+      "invalid_auth": "Autenticazione non valida",
+      "unknown": "Errore imprevisto",
+      "detectonly": "È supportato solo il rilevamento automatico dei dispositivi."
+    },
+    "step": {
+      "user": {
+        "description": "Inserisci la password Bluetooth del tuo generatore Honda (predefinita 00000000).",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "description": "Aggiorna la password Bluetooth del tuo generatore Honda.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervallo di scansione (secondi)"
+        },
+        "description": "Configura le impostazioni del generatore Honda.",
+        "title": "Opzioni generatore Honda"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "runtime_hours": {
+        "name": "Ore di funzionamento"
+      },
+      "output_current": {
+        "name": "Corrente in uscita"
+      },
+      "output_power": {
+        "name": "Potenza in uscita"
+      },
+      "engine_event": {
+        "name": "Evento motore",
+        "state": {
+          "no_event": "Nessun evento",
+          "engine_start": "Avvio motore",
+          "engine_stop": "Arresto motore",
+          "error": "Errore",
+          "voltage_drop": "Caduta di tensione"
+        }
+      },
+      "engine_error": {
+        "name": "Errore motore",
+        "state": {
+          "no_error": "Nessun errore",
+          "co_detected": "CO rilevato",
+          "stop_failure": "Errore arresto",
+          "continuous_restarting": "Riavvio continuo",
+          "starting_circuit_fault": "Guasto circuito avvio"
+        }
+      },
+      "output_voltage": {
+        "name": "Tensione in uscita"
+      },
+      "fuel_level": {
+        "name": "Livello carburante"
+      },
+      "fuel_remaining_time": {
+        "name": "Tempo carburante rimanente"
+      },
+      "fuel_level_ml": {
+        "name": "Livello carburante"
+      },
+      "fuel_gauge_level": {
+        "name": "Livello indicatore carburante"
+      },
+      "output_voltage_setting": {
+        "name": "Impostazione tensione in uscita"
+      }
+    },
+    "binary_sensor": {
+      "eco_mode": {
+        "name": "Modalità ECO"
+      },
+      "engine_status": {
+        "name": "Stato motore"
+      }
+    },
+    "button": {
+      "stop_engine": {
+        "name": "Arresta motore"
+      },
+      "start_engine": {
+        "name": "Avvia motore"
+      }
+    },
+    "switch": {
+      "eco_mode": {
+        "name": "Modalità ECO"
+      }
+    }
+  },
+  "services": {
+    "stop_engine": {
+      "name": "Arresta motore",
+      "description": "Arresta il motore del generatore."
+    }
+  },
+  "alert_codes": {
+    "c_01": "Controllare motore",
+    "c_02": "Controllare carburante",
+    "c_03": "Controllare inverter",
+    "c_04": "Controllare carico",
+    "c_05": "Corrente uscita alta",
+    "c_06": "Sovracorrente rilevata (slave)",
+    "c_07": "Sovratensione rilevata (slave)",
+    "c_08": "Cortocircuito sovracorrente (slave)",
+    "c_09": "Controllare sensore CO",
+    "c_10": "CO rilevato",
+    "c_2a": "Fuorigiri",
+    "c_a2": "Controllare unità controllo",
+    "e_00": "Guasto motorino",
+    "e_01": "Motorino bloccato",
+    "e_02": "Guasto tensione batteria",
+    "e_03": "Olio basso",
+    "e_04": "Guasto sensore olio",
+    "e_05": "Surriscaldamento",
+    "e_06": "Guasto impulso generatore",
+    "e_07": "RPM anomali",
+    "e_0a": "Errore motorino",
+    "e_0b": "Circuito motorino",
+    "e_10": "Guasto accensione",
+    "e_11": "Comm. inverter (master)",
+    "e_12": "Guasto inverter",
+    "e_13": "Guasto CC inverter",
+    "e_15": "Sovracorrente inverter",
+    "e_16": "Sovraccarico inverter",
+    "e_17": "Guasto tensione inverter",
+    "e_19": "Sovratensione uscita",
+    "e_1a": "Spegnimento sovraccarico",
+    "e_1b": "Guasto terra",
+    "e_1c": "Comunicazione inverter",
+    "e_1e": "Surriscaldamento inverter",
+    "e_20": "Comm. inverter-GCU (slave)",
+    "e_21": "Comm. inverter (slave)",
+    "e_22": "Spegnimento sovracorrente (slave)",
+    "e_23": "Spegnimento sovratensione (slave)",
+    "e_25": "Surriscaldamento modulo (slave)",
+    "e_26": "Guasto ingresso A/D (slave)",
+    "e_27": "Circuito aperto FET (slave)",
+    "e_29": "Cortocircuito FET (slave)",
+    "e_2a": "Cortocircuito diodo (slave)",
+    "e_2b": "Cortocircuito SCR (slave)",
+    "e_2c": "Guasto memoria inverter (slave)",
+    "e_2e": "Cortocircuito sovracorrente (slave)",
+    "e_50": "Allarme CO",
+    "e_51": "Sensore pressione atmosferica",
+    "e_52": "CO alto rilevato",
+    "e_53": "Errore sensore CO",
+    "e_56": "Errore calibrazione CO",
+    "e_57": "Spegnimento CO",
+    "e_70": "Comunicazione unità BT",
+    "e_71": "Errore connessione BT",
+    "e_72": "Errore comunicazione BT",
+    "e_73": "Errore modulo BT"
+  }
+}

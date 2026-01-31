@@ -1,0 +1,11 @@
+stop_engine:
+  name: Stop Engine
+  description: Stop the generator engine.
+  fields:
+    device_id:
+      name: Device
+      description: The generator to stop.
+      required: true
+      selector:
+        device:
+          integration: honda_generator
