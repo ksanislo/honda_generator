@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "燃料残り時間"
       },
-      "fuel_level_ml": {
-        "name": "燃料レベル"
+      "fuel_volume": {
+        "name": "燃料量"
       },
       "fuel_gauge_level": {
         "name": "燃料計レベル"

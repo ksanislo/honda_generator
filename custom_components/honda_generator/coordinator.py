@@ -30,6 +30,7 @@ from .api import (
     DiagnosticCategory,
     GeneratorAPIProtocol,
     create_api,
+    get_model_spec,
 )
 from .const import (
     CONF_ARCHITECTURE,
@@ -349,6 +350,16 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         if self.data is None:
             return
 
+        # Calculate fuel level percentage from mL using tank capacity
+        fuel_ml = state.get("fuel_ml")
+        fuel_level_percent: int | None = None
+        if fuel_ml is not None and self._cached_model:
+            model_spec = get_model_spec(self._cached_model)
+            if model_spec and model_spec.fuel_tank_liters > 0:
+                fuel_level_percent = min(
+                    round((fuel_ml / (model_spec.fuel_tank_liters * 1000)) * 100), 100
+                )
+
         # Map stream state to device values
         state_map: dict[DeviceType, int | float | bool | None] = {
             DeviceType.RUNTIME_HOURS: state.get("runtime_hours"),
@@ -357,7 +368,8 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             DeviceType.ECO_MODE: state.get("eco_status"),
             DeviceType.ENGINE_RUNNING: state.get("engine_mode", 0) > 0,
             DeviceType.OUTPUT_VOLTAGE: state.get("voltage"),
-            DeviceType.FUEL_LEVEL_ML: state.get("fuel_ml"),
+            DeviceType.FUEL_LEVEL: fuel_level_percent,
+            DeviceType.FUEL_VOLUME_ML: fuel_ml,
             DeviceType.FUEL_REMAINS_LEVEL: state.get("fuel_level_discrete"),
             DeviceType.FUEL_REMAINING_TIME: state.get("fuel_remaining_min"),
             DeviceType.OUTPUT_VOLTAGE_SETTING: state.get("voltage_setting"),

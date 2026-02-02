@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Resterende brandstoftijd"
       },
-      "fuel_level_ml": {
-        "name": "Brandstofniveau"
+      "fuel_volume": {
+        "name": "Brandstofvolume"
       },
       "fuel_gauge_level": {
         "name": "Brandstofmeterniveau"

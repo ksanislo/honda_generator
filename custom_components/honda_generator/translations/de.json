@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Verbleibende Kraftstoffzeit"
       },
-      "fuel_level_ml": {
-        "name": "Kraftstoffstand"
+      "fuel_volume": {
+        "name": "Kraftstoffvolumen"
       },
       "fuel_gauge_level": {
         "name": "Tankanzeigestand"

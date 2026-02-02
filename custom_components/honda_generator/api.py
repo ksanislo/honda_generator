@@ -198,7 +198,7 @@ class DeviceType(StrEnum):
     FUEL_LEVEL = "fuel_level"
     FUEL_REMAINING_TIME = "fuel_remaining_time"
     # EU3200i-specific types (Push architecture)
-    FUEL_LEVEL_ML = "fuel_level_ml"  # Fuel level in milliliters
+    FUEL_VOLUME_ML = "fuel_volume_ml"  # Fuel volume in milliliters
     FUEL_REMAINS_LEVEL = "fuel_remains_level"  # Discrete fuel level (0-17)
     OUTPUT_VOLTAGE_SETTING = "output_voltage_setting"  # Configured output voltage
 
@@ -238,7 +238,7 @@ DEVICE_NAMES: dict[DeviceType, str] = {
     DeviceType.FUEL_LEVEL: "Fuel Level",
     DeviceType.FUEL_REMAINING_TIME: "Fuel Remaining Time",
     # EU3200i-specific names
-    DeviceType.FUEL_LEVEL_ML: "Fuel Level",
+    DeviceType.FUEL_VOLUME_ML: "Fuel Volume",
     DeviceType.FUEL_REMAINS_LEVEL: "Fuel Gauge Level",
     DeviceType.OUTPUT_VOLTAGE_SETTING: "Output Voltage Setting",
 }
@@ -266,7 +266,8 @@ DEVICE_TYPES_PUSH: list[DeviceType] = [
     DeviceType.ECO_MODE,
     DeviceType.ENGINE_RUNNING,
     DeviceType.OUTPUT_VOLTAGE,
-    DeviceType.FUEL_LEVEL_ML,
+    DeviceType.FUEL_LEVEL,
+    DeviceType.FUEL_VOLUME_ML,
     DeviceType.FUEL_REMAINS_LEVEL,
     DeviceType.FUEL_REMAINING_TIME,
     DeviceType.OUTPUT_VOLTAGE_SETTING,
@@ -1736,6 +1737,16 @@ class PushAPI(GeneratorAPIProtocol):
         devices = []
         controller_name = self.controller_name
 
+        # Calculate fuel level percentage from mL using tank capacity
+        fuel_ml = self._state["fuel_ml"]
+        fuel_level_percent: int | None = None
+        if fuel_ml is not None:
+            model_spec = get_model_spec(self._model) if self._model else None
+            if model_spec and model_spec.fuel_tank_liters > 0:
+                fuel_level_percent = min(
+                    round((fuel_ml / (model_spec.fuel_tank_liters * 1000)) * 100), 100
+                )
+
         # Map internal state to device types
         device_values: dict[DeviceType, int | float | bool | None] = {
             DeviceType.RUNTIME_HOURS: self._state["runtime_hours"],
@@ -1744,7 +1755,8 @@ class PushAPI(GeneratorAPIProtocol):
             DeviceType.ECO_MODE: self._state["eco_status"],
             DeviceType.ENGINE_RUNNING: self._state["engine_mode"] > 0,
             DeviceType.OUTPUT_VOLTAGE: self._state["voltage"],
-            DeviceType.FUEL_LEVEL_ML: self._state["fuel_ml"],
+            DeviceType.FUEL_LEVEL: fuel_level_percent,
+            DeviceType.FUEL_VOLUME_ML: fuel_ml,
             DeviceType.FUEL_REMAINS_LEVEL: self._state["fuel_level_discrete"],
             DeviceType.FUEL_REMAINING_TIME: self._state["fuel_remaining_min"],
             DeviceType.OUTPUT_VOLTAGE_SETTING: self._state["voltage_setting"],

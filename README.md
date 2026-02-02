@@ -79,8 +79,8 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 | Output Voltage | Output voltage | V | |
 | Engine Event | Last engine event | - | Poll architecture only |
 | Engine Error | Current error code | - | Poll architecture only |
-| Fuel Level | Current fuel tank level | % | EU7000is only |
-| Fuel Level | Current fuel level | mL | EU3200i only |
+| Fuel Level | Current fuel tank level | % | EU7000is, EU3200i |
+| Fuel Volume | Current fuel volume | mL | EU3200i only |
 | Fuel Gauge Level | Discrete fuel gauge level (0-17) | - | EU3200i only |
 | Fuel Remaining Time | Estimated runtime remaining | min | EU7000is, EU3200i |
 | Output Voltage Setting | Configured output voltage | V | EU3200i only |

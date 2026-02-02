@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Jäljellä oleva polttoaineaika"
       },
-      "fuel_level_ml": {
-        "name": "Polttoainetaso"
+      "fuel_volume": {
+        "name": "Polttoainemäärä"
       },
       "fuel_gauge_level": {
         "name": "Polttoainemittarin taso"

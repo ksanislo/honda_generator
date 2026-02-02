@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Tempo carburante rimanente"
       },
-      "fuel_level_ml": {
-        "name": "Livello carburante"
+      "fuel_volume": {
+        "name": "Volume carburante"
       },
       "fuel_gauge_level": {
         "name": "Livello indicatore carburante"

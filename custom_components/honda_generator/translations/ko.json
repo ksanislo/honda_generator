@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "연료 잔여 시간"
       },
-      "fuel_level_ml": {
-        "name": "연료 수준"
+      "fuel_volume": {
+        "name": "연료량"
       },
       "fuel_gauge_level": {
         "name": "연료 게이지 수준"

@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Оставшееся время работы"
       },
-      "fuel_level_ml": {
-        "name": "Уровень топлива"
+      "fuel_volume": {
+        "name": "Объем топлива"
       },
       "fuel_gauge_level": {
         "name": "Уровень указателя топлива"

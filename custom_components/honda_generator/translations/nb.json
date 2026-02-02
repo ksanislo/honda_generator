@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Gjenværende drivstofftid"
       },
-      "fuel_level_ml": {
-        "name": "Drivstoffnivå"
+      "fuel_volume": {
+        "name": "Drivstoffvolum"
       },
       "fuel_gauge_level": {
         "name": "Drivstoffmålernivå"

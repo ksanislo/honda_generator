@@ -260,7 +260,7 @@ class TestDeviceTypes:
 
     def test_eu3200i_device_types(self) -> None:
         """Test EU3200i-specific device types."""
-        assert DeviceType.FUEL_LEVEL_ML == "fuel_level_ml"
+        assert DeviceType.FUEL_VOLUME_ML == "fuel_volume_ml"
         assert DeviceType.FUEL_REMAINS_LEVEL == "fuel_remains_level"
         assert DeviceType.OUTPUT_VOLTAGE_SETTING == "output_voltage_setting"
 
@@ -268,12 +268,12 @@ class TestDeviceTypes:
         """Test that Poll device types list is correct."""
         assert DeviceType.RUNTIME_HOURS in DEVICE_TYPES_POLL
         assert DeviceType.ENGINE_EVENT in DEVICE_TYPES_POLL
-        assert DeviceType.FUEL_LEVEL_ML not in DEVICE_TYPES_POLL
+        assert DeviceType.FUEL_VOLUME_ML not in DEVICE_TYPES_POLL
 
     def test_device_types_push_list(self) -> None:
         """Test that Push device types list is correct."""
         assert DeviceType.RUNTIME_HOURS in DEVICE_TYPES_PUSH
-        assert DeviceType.FUEL_LEVEL_ML in DEVICE_TYPES_PUSH
+        assert DeviceType.FUEL_VOLUME_ML in DEVICE_TYPES_PUSH
         assert DeviceType.ENGINE_EVENT not in DEVICE_TYPES_PUSH
 
 

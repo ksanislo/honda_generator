@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Zbývající čas paliva"
       },
-      "fuel_level_ml": {
-        "name": "Hladina paliva"
+      "fuel_volume": {
+        "name": "Objem paliva"
       },
       "fuel_gauge_level": {
         "name": "Úroveň ukazatele paliva"

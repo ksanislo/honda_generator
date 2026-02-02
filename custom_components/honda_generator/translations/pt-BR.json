@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Tempo restante de combustível"
       },
-      "fuel_level_ml": {
-        "name": "Nível de combustível"
+      "fuel_volume": {
+        "name": "Volume de combustível"
       },
       "fuel_gauge_level": {
         "name": "Nível do indicador de combustível"

@@ -76,8 +76,8 @@
       "fuel_remaining_time": {
         "name": "Fuel Remaining Time"
       },
-      "fuel_level_ml": {
-        "name": "Fuel Level"
+      "fuel_volume": {
+        "name": "Fuel Volume"
       },
       "fuel_gauge_level": {
         "name": "Fuel Gauge Level"

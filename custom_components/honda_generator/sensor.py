@@ -190,9 +190,18 @@ PUSH_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
 # EU3200i-specific sensors (Push architecture)
 EU3200I_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
     HondaGeneratorSensorEntityDescription(
-        key="fuel_level_ml",
-        translation_key="fuel_level_ml",
-        device_type=DeviceType.FUEL_LEVEL_ML,
+        key="fuel_level",
+        translation_key="fuel_level",
+        device_type=DeviceType.FUEL_LEVEL,
+        native_unit_of_measurement="%",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:fuel",
+    ),
+    HondaGeneratorSensorEntityDescription(
+        key="fuel_volume",
+        translation_key="fuel_volume",
+        device_type=DeviceType.FUEL_VOLUME_ML,
         native_unit_of_measurement="mL",
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
