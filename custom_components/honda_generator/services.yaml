@@ -9,3 +9,7 @@ stop_engine:
       selector:
         device:
           integration: honda_generator
+
+clear_discoveries:
+  name: Clear Discoveries
+  description: Clear all pending generator discoveries from the integration list.

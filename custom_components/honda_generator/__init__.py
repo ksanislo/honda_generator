@@ -31,6 +31,7 @@ PLATFORMS: list[Platform] = [
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_STOP_ENGINE = "stop_engine"
+SERVICE_CLEAR_DISCOVERIES = "clear_discoveries"
 
 
 @dataclass
@@ -84,10 +85,24 @@ async def _async_stop_engine(hass: HomeAssistant, service_call: ServiceCall) -> 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Honda Generator integration."""
+
+    async def async_clear_discoveries(call: ServiceCall) -> None:
+        """Clear all pending discovery flows."""
+        flows = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
+        count = len(flows)
+        for flow in flows:
+            hass.config_entries.flow.async_abort(flow["flow_id"])
+        _LOGGER.info("Cleared %d pending discovery flow(s)", count)
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_STOP_ENGINE,
         lambda call: _async_stop_engine(hass, call),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_CLEAR_DISCOVERIES,
+        async_clear_discoveries,
     )
     return True
 
