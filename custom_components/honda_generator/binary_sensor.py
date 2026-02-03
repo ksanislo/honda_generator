@@ -132,7 +132,16 @@ class HondaGeneratorBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
 
     @property
     def available(self) -> bool:
-        """Return True if entity is available."""
+        """Return True if entity is available.
+
+        Respects grace periods even for false_when_unavailable entities.
+        """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
+        # After grace period, false_when_unavailable entities stay available
         if self.entity_description.false_when_unavailable:
             return True
         return super().available

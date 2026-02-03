@@ -36,9 +36,11 @@ from .const import (
     CONF_ARCHITECTURE,
     CONF_MODEL,
     CONF_RECONNECT_AFTER_FAILURES,
+    CONF_RECONNECT_GRACE_PERIOD,
     CONF_SERIAL,
     CONF_STARTUP_GRACE_PERIOD,
     DEFAULT_RECONNECT_AFTER_FAILURES,
+    DEFAULT_RECONNECT_GRACE_PERIOD,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_STARTUP_GRACE_PERIOD,
     DOMAIN,
@@ -105,6 +107,23 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 self._startup_grace_period,
             )
 
+        # Reconnect grace period - keep entities unavailable after disconnect
+        self._disconnect_time: float | None = None
+        self._reconnect_grace_period: int = int(
+            config_entry.options.get(
+                CONF_RECONNECT_GRACE_PERIOD, DEFAULT_RECONNECT_GRACE_PERIOD
+            )
+        )
+        self._reconnect_grace_logged_expired: bool = False
+        if self._reconnect_grace_period > 0:
+            _LOGGER.debug(
+                "Reconnect grace period: %ds (entities unavailable after disconnect)",
+                self._reconnect_grace_period,
+            )
+
+        # Flag to skip grace period for intentional disconnects (e.g., stop engine)
+        self._intentional_disconnect: bool = False
+
         # Persistent storage for runtime hours (prevents backwards/forwards jumps)
         storage_key = f"{STORAGE_KEY_PREFIX}.{config_entry.entry_id}"
         self._store: Store = Store(hass, STORAGE_VERSION, storage_key)
@@ -153,6 +172,38 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             return False
         elapsed = time.monotonic() - self._startup_time
         return elapsed < self._startup_grace_period
+
+    def set_intentional_disconnect(self) -> None:
+        """Mark that the next disconnect is intentional (e.g., stop engine command).
+
+        This prevents the reconnect grace period from activating when the
+        generator is intentionally stopped, allowing entities to immediately
+        show offline defaults rather than "unavailable".
+        """
+        _LOGGER.debug("Intentional disconnect flagged (grace period will be skipped)")
+        self._intentional_disconnect = True
+
+    @property
+    def in_reconnect_grace_period(self) -> bool:
+        """Return True if we're in the reconnect grace period after a disconnect.
+
+        During this period, entities should report as unavailable rather than
+        showing default offline values. This preserves dashboard state while
+        attempting to reconnect after a connection loss.
+        """
+        if self._disconnect_time is None:
+            return False
+        if self._reconnect_grace_period <= 0:
+            return False
+        elapsed = time.monotonic() - self._disconnect_time
+        in_grace = elapsed < self._reconnect_grace_period
+        _LOGGER.debug(
+            "Reconnect grace period check: elapsed=%.1fs, period=%ds, in_grace=%s",
+            elapsed,
+            self._reconnect_grace_period,
+            in_grace,
+        )
+        return in_grace
 
     async def async_load_stored_data(self) -> None:
         """Load persisted data from storage."""
@@ -547,10 +598,23 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             if not self._has_connected_once:
                 elapsed = time.monotonic() - self._startup_time
                 _LOGGER.debug(
-                    "First successful connection after %.1fs, ending grace period",
+                    "First successful connection after %.1fs, ending startup grace period",
                     elapsed,
                 )
                 self._has_connected_once = True
+            # Clear disconnect time on successful reconnection
+            if self._disconnect_time is not None:
+                elapsed = time.monotonic() - self._disconnect_time
+                _LOGGER.debug(
+                    "Reconnected after %.1fs, ending reconnect grace period",
+                    elapsed,
+                )
+                self._disconnect_time = None
+                self._reconnect_grace_logged_expired = False
+            # Clear intentional disconnect flag if it was set but disconnect didn't happen
+            if self._intentional_disconnect:
+                _LOGGER.debug("Clearing unused intentional disconnect flag")
+                self._intentional_disconnect = False
             return self._last_successful_data
 
         except APIAuthError as err:
@@ -563,6 +627,33 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 self._consecutive_failures,
                 err,
             )
+
+            # Start reconnect grace period on first failure after being connected
+            # Skip grace period if this is an intentional disconnect (e.g., stop engine)
+            _LOGGER.debug(
+                "Grace period check: has_connected_once=%s, disconnect_time=%s, "
+                "period=%d, intentional=%s",
+                self._has_connected_once,
+                self._disconnect_time,
+                self._reconnect_grace_period,
+                self._intentional_disconnect,
+            )
+            if self._intentional_disconnect:
+                _LOGGER.debug(
+                    "Skipping grace period due to intentional disconnect"
+                )
+                self._intentional_disconnect = False
+            elif (
+                self._has_connected_once
+                and self._disconnect_time is None
+                and self._reconnect_grace_period > 0
+            ):
+                self._disconnect_time = time.monotonic()
+                _LOGGER.debug(
+                    "Connection lost, starting reconnect grace period (%ds)",
+                    self._reconnect_grace_period,
+                )
+
             # Force reconnect after threshold (0 disables this feature)
             if (
                 self._reconnect_after_failures > 0
@@ -577,7 +668,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 self.api = None
                 self._consecutive_failures = 0
 
-            # Check if grace period just expired - if so, notify entities
+            # Check if startup grace period just expired - if so, notify entities
             # so they can transition from unavailable to showing defaults
             if (
                 not self._has_connected_once
@@ -591,6 +682,20 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 )
                 # Force entity update by calling async_set_updated_data with current data
                 # This triggers availability re-evaluation in entities
+                if self.data is not None:
+                    self.async_set_updated_data(self.data)
+
+            # Check if reconnect grace period just expired
+            if (
+                self._disconnect_time is not None
+                and not self._reconnect_grace_logged_expired
+                and not self.in_reconnect_grace_period
+            ):
+                self._reconnect_grace_logged_expired = True
+                _LOGGER.debug(
+                    "Reconnect grace period expired after %ds, showing offline defaults",
+                    self._reconnect_grace_period,
+                )
                 if self.data is not None:
                     self.async_set_updated_data(self.data)
 

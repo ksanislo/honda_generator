@@ -347,10 +347,19 @@ class HondaGeneratorSensor(HondaGeneratorEntity, SensorEntity):
 
     @property
     def available(self) -> bool:
-        """Return True if entity is available."""
+        """Return True if entity is available.
+
+        Respects grace periods even for zero_when_unavailable sensors.
+        """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
         # If state is None (bounds check failed), sensor is unavailable
         if self._get_device_state() is None:
             return False
+        # After grace period, zero_when_unavailable sensors stay available
         if self.entity_description.zero_when_unavailable:
             return True
         return super().available
@@ -471,7 +480,14 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
 
         Returns unavailable until we've attempted the first update, to prevent
         restored values from being recorded before we've tried to get fresh data.
+        Respects grace periods during reconnection attempts.
         """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
+
         if self.coordinator.last_update_success:
             return True
 
