@@ -349,19 +349,24 @@ class HondaGeneratorSensor(HondaGeneratorEntity, SensorEntity):
     def available(self) -> bool:
         """Return True if entity is available.
 
-        Respects grace periods even for zero_when_unavailable sensors.
+        Sensors with zero_when_unavailable stay available to show offline
+        defaults (0) when not connected. Other sensors become unavailable.
         """
         # Grace periods take priority - show unavailable while reconnecting
         if self.coordinator.in_startup_grace_period:
             return False
         if self.coordinator.in_reconnect_grace_period:
             return False
+        # Sensors with zero_when_unavailable stay available to show offline default
+        if self.entity_description.zero_when_unavailable:
+            # But still unavailable if bounds check failed while connected
+            if self.coordinator.last_update_success and self._get_device_state() is None:
+                return False
+            return True
         # If state is None (bounds check failed), sensor is unavailable
         if self._get_device_state() is None:
             return False
-        # After grace period, zero_when_unavailable sensors stay available
-        if self.entity_description.zero_when_unavailable:
-            return True
+        # Regular sensors follow coordinator availability
         return super().available
 
 
@@ -455,20 +460,29 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
     def native_value(self) -> int | float | None:
         """Return the state of the sensor.
 
-        To prevent stale restored values from being recorded in history before
-        we've confirmed the current value, we only use the restored value after
-        the first coordinator update has been attempted.
+        When connected, use live data. When offline, use the best available
+        fallback value. For runtime_hours (total_increasing), this means
+        using the maximum of restored and stored values to avoid backwards jumps.
         """
         if self.coordinator.last_update_success:
             return self._get_device_state()
 
-        # Don't use restored value until we've tried to get fresh data at least once
+        # Don't use restored/stored value until we've tried to get fresh data
         if not self._first_update_attempted:
             return None
 
-        # After first update attempt failed, use restored value if available
-        if self._restored_value is not None:
-            return self._restored_value
+        # Use the best available offline value
+        # For runtime_hours, prefer the higher value (stored is high-water mark)
+        restored = self._restored_value
+        stored = self.coordinator.stored_runtime_hours
+
+        if restored is not None and stored is not None:
+            # Use whichever is greater (runtime hours should never decrease)
+            return max(restored, stored)
+        if stored is not None:
+            return stored
+        if restored is not None:
+            return restored
 
         if not self._restoration_complete:
             return None
@@ -476,7 +490,7 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
 
     @property
     def available(self) -> bool:
-        """Return True if we have any data (live or restored).
+        """Return True if we have any data (live, restored, or stored).
 
         Returns unavailable until we've attempted the first update, to prevent
         restored values from being recorded before we've tried to get fresh data.
@@ -497,6 +511,10 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
 
         # After first update attempt, available if we have restored data
         if self._restored_value is not None:
+            return True
+
+        # Fall back to coordinator's stored value (for runtime_hours)
+        if self.coordinator.stored_runtime_hours is not None:
             return True
 
         if not self._restoration_complete:

@@ -159,6 +159,15 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         return self._has_connected_once
 
     @property
+    def stored_runtime_hours(self) -> int | None:
+        """Return the stored runtime hours value.
+
+        This is the last known valid runtime hours value, persisted to storage.
+        Used as a fallback when the sensor can't get live data.
+        """
+        return self._stored_runtime_hours
+
+    @property
     def in_startup_grace_period(self) -> bool:
         """Return True if we're in the startup grace period without a connection.
 
@@ -677,13 +686,12 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             ):
                 self._grace_period_logged_expired = True
                 _LOGGER.debug(
-                    "Startup grace period expired after %ds, showing offline defaults",
+                    "Startup grace period expired after %ds, notifying entities",
                     self._startup_grace_period,
                 )
-                # Force entity update by calling async_set_updated_data with current data
-                # This triggers availability re-evaluation in entities
-                if self.data is not None:
-                    self.async_set_updated_data(self.data)
+                # Notify entities to re-evaluate availability without marking
+                # update as successful (which would make entities think we have data)
+                self.async_update_listeners()
 
             # Check if reconnect grace period just expired
             if (
@@ -693,11 +701,10 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             ):
                 self._reconnect_grace_logged_expired = True
                 _LOGGER.debug(
-                    "Reconnect grace period expired after %ds, showing offline defaults",
+                    "Reconnect grace period expired after %ds, notifying entities",
                     self._reconnect_grace_period,
                 )
-                if self.data is not None:
-                    self.async_set_updated_data(self.data)
+                self.async_update_listeners()
 
             raise UpdateFailed(err) from err
 

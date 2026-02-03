@@ -134,16 +134,19 @@ class HondaGeneratorBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
     def available(self) -> bool:
         """Return True if entity is available.
 
-        Respects grace periods even for false_when_unavailable entities.
+        Sensors with false_when_unavailable stay available to show offline
+        defaults (False) when not connected. Other sensors (like ECO mode)
+        become unavailable when not connected.
         """
         # Grace periods take priority - show unavailable while reconnecting
         if self.coordinator.in_startup_grace_period:
             return False
         if self.coordinator.in_reconnect_grace_period:
             return False
-        # After grace period, false_when_unavailable entities stay available
+        # Sensors with false_when_unavailable stay available to show offline default
         if self.entity_description.false_when_unavailable:
             return True
+        # Regular sensors (like ECO mode) follow coordinator availability
         return super().available
 
     @property
@@ -221,7 +224,15 @@ class HondaGeneratorAlertBinarySensor(
 
     @property
     def available(self) -> bool:
-        """Return True if we have any data (live or restored)."""
+        """Return True if we have any data (live or restored).
+
+        Respects grace periods to preserve dashboard state.
+        """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
         if self.coordinator.last_update_success:
             return True
         return self._restored_value is not None
