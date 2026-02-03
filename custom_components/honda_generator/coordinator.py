@@ -37,8 +37,10 @@ from .const import (
     CONF_MODEL,
     CONF_RECONNECT_AFTER_FAILURES,
     CONF_SERIAL,
+    CONF_STARTUP_GRACE_PERIOD,
     DEFAULT_RECONNECT_AFTER_FAILURES,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_STARTUP_GRACE_PERIOD,
     DOMAIN,
 )
 
@@ -88,6 +90,20 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 CONF_RECONNECT_AFTER_FAILURES, DEFAULT_RECONNECT_AFTER_FAILURES
             )
         )
+        # Startup grace period - keep entities unavailable until this expires
+        self._startup_time: float = time.monotonic()
+        self._startup_grace_period: int = int(
+            config_entry.options.get(
+                CONF_STARTUP_GRACE_PERIOD, DEFAULT_STARTUP_GRACE_PERIOD
+            )
+        )
+        self._has_connected_once: bool = False
+        self._grace_period_logged_expired: bool = False
+        if self._startup_grace_period > 0:
+            _LOGGER.debug(
+                "Startup grace period: %ds (entities unavailable until connected)",
+                self._startup_grace_period,
+            )
 
         # Persistent storage for runtime hours (prevents backwards/forwards jumps)
         storage_key = f"{STORAGE_KEY_PREFIX}.{config_entry.entry_id}"
@@ -117,6 +133,26 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
     def architecture(self) -> Architecture:
         """Return the communication architecture."""
         return self._architecture
+
+    @property
+    def has_connected_once(self) -> bool:
+        """Return True if we've successfully connected at least once."""
+        return self._has_connected_once
+
+    @property
+    def in_startup_grace_period(self) -> bool:
+        """Return True if we're in the startup grace period without a connection.
+
+        During this period, entities should report as unavailable rather than
+        showing default offline values. This preserves dashboard state while
+        waiting for the generator to be discovered after a restart.
+        """
+        if self._has_connected_once:
+            return False
+        if self._startup_grace_period <= 0:
+            return False
+        elapsed = time.monotonic() - self._startup_time
+        return elapsed < self._startup_grace_period
 
     async def async_load_stored_data(self) -> None:
         """Load persisted data from storage."""
@@ -506,8 +542,15 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 devices,
                 last_update=datetime.now(),
             )
-            # Reset failure counter on success
+            # Reset failure counter on success and mark as connected
             self._consecutive_failures = 0
+            if not self._has_connected_once:
+                elapsed = time.monotonic() - self._startup_time
+                _LOGGER.debug(
+                    "First successful connection after %.1fs, ending grace period",
+                    elapsed,
+                )
+                self._has_connected_once = True
             return self._last_successful_data
 
         except APIAuthError as err:
@@ -533,6 +576,24 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 await self.api.disconnect()
                 self.api = None
                 self._consecutive_failures = 0
+
+            # Check if grace period just expired - if so, notify entities
+            # so they can transition from unavailable to showing defaults
+            if (
+                not self._has_connected_once
+                and not self._grace_period_logged_expired
+                and not self.in_startup_grace_period
+            ):
+                self._grace_period_logged_expired = True
+                _LOGGER.debug(
+                    "Startup grace period expired after %ds, showing offline defaults",
+                    self._startup_grace_period,
+                )
+                # Force entity update by calling async_set_updated_data with current data
+                # This triggers availability re-evaluation in entities
+                if self.data is not None:
+                    self.async_set_updated_data(self.data)
+
             raise UpdateFailed(err) from err
 
     async def async_first_refresh_or_default(self) -> None:

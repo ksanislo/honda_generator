@@ -40,8 +40,10 @@ from .const import (
     CONF_MODEL,
     CONF_RECONNECT_AFTER_FAILURES,
     CONF_SERIAL,
+    CONF_STARTUP_GRACE_PERIOD,
     DEFAULT_RECONNECT_AFTER_FAILURES,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_STARTUP_GRACE_PERIOD,
     DOMAIN,
     MIN_SCAN_INTERVAL,
 )
@@ -272,6 +274,17 @@ class HondaGeneratorOptionsFlowHandler(OptionsFlow):
                             min=0, max=10, step=1, mode=NumberSelectorMode.BOX
                         )
                     ),
+                    vol.Required(
+                        CONF_STARTUP_GRACE_PERIOD,
+                        default=self.options.get(
+                            CONF_STARTUP_GRACE_PERIOD,
+                            DEFAULT_STARTUP_GRACE_PERIOD,
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=0, max=300, step=1, mode=NumberSelectorMode.BOX
+                        )
+                    ),
                 }
             )
         else:
@@ -296,6 +309,17 @@ class HondaGeneratorOptionsFlowHandler(OptionsFlow):
                     ): NumberSelector(
                         NumberSelectorConfig(
                             min=0, max=10, step=1, mode=NumberSelectorMode.BOX
+                        )
+                    ),
+                    vol.Required(
+                        CONF_STARTUP_GRACE_PERIOD,
+                        default=self.options.get(
+                            CONF_STARTUP_GRACE_PERIOD,
+                            DEFAULT_STARTUP_GRACE_PERIOD,
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=0, max=300, step=1, mode=NumberSelectorMode.BOX
                         )
                     ),
                 }
