@@ -101,9 +101,9 @@ SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
         device_type=DeviceType.ENGINE_EVENT,
         device_class=SensorDeviceClass.ENUM,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         options=ENGINE_EVENT_OPTIONS,
         icon="mdi:engine",
-        zero_when_unavailable=True,
         enum_keys=ENGINE_EVENT_KEYS,
     ),
     HondaGeneratorSensorEntityDescription(
@@ -112,9 +112,9 @@ SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
         device_type=DeviceType.ENGINE_ERROR,
         device_class=SensorDeviceClass.ENUM,
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         options=ENGINE_ERROR_OPTIONS,
         icon="mdi:alert-octagon",
-        zero_when_unavailable=True,
         enum_keys=ENGINE_ERROR_KEYS,
     ),
 )
