@@ -540,10 +540,6 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             if self.api is None or not self.api.connected:
                 ble_device = self._get_ble_device()
                 if not ble_device:
-                    _LOGGER.debug(
-                        "Could not find Honda Generator with address %s",
-                        self.config_entry.unique_id,
-                    )
                     raise UpdateFailed("Generator not available")
 
                 _LOGGER.debug(
@@ -636,11 +632,20 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             raise UpdateFailed(err) from err
         except (APIConnectionError, APIReadError, UpdateFailed) as err:
             self._consecutive_failures += 1
-            _LOGGER.debug(
-                "Update failed (%d consecutive): %s",
-                self._consecutive_failures,
-                err,
-            )
+            if self.api is None:
+                _LOGGER.debug(
+                    "Update failed for %s (waiting for device): %s",
+                    self.config_entry.unique_id,
+                    err,
+                )
+            else:
+                _LOGGER.debug(
+                    "Update failed for %s (%d consecutive, reconnect at %d): %s",
+                    self.config_entry.unique_id,
+                    self._consecutive_failures,
+                    self._reconnect_after_failures,
+                    err,
+                )
 
             # Start reconnect grace period on first failure after being connected
             # Skip grace period if this is an intentional disconnect (e.g., stop engine)
