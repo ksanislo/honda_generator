@@ -39,10 +39,12 @@ from .const import (
     CONF_RECONNECT_GRACE_PERIOD,
     CONF_SERIAL,
     CONF_STARTUP_GRACE_PERIOD,
+    CONF_STOP_ATTEMPTS,
     DEFAULT_RECONNECT_AFTER_FAILURES,
     DEFAULT_RECONNECT_GRACE_PERIOD,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_STARTUP_GRACE_PERIOD,
+    DEFAULT_STOP_ATTEMPTS,
     DOMAIN,
 )
 
@@ -124,6 +126,11 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         # Flag to skip grace period for intentional disconnects (e.g., stop engine)
         self._intentional_disconnect: bool = False
 
+        # Number of stop command attempts (Poll architecture only)
+        self._stop_attempts: int = int(
+            config_entry.options.get(CONF_STOP_ATTEMPTS, DEFAULT_STOP_ATTEMPTS)
+        )
+
         # Persistent storage for runtime hours (prevents backwards/forwards jumps)
         storage_key = f"{STORAGE_KEY_PREFIX}.{config_entry.entry_id}"
         self._store: Store = Store(hass, STORAGE_VERSION, storage_key)
@@ -166,6 +173,11 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         Used as a fallback when the sensor can't get live data.
         """
         return self._stored_runtime_hours
+
+    @property
+    def stop_attempts(self) -> int:
+        """Return the configured number of stop command attempts."""
+        return self._stop_attempts
 
     @property
     def in_startup_grace_period(self) -> bool:

@@ -1153,18 +1153,20 @@ class PollAPI(GeneratorAPIProtocol):
         _LOGGER.debug("Firmware version read: %s", version)
         return version
 
-    async def engine_stop(self) -> bool:
+    async def engine_stop(self, max_attempts: int = 3) -> bool:
         """Stop the generator engine.
 
         Sends the stop command repeatedly until the connection drops
-        (indicating the generator shut off) or 3 seconds elapse.
+        (indicating the generator shut off) or max attempts reached.
+
+        Args:
+            max_attempts: Number of times to send the stop command (default 3).
         """
         if not self._client or not self._client.is_connected:
             _LOGGER.error("Cannot stop engine: not connected")
             return False
 
         attempts = 0
-        max_attempts = 30  # 3 seconds at 100ms intervals
 
         while attempts < max_attempts:
             try:
