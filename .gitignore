@@ -23,9 +23,6 @@ __pycache__/
 .venv/
 venv/
 
-# Claude Code
-CLAUDE.md
-
 # Distribution
 dist/
 build/
