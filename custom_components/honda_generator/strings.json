@@ -122,6 +122,14 @@
     "stop_engine": {
       "name": "Stop engine",
       "description": "Stops the generator engine."
+    },
+    "clear_discoveries": {
+      "name": "Clear discoveries",
+      "description": "Clear all pending generator discoveries from the integration list."
+    },
+    "set_service_record": {
+      "name": "Set service record",
+      "description": "Set the last service date and hours for a maintenance item. Use this to import service history from the Honda app or set initial values."
     }
   },
   "alert_codes": {

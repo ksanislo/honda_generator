@@ -47,6 +47,7 @@ from .const import (
     DEFAULT_STOP_ATTEMPTS,
     DOMAIN,
 )
+from .services import OIL_CHANGE_BREAKIN_INTERVAL, ServiceType, get_model_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,11 +132,14 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             config_entry.options.get(CONF_STOP_ATTEMPTS, DEFAULT_STOP_ATTEMPTS)
         )
 
-        # Persistent storage for runtime hours (prevents backwards/forwards jumps)
+        # Persistent storage for runtime hours and service records
         storage_key = f"{STORAGE_KEY_PREFIX}.{config_entry.entry_id}"
         self._store: Store = Store(hass, STORAGE_VERSION, storage_key)
         self._stored_runtime_hours: int | None = None
         self._stored_runtime_hours_timestamp: datetime | None = None
+
+        # Service tracking: {service_type: {"hours": int, "date": str}}
+        self._service_records: dict[str, dict] = {}
 
         # Detect architecture from config entry
         self._architecture = Architecture(
@@ -238,6 +242,23 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                     self._stored_runtime_hours,
                     self._stored_runtime_hours_timestamp,
                 )
+            # Load service records
+            self._service_records = data.get("service_records", {})
+            if self._service_records:
+                _LOGGER.debug(
+                    "Loaded %d service records", len(self._service_records)
+                )
+
+    async def _async_save_storage(self) -> None:
+        """Save all persistent data to storage."""
+        data = {
+            "service_records": self._service_records,
+        }
+        if self._stored_runtime_hours is not None:
+            data["runtime_hours"] = self._stored_runtime_hours
+        if self._stored_runtime_hours_timestamp is not None:
+            data["timestamp"] = self._stored_runtime_hours_timestamp.isoformat()
+        await self._store.async_save(data)
 
     async def _async_save_runtime_hours(self, value: int) -> None:
         """Save runtime hours to persistent storage if validated."""
@@ -251,13 +272,121 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         if self._stored_runtime_hours is None or value > self._stored_runtime_hours:
             self._stored_runtime_hours = value
             self._stored_runtime_hours_timestamp = now
-            await self._store.async_save(
-                {
-                    "runtime_hours": value,
-                    "timestamp": now.isoformat(),
-                }
-            )
+            await self._async_save_storage()
             _LOGGER.debug("Saved runtime hours: %d", value)
+
+    async def async_mark_service_complete(self, service_type: ServiceType) -> None:
+        """Mark a service as complete at current runtime hours and date.
+
+        Args:
+            service_type: The type of service that was performed
+        """
+        now = datetime.now()
+        current_hours = self._stored_runtime_hours or 0
+
+        self._service_records[service_type.value] = {
+            "hours": current_hours,
+            "date": now.isoformat(),
+        }
+        await self._async_save_storage()
+        _LOGGER.info(
+            "Marked %s complete at %d hours on %s",
+            service_type.value,
+            current_hours,
+            now.date().isoformat(),
+        )
+        # Notify entities to update
+        self.async_update_listeners()
+
+    def get_service_record(self, service_type: ServiceType) -> dict | None:
+        """Get the service record for a service type.
+
+        Args:
+            service_type: The type of service
+
+        Returns:
+            Dict with "hours" and "date" keys, or None if never serviced
+        """
+        return self._service_records.get(service_type.value)
+
+    def is_service_due(self, service_type: ServiceType) -> bool:
+        """Check if a service is due based on hours and/or time.
+
+        Args:
+            service_type: The type of service to check
+
+        Returns:
+            True if service is due, False otherwise
+        """
+        model = self.config_entry.data.get(CONF_MODEL)
+        model_services = get_model_services(model)
+
+        # Service not applicable to this model
+        if service_type not in model_services:
+            return False
+
+        interval = model_services[service_type]
+        record = self.get_service_record(service_type)
+
+        # Special handling for oil change - uses break-in interval until first change
+        if service_type == ServiceType.OIL_CHANGE:
+            # Check if any oil change has been recorded
+            if record is None:
+                # No oil change recorded - use break-in interval (20h/30d)
+                interval = OIL_CHANGE_BREAKIN_INTERVAL
+                # Check against break-in interval
+                current_hours = self._stored_runtime_hours or 0
+                if interval.hours and current_hours >= interval.hours:
+                    return True
+                if interval.days:
+                    # Use storage timestamp as proxy for install date
+                    install_date = self._stored_runtime_hours_timestamp
+                    if install_date:
+                        days_since = (datetime.now() - install_date).days
+                        if days_since >= interval.days:
+                            return True
+                return False
+            # Oil change has been done - fall through to regular interval check
+
+        # Never serviced - check against initial values
+        if record is None:
+            current_hours = self._stored_runtime_hours or 0
+            if interval.hours and current_hours >= interval.hours:
+                return True
+            # Can't check time-based without a reference point
+            return False
+
+        # Check hours since last service
+        current_hours = self._stored_runtime_hours or 0
+        last_service_hours = record.get("hours", 0)
+        if interval.hours:
+            hours_since = current_hours - last_service_hours
+            if hours_since >= interval.hours:
+                return True
+
+        # Check days since last service
+        if interval.days:
+            last_service_date_str = record.get("date")
+            if last_service_date_str:
+                try:
+                    last_service_date = datetime.fromisoformat(last_service_date_str)
+                    days_since = (datetime.now() - last_service_date).days
+                    if days_since >= interval.days:
+                        return True
+                except (ValueError, TypeError):
+                    pass
+
+        return False
+
+    def get_applicable_services(self) -> list[ServiceType]:
+        """Get list of service types applicable to this generator's model.
+
+        Returns:
+            List of ServiceType values applicable to the model
+        """
+        model = self.config_entry.data.get(CONF_MODEL)
+        model_services = get_model_services(model)
+        return list(model_services.keys())
 
     def _validate_runtime_hours(self, value: int, now: datetime) -> bool:
         """Validate that runtime hours increase is plausible.

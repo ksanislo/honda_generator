@@ -21,6 +21,7 @@ from .api import DeviceType, get_model_spec
 from .codes import AlertCode, get_fault_codes, get_warning_codes
 from .const import DOMAIN
 from .entity import HondaGeneratorEntity
+from .services import ServiceType, get_model_services, get_service_definition
 
 if TYPE_CHECKING:
     from . import HondaGeneratorConfigEntry
@@ -88,6 +89,11 @@ async def async_setup_entry(
         entities.append(
             HondaGeneratorAlertBinarySensor(coordinator, alert_code, is_fault=True)
         )
+
+    # Service due binary sensors (model-specific)
+    model_services = get_model_services(coordinator.data.model)
+    for service_type in model_services:
+        entities.append(ServiceDueBinarySensor(coordinator, service_type))
 
     async_add_entities(entities)
 
@@ -259,5 +265,74 @@ class HondaGeneratorAlertBinarySensor(
             elif self.coordinator.data and self.coordinator.data.last_update:
                 attrs["last_update"] = self.coordinator.data.last_update.isoformat()
             attrs["data_stale"] = True
+
+        return attrs
+
+
+class ServiceDueBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
+    """Binary sensor for service due status."""
+
+    def __init__(
+        self,
+        coordinator: HondaGeneratorCoordinator,
+        service_type: ServiceType,
+    ) -> None:
+        """Initialize the service due binary sensor."""
+        super().__init__(coordinator)
+        self._service_type = service_type
+        service_def = get_service_definition(service_type)
+        self._attr_unique_id = (
+            f"{DOMAIN}-{coordinator.data.controller_name}_service_{service_type.value}"
+        )
+        self._attr_name = f"{service_def.name} Due"
+        self._attr_device_class = BinarySensorDeviceClass.PROBLEM
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_icon = service_def.icon
+        # Only oil change services enabled by default
+        self._attr_entity_registry_enabled_default = service_def.enabled_by_default
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if service is due."""
+        return self.coordinator.is_service_due(self._service_type)
+
+    @property
+    def available(self) -> bool:
+        """Return True - service sensors are always available."""
+        # Service due status is based on stored data, always available
+        return True
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes."""
+        record = self.coordinator.get_service_record(self._service_type)
+        service_def = get_service_definition(self._service_type)
+        model_services = get_model_services(self.coordinator.data.model)
+        interval = model_services.get(self._service_type)
+
+        attrs: dict[str, Any] = {
+            "service_type": self._service_type.value,
+        }
+
+        if interval:
+            if interval.hours:
+                attrs["interval_hours"] = interval.hours
+            if interval.days:
+                attrs["interval_days"] = interval.days
+
+        if record:
+            attrs["last_service_hours"] = record.get("hours")
+            attrs["last_service_date"] = record.get("date")
+        else:
+            attrs["last_service_hours"] = None
+            attrs["last_service_date"] = None
+
+        if service_def.is_dealer_service:
+            attrs["dealer_service"] = True
 
         return attrs

@@ -13,3 +13,64 @@ stop_engine:
 clear_discoveries:
   name: Clear Discoveries
   description: Clear all pending generator discoveries from the integration list.
+
+set_service_record:
+  name: Set Service Record
+  description: Set the last service date and hours for a maintenance item. Use this to import service history from the Honda app or set initial values.
+  fields:
+    device_id:
+      name: Device
+      description: The generator to update.
+      required: true
+      selector:
+        device:
+          integration: honda_generator
+    service_type:
+      name: Service Type
+      description: The type of service to record.
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Oil Change"
+              value: "oil_change"
+            - label: "Air Filter Clean"
+              value: "air_filter_clean"
+            - label: "Air Filter Replace"
+              value: "air_filter_replace"
+            - label: "Spark Plug Check"
+              value: "spark_plug_check"
+            - label: "Spark Plug Replace"
+              value: "spark_plug_replace"
+            - label: "Spark Arrester Clean"
+              value: "spark_arrester_clean"
+            - label: "Sediment Cup Clean"
+              value: "sediment_cup_clean"
+            - label: "Valve Clearance"
+              value: "valve_clearance"
+            - label: "Timing Belt"
+              value: "timing_belt"
+            - label: "Combustion Chamber"
+              value: "combustion_chamber"
+            - label: "Fuel Tank Clean"
+              value: "fuel_tank_clean"
+            - label: "Fuel Pump Filter"
+              value: "fuel_pump_filter"
+            - label: "Fuel System Check"
+              value: "fuel_system_check"
+    hours:
+      name: Runtime Hours
+      description: The runtime hours when the service was performed.
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100000
+          mode: box
+          unit_of_measurement: hours
+    date:
+      name: Service Date
+      description: The date when the service was performed.
+      required: true
+      selector:
+        date:

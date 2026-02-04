@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TypeAlias
 
 from homeassistant.config_entries import ConfigEntry
@@ -18,6 +19,7 @@ from homeassistant.helpers.device_registry import DeviceEntry
 from .api import API, Architecture
 from .const import CONF_ARCHITECTURE, CONF_MODEL, CONF_SERIAL, DOMAIN
 from .coordinator import HondaGeneratorCoordinator
+from .services import ServiceType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +34,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_STOP_ENGINE = "stop_engine"
 SERVICE_CLEAR_DISCOVERIES = "clear_discoveries"
+SERVICE_SET_SERVICE_RECORD = "set_service_record"
 
 
 @dataclass
@@ -83,6 +86,56 @@ async def _async_stop_engine(hass: HomeAssistant, service_call: ServiceCall) -> 
         _LOGGER.info("Engine stop command sent successfully via service")
 
 
+async def _async_set_service_record(
+    hass: HomeAssistant, service_call: ServiceCall
+) -> None:
+    """Handle the set_service_record service call."""
+    device_id = service_call.data.get("device_id")
+    service_type_str = service_call.data.get("service_type")
+    hours = service_call.data.get("hours")
+    date_value = service_call.data.get("date")
+
+    if isinstance(device_id, list):
+        device_id = device_id[0]
+
+    config_entry = _get_config_entry_from_device_id(hass, device_id)
+    if config_entry is None:
+        raise HomeAssistantError(f"Device {device_id} not found")
+
+    # Validate service type
+    try:
+        service_type = ServiceType(service_type_str)
+    except ValueError:
+        raise HomeAssistantError(f"Invalid service type: {service_type_str}")
+
+    # Parse date - can be datetime.date or string
+    if isinstance(date_value, str):
+        try:
+            service_date = datetime.fromisoformat(date_value)
+        except ValueError:
+            raise HomeAssistantError(f"Invalid date format: {date_value}")
+    else:
+        # datetime.date from selector
+        service_date = datetime.combine(date_value, datetime.min.time())
+
+    coordinator = config_entry.runtime_data.coordinator
+
+    # Directly set the service record
+    coordinator._service_records[service_type.value] = {
+        "hours": int(hours),
+        "date": service_date.isoformat(),
+    }
+    await coordinator._async_save_storage()
+    coordinator.async_update_listeners()
+
+    _LOGGER.info(
+        "Set service record for %s: %d hours on %s",
+        service_type.value,
+        hours,
+        service_date.date().isoformat(),
+    )
+
+
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Honda Generator integration."""
 
@@ -94,15 +147,28 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             hass.config_entries.flow.async_abort(flow["flow_id"])
         _LOGGER.info("Cleared %d pending discovery flow(s)", count)
 
+    async def async_stop_engine(call: ServiceCall) -> None:
+        """Handle stop_engine service call."""
+        await _async_stop_engine(hass, call)
+
+    async def async_set_service_record(call: ServiceCall) -> None:
+        """Handle set_service_record service call."""
+        await _async_set_service_record(hass, call)
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_STOP_ENGINE,
-        lambda call: _async_stop_engine(hass, call),
+        async_stop_engine,
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_CLEAR_DISCOVERIES,
         async_clear_discoveries,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_SERVICE_RECORD,
+        async_set_service_record,
     )
     return True
 
