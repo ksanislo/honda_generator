@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "Laite on jo määritetty",
-      "reconfigure_successful": "Uudelleenmääritys onnistui"
+      "reconfigure_successful": "Uudelleenmääritys onnistui",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "Yhteys epäonnistui",
       "invalid_auth": "Virheellinen todennus",
-      "unknown": "Odottamaton virhe",
-      "detectonly": "Vain automaattinen laitteiden tunnistus on tuettu."
+      "unknown": "Odottamaton virhe"
     },
     "step": {
       "user": {
-        "description": "Anna Honda-generaattorisi Bluetooth-salasana (oletus on 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "Salasana"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Päivitä Honda-generaattorisi Bluetooth-salasana.",
+        "data": {
+          "password": "Salasana"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "Salasana"
         }

@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "裝置已設定",
-      "reconfigure_successful": "重新設定成功"
+      "reconfigure_successful": "重新設定成功",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "連線失敗",
       "invalid_auth": "身份驗證無效",
-      "unknown": "意外錯誤",
-      "detectonly": "僅支援自動裝置偵測。"
+      "unknown": "意外錯誤"
     },
     "step": {
       "user": {
-        "description": "輸入您的本田發電機的藍牙密碼（預設為 00000000）。",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "密碼"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "更新您的本田發電機的藍牙密碼。",
+        "data": {
+          "password": "密碼"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "密碼"
         }

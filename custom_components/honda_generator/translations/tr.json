@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
-      "reconfigure_successful": "Yeniden yapılandırma başarılı"
+      "reconfigure_successful": "Yeniden yapılandırma başarılı",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "Bağlantı başarısız",
       "invalid_auth": "Geçersiz kimlik doğrulama",
-      "unknown": "Beklenmeyen hata",
-      "detectonly": "Yalnızca otomatik cihaz algılama desteklenir."
+      "unknown": "Beklenmeyen hata"
     },
     "step": {
       "user": {
-        "description": "Honda jeneratörünüzün Bluetooth şifresini girin (varsayılan 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "Şifre"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Honda jeneratörünüzün Bluetooth şifresini güncelleyin.",
+        "data": {
+          "password": "Şifre"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "Şifre"
         }

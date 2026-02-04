@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "L'appareil est déjà configuré",
-      "reconfigure_successful": "Reconfiguration réussie"
+      "reconfigure_successful": "Reconfiguration réussie",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "Échec de la connexion",
       "invalid_auth": "Authentification invalide",
-      "unknown": "Erreur inattendue",
-      "detectonly": "Seule la détection automatique des appareils est prise en charge."
+      "unknown": "Erreur inattendue"
     },
     "step": {
       "user": {
-        "description": "Entrez le mot de passe Bluetooth de votre générateur Honda (par défaut 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "Mot de passe"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Mettez à jour le mot de passe Bluetooth de votre générateur Honda.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "Mot de passe"
         }

@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "장치가 이미 구성되어 있습니다",
-      "reconfigure_successful": "재구성 성공"
+      "reconfigure_successful": "재구성 성공",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "연결 실패",
       "invalid_auth": "인증이 유효하지 않습니다",
-      "unknown": "예기치 않은 오류",
-      "detectonly": "자동 장치 감지만 지원됩니다."
+      "unknown": "예기치 않은 오류"
     },
     "step": {
       "user": {
-        "description": "Honda 발전기의 Bluetooth 비밀번호를 입력하세요 (기본값은 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "비밀번호"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Honda 발전기의 Bluetooth 비밀번호를 업데이트하세요.",
+        "data": {
+          "password": "비밀번호"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "비밀번호"
         }

@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
-      "reconfigure_successful": "Omkonfigurering lykkedes"
+      "reconfigure_successful": "Omkonfigurering lykkedes",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "Forbindelse mislykkedes",
       "invalid_auth": "Ugyldig godkendelse",
-      "unknown": "Uventet fejl",
-      "detectonly": "Kun automatisk enhedsregistrering understøttes."
+      "unknown": "Uventet fejl"
     },
     "step": {
       "user": {
-        "description": "Indtast Bluetooth-adgangskoden til din Honda-generator (standard er 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "Adgangskode"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Opdater Bluetooth-adgangskoden til din Honda-generator.",
+        "data": {
+          "password": "Adgangskode"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "Adgangskode"
         }

@@ -2,23 +2,30 @@
   "config": {
     "abort": {
       "already_configured": "Устройство уже настроено",
-      "reconfigure_successful": "Перенастройка выполнена успешно"
+      "reconfigure_successful": "Перенастройка выполнена успешно",
+      "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
       "cannot_connect": "Ошибка подключения",
       "invalid_auth": "Неверная аутентификация",
-      "unknown": "Непредвиденная ошибка",
-      "detectonly": "Поддерживается только автоматическое обнаружение устройств."
+      "unknown": "Непредвиденная ошибка"
     },
     "step": {
       "user": {
-        "description": "Введите Bluetooth-пароль вашего генератора Honda (по умолчанию 00000000).",
+        "title": "Select Honda Generator",
+        "description": "Select the Honda generator to set up.",
         "data": {
-          "password": "Пароль"
+          "address": "Device"
         }
       },
       "reconfigure": {
         "description": "Обновите Bluetooth-пароль вашего генератора Honda.",
+        "data": {
+          "password": "Пароль"
+        }
+      },
+      "password": {
+        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
         "data": {
           "password": "Пароль"
         }
