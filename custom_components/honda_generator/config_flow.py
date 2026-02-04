@@ -8,7 +8,10 @@ from typing import Any
 import voluptuous as vol
 from bluetooth_data_tools import human_readable_name
 from homeassistant.components import bluetooth
-from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
+from homeassistant.components.bluetooth import (
+    BluetoothServiceInfoBleak,
+    async_discovered_service_info,
+)
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
@@ -54,11 +57,25 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# Service UUIDs used to identify Honda generators
+HONDA_SERVICE_UUIDS = {
+    "066b0001-5d90-4939-a7ba-7b9222f53e81",  # Poll architecture
+    "01b60001-875a-4c56-b8bf-5103cafaeec7",  # Push architecture
+}
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_PASSWORD, description={"suggested_value": "00000000"}): str,
     }
 )
+
+
+def _is_honda_generator(service_info: BluetoothServiceInfoBleak) -> bool:
+    """Check if a service info is from a Honda generator."""
+    for uuid in service_info.service_uuids:
+        if uuid.lower() in HONDA_SERVICE_UUIDS:
+            return True
+    return False
 
 
 async def validate_input(
@@ -95,6 +112,7 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Initialize the config flow."""
         self._discovery_info: BluetoothServiceInfoBleak | None = None
+        self._discovered_devices: dict[str, BluetoothServiceInfoBleak] = {}
 
     @staticmethod
     @callback
@@ -116,16 +134,51 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
                 None, discovery_info.name, discovery_info.address
             )
         }
-        return await self.async_step_user()
+        return await self.async_step_password()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle the initial step."""
-        errors: dict[str, str] = {}
+        """Handle the user step to pick discovered device."""
+        # If we already have discovery info (from bluetooth discovery),
+        # go directly to password entry
+        if self._discovery_info is not None:
+            return await self.async_step_password()
 
-        if self._discovery_info is None:
-            errors["base"] = "detectonly"
+        # Manual setup: show device picker
+        if user_input is not None:
+            address = user_input["address"]
+            await self.async_set_unique_id(address, raise_on_progress=False)
+            self._abort_if_unique_id_configured()
+            self._discovery_info = self._discovered_devices[address]
+            return await self.async_step_password()
+
+        # Scan for Honda generators
+        current_addresses = self._async_current_ids()
+        for discovery_info in async_discovered_service_info(self.hass):
+            if discovery_info.address in current_addresses:
+                continue
+            if _is_honda_generator(discovery_info):
+                self._discovered_devices[discovery_info.address] = discovery_info
+
+        if not self._discovered_devices:
+            return self.async_abort(reason="no_devices_found")
+
+        device_options = {
+            address: human_readable_name(None, info.name, address)
+            for address, info in self._discovered_devices.items()
+        }
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({vol.Required("address"): vol.In(device_options)}),
+        )
+
+    async def async_step_password(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle the password entry step."""
+        errors: dict[str, str] = {}
 
         if user_input is not None and self._discovery_info is not None:
             # Detect architecture from device name
@@ -165,7 +218,7 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="password", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
 
     async def async_step_reconfigure(
