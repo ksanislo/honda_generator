@@ -13,6 +13,7 @@ Unofficial Home Assistant integration for remote monitoring and control of Honda
 - **Engine Control**: Start and stop the generator remotely via Home Assistant (model-dependent)
 - **ECO Mode Control**: Toggle ECO mode on supported models
 - **Fuel Monitoring**: View fuel level and remaining runtime on supported models
+- **Service Tracking**: Track maintenance schedules based on runtime hours and calendar time
 - **Automatic Reconnection**: Handles BLE connection drops gracefully
 - **Diagnostics Support**: Download debug information for troubleshooting
 
@@ -92,6 +93,7 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 | ECO Mode | Whether ECO throttle mode is active | Read-only; excluded on models with ECO switch |
 | Engine Running | Whether the engine is currently running | |
 | Warning/Fault Codes | Individual warning and fault flags | Disabled by default |
+| Service Due | Whether a maintenance service is due | See [Service Tracking](#service-tracking) |
 
 ### Buttons
 
@@ -99,6 +101,7 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 |--------|-------------|-------|
 | Stop Engine | Remotely stop the generator engine | All models |
 | Start Engine | Remotely start the generator engine | EM5000SX, EM6500SX, EU7000is only |
+| Mark Service Complete | Record that a maintenance service was performed | See [Service Tracking](#service-tracking) |
 
 ### Switches
 
@@ -111,12 +114,59 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 | Service | Description |
 |---------|-------------|
 | `honda_generator.stop_engine` | Stop the generator engine (for use in automations) |
+| `honda_generator.set_service_record` | Set the last service date and hours for a maintenance item |
+| `honda_generator.clear_discoveries` | Clear pending discovery flows from the integration list |
 
 ### Device Info
 
 - **Model**: Detected from serial number prefix (EU2200i, EU3200i, EM5000SX, EM6500SX, EU7000is, or Unknown)
 - **Serial Number**: Generator serial number
 - **Firmware Version**: Generator firmware version
+
+## Service Tracking
+
+The integration tracks maintenance schedules based on both runtime hours and calendar time, similar to the official Honda app.
+
+### Tracked Services
+
+| Service | Enabled by Default | Notes |
+|---------|-------------------|-------|
+| Oil Change | Yes | Uses break-in interval (20h/30d) until first change, then regular interval (100h/180d) |
+| Air Filter Clean | No | |
+| Air Filter Replace | No | EU3200i only |
+| Spark Plug Check | No | |
+| Spark Plug Replace | No | |
+| Spark Arrester Clean | No | |
+| Sediment Cup Clean | No | EM5000SX, EM6500SX, EU7000is only |
+| Valve Clearance | No | Dealer service |
+| Timing Belt | No | EU3200i only, dealer service |
+| Combustion Chamber | No | Dealer service |
+| Fuel Tank Clean | No | Dealer service |
+| Fuel Pump Filter | No | EU3200i only, dealer service |
+| Fuel System Check | No | Dealer service |
+
+Service intervals vary by model. See [SERVICE_SCHEDULE.md](SERVICE_SCHEDULE.md) for complete details.
+
+### How It Works
+
+Each service has two entities:
+- **Binary Sensor** (`binary_sensor.*_service_due`): Shows `on` when the service is due based on runtime hours OR calendar time (whichever threshold is reached first)
+- **Button** (`button.*_mark_service_complete`): Press to record the service as complete at the current runtime hours and date
+
+### Importing Service History
+
+To import existing service records (e.g., from the Honda app), use the `honda_generator.set_service_record` service:
+
+```yaml
+service: honda_generator.set_service_record
+data:
+  device_id: <your_device_id>
+  service_type: oil_change
+  hours: 2049
+  date: "2025-10-17"
+```
+
+Find your device ID in **Settings** → **Devices & Services** → **Honda Generator** → click on your device → the ID is in the URL.
 
 ## Requirements
 
