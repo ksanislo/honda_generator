@@ -327,37 +327,34 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
 
         interval = model_services[service_type]
         record = self.get_service_record(service_type)
+        current_hours = self._stored_runtime_hours or 0
+        first_seen_date = self._stored_runtime_hours_timestamp
 
-        # Special handling for oil change - uses break-in interval until first change
-        if service_type == ServiceType.OIL_CHANGE:
-            # Check if any oil change has been recorded
-            if record is None:
-                # No oil change recorded - use break-in interval (20h/30d)
-                interval = OIL_CHANGE_BREAKIN_INTERVAL
-                # Check against break-in interval
-                current_hours = self._stored_runtime_hours or 0
-                if interval.hours and current_hours >= interval.hours:
-                    return True
-                if interval.days:
-                    # Use storage timestamp as proxy for install date
-                    install_date = self._stored_runtime_hours_timestamp
-                    if install_date:
-                        days_since = (datetime.now() - install_date).days
-                        if days_since >= interval.days:
-                            return True
+        # Special handling for oil change - uses break-in interval for new engines
+        if service_type == ServiceType.OIL_CHANGE and record is None:
+            breakin_hours = OIL_CHANGE_BREAKIN_INTERVAL.hours
+            # For engines under break-in threshold, check against break-in interval
+            if current_hours < breakin_hours:
+                # Not yet at break-in hours, check time-based
+                if OIL_CHANGE_BREAKIN_INTERVAL.days and first_seen_date:
+                    days_since = (datetime.now() - first_seen_date).days
+                    if days_since >= OIL_CHANGE_BREAKIN_INTERVAL.days:
+                        return True
                 return False
-            # Oil change has been done - fall through to regular interval check
+            # Engine is past break-in hours - use regular interval from first seen
+            # Fall through to the "no record" logic below
 
-        # Never serviced - check against initial values
+        # Never serviced - use "first seen" as baseline (time-based only)
         if record is None:
-            current_hours = self._stored_runtime_hours or 0
-            if interval.hours and current_hours >= interval.hours:
-                return True
-            # Can't check time-based without a reference point
+            # Check days since first seen
+            if interval.days and first_seen_date:
+                days_since = (datetime.now() - first_seen_date).days
+                if days_since >= interval.days:
+                    return True
+            # Can't check hours-based without knowing first-seen runtime hours
             return False
 
-        # Check hours since last service
-        current_hours = self._stored_runtime_hours or 0
+        # Has been serviced - check against last service record
         last_service_hours = record.get("hours", 0)
         if interval.hours:
             hours_since = current_hours - last_service_hours
