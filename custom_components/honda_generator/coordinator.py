@@ -268,12 +268,58 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         if not self._validate_runtime_hours(value, now):
             return
 
+        # Check if this is the first time we're seeing runtime hours
+        first_time = self._stored_runtime_hours is None
+
         # Save if this is a new max or first value
-        if self._stored_runtime_hours is None or value > self._stored_runtime_hours:
+        if first_time or value > self._stored_runtime_hours:
             self._stored_runtime_hours = value
             self._stored_runtime_hours_timestamp = now
             await self._async_save_storage()
             _LOGGER.debug("Saved runtime hours: %d", value)
+
+        # Initialize service records on first runtime hours reading
+        if first_time:
+            await self._async_initialize_service_records(value, now)
+
+    async def _async_initialize_service_records(
+        self, hours: int, date: datetime
+    ) -> None:
+        """Initialize service records for services that have no history.
+
+        Sets the baseline for service tracking so intervals start counting
+        from when the generator was first seen. For oil change on generators
+        under 20 hours, initializes at 0 so break-in interval triggers at
+        20 total hours.
+        """
+        model = self.config_entry.data.get(CONF_MODEL)
+        model_services = get_model_services(model)
+        initialized = []
+
+        for service_type in model_services:
+            if service_type.value not in self._service_records:
+                init_hours = hours
+                # For oil change on new engines, start from 0 so break-in
+                # interval (20h) triggers at 20 total hours
+                if (
+                    service_type == ServiceType.OIL_CHANGE
+                    and hours < OIL_CHANGE_BREAKIN_INTERVAL.hours
+                ):
+                    init_hours = 0
+
+                self._service_records[service_type.value] = {
+                    "hours": init_hours,
+                    "date": date.isoformat(),
+                }
+                initialized.append(f"{service_type.value}@{init_hours}h")
+
+        if initialized:
+            await self._async_save_storage()
+            _LOGGER.info(
+                "Initialized %d service records: %s",
+                len(initialized),
+                ", ".join(initialized),
+            )
 
     async def async_mark_service_complete(self, service_type: ServiceType) -> None:
         """Mark a service as complete at current runtime hours and date.
@@ -328,34 +374,22 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         interval = model_services[service_type]
         record = self.get_service_record(service_type)
         current_hours = self._stored_runtime_hours or 0
-        first_seen_date = self._stored_runtime_hours_timestamp
 
-        # Special handling for oil change - uses break-in interval for new engines
-        if service_type == ServiceType.OIL_CHANGE and record is None:
-            breakin_hours = OIL_CHANGE_BREAKIN_INTERVAL.hours
-            # For engines under break-in threshold, check against break-in interval
-            if current_hours < breakin_hours:
-                # Not yet at break-in hours, check time-based
-                if OIL_CHANGE_BREAKIN_INTERVAL.days and first_seen_date:
-                    days_since = (datetime.now() - first_seen_date).days
-                    if days_since >= OIL_CHANGE_BREAKIN_INTERVAL.days:
-                        return True
-                return False
-            # Engine is past break-in hours - use regular interval from first seen
-            # Fall through to the "no record" logic below
-
-        # Never serviced - use "first seen" as baseline (time-based only)
+        # No record yet (generator not seen) - can't determine if due
         if record is None:
-            # Check days since first seen
-            if interval.days and first_seen_date:
-                days_since = (datetime.now() - first_seen_date).days
-                if days_since >= interval.days:
-                    return True
-            # Can't check hours-based without knowing first-seen runtime hours
             return False
 
-        # Has been serviced - check against last service record
         last_service_hours = record.get("hours", 0)
+
+        # Special handling for oil change - use break-in interval if last
+        # service was recorded at < 20 hours (new engine)
+        if (
+            service_type == ServiceType.OIL_CHANGE
+            and last_service_hours < OIL_CHANGE_BREAKIN_INTERVAL.hours
+        ):
+            interval = OIL_CHANGE_BREAKIN_INTERVAL
+
+        # Check hours since last service
         if interval.hours:
             hours_since = current_hours - last_service_hours
             if hours_since >= interval.hours:
