@@ -245,9 +245,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             # Load service records
             self._service_records = data.get("service_records", {})
             if self._service_records:
-                _LOGGER.debug(
-                    "Loaded %d service records", len(self._service_records)
-                )
+                _LOGGER.debug("Loaded %d service records", len(self._service_records))
 
     async def _async_save_storage(self) -> None:
         """Save all persistent data to storage."""
@@ -810,9 +808,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             # Start reconnect grace period on first failure after being connected
             # Skip grace period if this is an intentional disconnect (e.g., stop engine)
             if self._intentional_disconnect:
-                _LOGGER.debug(
-                    "Skipping grace period due to intentional disconnect"
-                )
+                _LOGGER.debug("Skipping grace period due to intentional disconnect")
                 self._intentional_disconnect = False
                 # Also clear any grace period that may have started during disconnect
                 self._disconnect_time = None

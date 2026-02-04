@@ -126,9 +126,7 @@ class ServiceCompleteButton(HondaGeneratorEntity, ButtonEntity):
         super().__init__(coordinator)
         self._service_type = service_type
         service_def = get_service_definition(service_type)
-        self._attr_unique_id = (
-            f"{DOMAIN}-{coordinator.data.controller_name}_service_complete_{service_type.value}"
-        )
+        self._attr_unique_id = f"{DOMAIN}-{coordinator.data.controller_name}_service_complete_{service_type.value}"
         self._attr_name = f"Mark {service_def.name} Complete"
         self._attr_icon = "mdi:check-circle"
         # Only oil change services enabled by default

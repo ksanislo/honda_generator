@@ -1102,57 +1102,6 @@ class PollAPI(GeneratorAPIProtocol):
         """Get the state of a fault bit."""
         return bool(self._faults_raw & (1 << bit))
 
-    async def get_serial(self) -> str:
-        """Get the generator serial number.
-
-        Returns the cached serial from connect() if available,
-        otherwise reads from the device.
-        """
-        # Return cached value if available
-        if self._serial:
-            return self._serial
-
-        if not self._client or not self._client.is_connected:
-            raise APIConnectionError("Not connected")
-        try:
-            data = await asyncio.wait_for(
-                self._client.read_gatt_char(SERIAL_NUMBER_CHAR),
-                timeout=5.0,
-            )
-        except TimeoutError as exc:
-            _LOGGER.debug("Serial number read timed out: %s", exc)
-            raise APIConnectionError("Serial number read timed out") from exc
-        serial = data.decode().rstrip("\x00").split(" ")[0]
-        _LOGGER.debug("Serial number read: %s", serial)
-        return serial
-
-    async def get_firmware_version(self) -> str:
-        """Get the generator firmware version (BCD encoded).
-
-        Returns the cached firmware version from connect() if available,
-        otherwise reads from the device.
-        """
-        # Return cached value if available
-        if self._firmware_version:
-            return self._firmware_version
-
-        if not self._client or not self._client.is_connected:
-            raise APIConnectionError("Not connected")
-        try:
-            data = await asyncio.wait_for(
-                self._client.read_gatt_char(FIRMWARE_VERSION_CHAR),
-                timeout=5.0,
-            )
-        except TimeoutError as exc:
-            _LOGGER.debug("Firmware version read timed out: %s", exc)
-            raise APIConnectionError("Firmware version read timed out") from exc
-        # Decode BCD: each nibble is a separate version component
-        version = ".".join(
-            str((data[i // 2] >> (4 if i % 2 == 0 else 0)) & 0x0F) for i in range(4)
-        )
-        _LOGGER.debug("Firmware version read: %s", version)
-        return version
-
     async def engine_stop(self, max_attempts: int = 3) -> bool:
         """Stop the generator engine.
 

@@ -220,27 +220,6 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    @staticmethod
-    async def async_migrate_entry(
-        hass: HomeAssistant, config_entry: ConfigEntry
-    ) -> bool:
-        """Migrate old entry to new version."""
-        _LOGGER.debug("Migrating config entry from version %s", config_entry.version)
-
-        if config_entry.version < 3:
-            # Version 3: Add architecture field (default to POLL for existing entries)
-            new_data = {**config_entry.data}
-            if CONF_ARCHITECTURE not in new_data:
-                new_data[CONF_ARCHITECTURE] = Architecture.POLL.value
-                _LOGGER.debug("Added architecture field (default: poll)")
-
-            hass.config_entries.async_update_entry(
-                config_entry, data=new_data, version=3
-            )
-            _LOGGER.debug("Migration to version 3 successful")
-
-        return True
-
 
 class HondaGeneratorOptionsFlowHandler(OptionsFlow):
     """Handle options flow for Honda Generator."""

@@ -53,7 +53,7 @@ class HondaGeneratorSensorEntityDescription(SensorEntityDescription):
     enum_keys: dict[int, str] | None = None  # Maps int values to translation keys
 
 
-SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
+POLL_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
     HondaGeneratorSensorEntityDescription(
         key="runtime_hours",
         translation_key="runtime_hours",
@@ -267,7 +267,7 @@ async def async_setup_entry(
             entities.append(HondaGeneratorSensor(coordinator, description))
     else:
         # Poll architecture: Use standard sensor descriptions
-        for description in SENSOR_DESCRIPTIONS:
+        for description in POLL_SENSOR_DESCRIPTIONS:
             if description.persist_value:
                 entities.append(
                     HondaGeneratorPersistentSensor(coordinator, description)
@@ -360,7 +360,10 @@ class HondaGeneratorSensor(HondaGeneratorEntity, SensorEntity):
         # Sensors with zero_when_unavailable stay available to show offline default
         if self.entity_description.zero_when_unavailable:
             # But still unavailable if bounds check failed while connected
-            if self.coordinator.last_update_success and self._get_device_state() is None:
+            if (
+                self.coordinator.last_update_success
+                and self._get_device_state() is None
+            ):
                 return False
             return True
         # If state is None (bounds check failed), sensor is unavailable
