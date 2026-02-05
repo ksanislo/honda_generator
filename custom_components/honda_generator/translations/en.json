@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Engine Status"
+      },
+      "warning_c_01": {
+        "name": "Check engine (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Check fuel (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Check inverter (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Check load (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Output current high (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Overcurrent detect (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Overvoltage detect (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Short overcurrent detect (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Check CO sensor (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO detected (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Overspeed (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Control unit check (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Overspeed (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Starter fault (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Starter stuck on (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Battery voltage fault (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Low oil (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Oil sensor fault (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Overheat (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Generator pulse fault (E-06)"
+      },
+      "fault_e_07": {
+        "name": "RPM abnormal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Starter failure (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Starter circuit (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Ignition fault (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Inverter comm (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Inverter fault (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Inverter DC fault (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Inverter overcurrent (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Inverter overload (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Inverter voltage fault (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Output overvoltage (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Overload shutdown (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Ground fault (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Inverter communication (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Inverter overheat (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Inverter-GCU comm (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Inverter comm (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Overcurrent shutdown (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Overvoltage shutdown (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Power module overheat (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D input fault (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET open circuit (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET short circuit (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Diode short (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR short (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Inverter memory fault (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Short-circuit overcurrent (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO alert (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmospheric pressure sensor (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO detected high (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO sensor error (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO calibration error (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO shutdown (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT unit communication (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT connection error (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT communication error (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT module error (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Stop engine",
       "description": "Stops the generator engine."
     }
-  },
-  "alert_codes": {
-    "c_01": "Check engine",
-    "c_02": "Check fuel",
-    "c_03": "Check inverter",
-    "c_04": "Check load",
-    "c_05": "Output current high",
-    "c_06": "Overcurrent detect (slave)",
-    "c_07": "Overvoltage detect (slave)",
-    "c_08": "Short overcurrent detect (slave)",
-    "c_09": "Check CO sensor",
-    "c_10": "CO detected",
-    "c_2a": "Overspeed",
-    "c_a2": "Control unit check",
-    "e_00": "Starter fault",
-    "e_01": "Starter stuck on",
-    "e_02": "Battery voltage fault",
-    "e_03": "Low oil",
-    "e_04": "Oil sensor fault",
-    "e_05": "Overheat",
-    "e_06": "Generator pulse fault",
-    "e_07": "RPM abnormal",
-    "e_0a": "Starter failure",
-    "e_0b": "Starter circuit",
-    "e_10": "Ignition fault",
-    "e_11": "Inverter comm (master)",
-    "e_12": "Inverter fault",
-    "e_13": "Inverter DC fault",
-    "e_15": "Inverter overcurrent",
-    "e_16": "Inverter overload",
-    "e_17": "Inverter voltage fault",
-    "e_19": "Output overvoltage",
-    "e_1a": "Overload shutdown",
-    "e_1b": "Ground fault",
-    "e_1c": "Inverter communication",
-    "e_1e": "Inverter overheat",
-    "e_20": "Inverter-GCU comm (slave)",
-    "e_21": "Inverter comm (slave)",
-    "e_22": "Overcurrent shutdown (slave)",
-    "e_23": "Overvoltage shutdown (slave)",
-    "e_25": "Power module overheat (slave)",
-    "e_26": "A/D input fault (slave)",
-    "e_27": "FET open circuit (slave)",
-    "e_29": "FET short circuit (slave)",
-    "e_2a": "Diode short (slave)",
-    "e_2b": "SCR short (slave)",
-    "e_2c": "Inverter memory fault (slave)",
-    "e_2e": "Short-circuit overcurrent (slave)",
-    "e_50": "CO alert",
-    "e_51": "Atmospheric pressure sensor",
-    "e_52": "CO detected high",
-    "e_53": "CO sensor error",
-    "e_56": "CO calibration error",
-    "e_57": "CO shutdown",
-    "e_70": "BT unit communication",
-    "e_71": "BT connection error",
-    "e_72": "BT communication error",
-    "e_73": "BT module error"
   }
 }

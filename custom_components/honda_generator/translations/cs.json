@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Stav motoru"
+      },
+      "warning_c_01": {
+        "name": "Zkontrolujte motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Zkontrolujte palivo (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Zkontrolujte měnič (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Zkontrolujte zátěž (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Vysoký výstupní proud (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Detekován nadproud (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Detekováno přepětí (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Zkrat nadproud (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Zkontrolujte CO senzor (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO detekováno (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Překročení otáček (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Zkontrolujte řídicí jednotku (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Překročení otáček (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Porucha startéru (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Startér zablokován (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Porucha napětí baterie (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Nízká hladina oleje (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Porucha senzoru oleje (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Přehřátí (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Porucha pulzu generátoru (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Abnormální otáčky (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Selhání startu (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Startovací obvod (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Porucha zapalování (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Komunikace měniče (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Porucha měniče (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Porucha DC měniče (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Nadproud měniče (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Přetížení měniče (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Porucha napětí měniče (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Výstupní přepětí (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Vypnutí při přetížení (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Zemní porucha (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Komunikace měniče (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Přehřátí měniče (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Komunikace měnič-GCU (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Komunikace měniče (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Vypnutí při nadproudu (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Vypnutí při přepětí (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Přehřátí výkonového modulu (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Porucha A/D vstupu (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET otevřený obvod (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET zkrat (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Zkrat diody (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Zkrat SCR (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Porucha paměti měniče (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Zkrat nadproud (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO alarm (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Senzor atmosférického tlaku (E-51)"
+      },
+      "fault_e_52": {
+        "name": "Detekováno vysoké CO (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Chyba CO senzoru (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Chyba kalibrace CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Vypnutí CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Komunikace BT jednotky (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Chyba připojení BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Chyba komunikace BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Chyba BT modulu (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Zastavit motor",
       "description": "Zastaví motor generátoru."
     }
-  },
-  "alert_codes": {
-    "c_01": "Zkontrolujte motor",
-    "c_02": "Zkontrolujte palivo",
-    "c_03": "Zkontrolujte měnič",
-    "c_04": "Zkontrolujte zátěž",
-    "c_05": "Vysoký výstupní proud",
-    "c_06": "Detekován nadproud (slave)",
-    "c_07": "Detekováno přepětí (slave)",
-    "c_08": "Zkrat nadproud (slave)",
-    "c_09": "Zkontrolujte CO senzor",
-    "c_10": "CO detekováno",
-    "c_2a": "Překročení otáček",
-    "c_a2": "Zkontrolujte řídicí jednotku",
-    "e_00": "Porucha startéru",
-    "e_01": "Startér zablokován",
-    "e_02": "Porucha napětí baterie",
-    "e_03": "Nízká hladina oleje",
-    "e_04": "Porucha senzoru oleje",
-    "e_05": "Přehřátí",
-    "e_06": "Porucha pulzu generátoru",
-    "e_07": "Abnormální otáčky",
-    "e_0a": "Selhání startu",
-    "e_0b": "Startovací obvod",
-    "e_10": "Porucha zapalování",
-    "e_11": "Komunikace měniče (master)",
-    "e_12": "Porucha měniče",
-    "e_13": "Porucha DC měniče",
-    "e_15": "Nadproud měniče",
-    "e_16": "Přetížení měniče",
-    "e_17": "Porucha napětí měniče",
-    "e_19": "Výstupní přepětí",
-    "e_1a": "Vypnutí při přetížení",
-    "e_1b": "Zemní porucha",
-    "e_1c": "Komunikace měniče",
-    "e_1e": "Přehřátí měniče",
-    "e_20": "Komunikace měnič-GCU (slave)",
-    "e_21": "Komunikace měniče (slave)",
-    "e_22": "Vypnutí při nadproudu (slave)",
-    "e_23": "Vypnutí při přepětí (slave)",
-    "e_25": "Přehřátí výkonového modulu (slave)",
-    "e_26": "Porucha A/D vstupu (slave)",
-    "e_27": "FET otevřený obvod (slave)",
-    "e_29": "FET zkrat (slave)",
-    "e_2a": "Zkrat diody (slave)",
-    "e_2b": "Zkrat SCR (slave)",
-    "e_2c": "Porucha paměti měniče (slave)",
-    "e_2e": "Zkrat nadproud (slave)",
-    "e_50": "CO alarm",
-    "e_51": "Senzor atmosférického tlaku",
-    "e_52": "Detekováno vysoké CO",
-    "e_53": "Chyba CO senzoru",
-    "e_56": "Chyba kalibrace CO",
-    "e_57": "Vypnutí CO",
-    "e_70": "Komunikace BT jednotky",
-    "e_71": "Chyba připojení BT",
-    "e_72": "Chyba komunikace BT",
-    "e_73": "Chyba BT modulu"
   }
 }

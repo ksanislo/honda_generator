@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Stato motore"
+      },
+      "warning_c_01": {
+        "name": "Controllare motore (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Controllare carburante (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Controllare inverter (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Controllare carico (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Corrente uscita alta (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Sovracorrente rilevata (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Sovratensione rilevata (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Cortocircuito sovracorrente (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Controllare sensore CO (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO rilevato (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Fuorigiri (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Controllare unità controllo (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Fuorigiri (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Guasto motorino (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Motorino bloccato (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Guasto tensione batteria (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Olio basso (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Guasto sensore olio (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Surriscaldamento (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Guasto impulso generatore (E-06)"
+      },
+      "fault_e_07": {
+        "name": "RPM anomali (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Errore motorino (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Circuito motorino (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Guasto accensione (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Comm. inverter (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Guasto inverter (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Guasto CC inverter (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Sovracorrente inverter (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Sovraccarico inverter (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Guasto tensione inverter (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Sovratensione uscita (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Spegnimento sovraccarico (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Guasto terra (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Comunicazione inverter (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Surriscaldamento inverter (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Comm. inverter-GCU (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Comm. inverter (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Spegnimento sovracorrente (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Spegnimento sovratensione (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Surriscaldamento modulo (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Guasto ingresso A/D (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "Circuito aperto FET (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "Cortocircuito FET (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Cortocircuito diodo (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Cortocircuito SCR (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Guasto memoria inverter (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Cortocircuito sovracorrente (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "Allarme CO (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Sensore pressione atmosferica (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO alto rilevato (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Errore sensore CO (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Errore calibrazione CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Spegnimento CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Comunicazione unità BT (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Errore connessione BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Errore comunicazione BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Errore modulo BT (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Arresta motore",
       "description": "Arresta il motore del generatore."
     }
-  },
-  "alert_codes": {
-    "c_01": "Controllare motore",
-    "c_02": "Controllare carburante",
-    "c_03": "Controllare inverter",
-    "c_04": "Controllare carico",
-    "c_05": "Corrente uscita alta",
-    "c_06": "Sovracorrente rilevata (slave)",
-    "c_07": "Sovratensione rilevata (slave)",
-    "c_08": "Cortocircuito sovracorrente (slave)",
-    "c_09": "Controllare sensore CO",
-    "c_10": "CO rilevato",
-    "c_2a": "Fuorigiri",
-    "c_a2": "Controllare unità controllo",
-    "e_00": "Guasto motorino",
-    "e_01": "Motorino bloccato",
-    "e_02": "Guasto tensione batteria",
-    "e_03": "Olio basso",
-    "e_04": "Guasto sensore olio",
-    "e_05": "Surriscaldamento",
-    "e_06": "Guasto impulso generatore",
-    "e_07": "RPM anomali",
-    "e_0a": "Errore motorino",
-    "e_0b": "Circuito motorino",
-    "e_10": "Guasto accensione",
-    "e_11": "Comm. inverter (master)",
-    "e_12": "Guasto inverter",
-    "e_13": "Guasto CC inverter",
-    "e_15": "Sovracorrente inverter",
-    "e_16": "Sovraccarico inverter",
-    "e_17": "Guasto tensione inverter",
-    "e_19": "Sovratensione uscita",
-    "e_1a": "Spegnimento sovraccarico",
-    "e_1b": "Guasto terra",
-    "e_1c": "Comunicazione inverter",
-    "e_1e": "Surriscaldamento inverter",
-    "e_20": "Comm. inverter-GCU (slave)",
-    "e_21": "Comm. inverter (slave)",
-    "e_22": "Spegnimento sovracorrente (slave)",
-    "e_23": "Spegnimento sovratensione (slave)",
-    "e_25": "Surriscaldamento modulo (slave)",
-    "e_26": "Guasto ingresso A/D (slave)",
-    "e_27": "Circuito aperto FET (slave)",
-    "e_29": "Cortocircuito FET (slave)",
-    "e_2a": "Cortocircuito diodo (slave)",
-    "e_2b": "Cortocircuito SCR (slave)",
-    "e_2c": "Guasto memoria inverter (slave)",
-    "e_2e": "Cortocircuito sovracorrente (slave)",
-    "e_50": "Allarme CO",
-    "e_51": "Sensore pressione atmosferica",
-    "e_52": "CO alto rilevato",
-    "e_53": "Errore sensore CO",
-    "e_56": "Errore calibrazione CO",
-    "e_57": "Spegnimento CO",
-    "e_70": "Comunicazione unità BT",
-    "e_71": "Errore connessione BT",
-    "e_72": "Errore comunicazione BT",
-    "e_73": "Errore modulo BT"
   }
 }

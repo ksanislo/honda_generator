@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Motorstatus"
+      },
+      "warning_c_01": {
+        "name": "Kontrollera motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Kontrollera bränsle (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Kontrollera växelriktare (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Kontrollera last (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Utgångsström hög (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Överström detekterat (slav) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Överspänning detekterat (slav) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Kortslutning överström (slav) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Kontrollera CO-sensor (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO detekterat (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Överhastighet (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Kontrollera styrenhet (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Överhastighet (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Startmotorfel (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Startmotor fastnad (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Batterispänningsfel (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Låg oljenivå (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Oljesensorfel (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Överhettning (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Generatorpulsfel (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Onormalt varvtal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Startfel (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Startkrets (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Tändningsfel (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Växelriktare komm. (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Växelriktarfel (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Växelriktare DC-fel (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Växelriktare överström (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Växelriktare överbelastning (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Växelriktare spänningsfel (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Utgång överspänning (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Överbelastningsavstängning (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Jordfel (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Växelriktarkommunikation (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Växelriktare överhettning (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Växelriktare-GCU komm. (slav) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Växelriktare komm. (slav) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Överströmsavstängning (slav) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Överspänningsavstängning (slav) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Effektmodul överhettning (slav) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D-ingångsfel (slav) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET öppen krets (slav) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET kortslutning (slav) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Diod kortslutning (slav) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR kortslutning (slav) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Växelriktare minnesfel (slav) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Kortslutning överström (slav) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO-larm (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmosfärstrycksensor (E-51)"
+      },
+      "fault_e_52": {
+        "name": "Hög CO detekterat (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO-sensorfel (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO-kalibreringsfel (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO-avstängning (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT-enhet kommunikation (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT-anslutningsfel (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT-kommunikationsfel (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT-modulfel (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Stoppa motor",
       "description": "Stoppar generatormotorn."
     }
-  },
-  "alert_codes": {
-    "c_01": "Kontrollera motor",
-    "c_02": "Kontrollera bränsle",
-    "c_03": "Kontrollera växelriktare",
-    "c_04": "Kontrollera last",
-    "c_05": "Utgångsström hög",
-    "c_06": "Överström detekterat (slav)",
-    "c_07": "Överspänning detekterat (slav)",
-    "c_08": "Kortslutning överström (slav)",
-    "c_09": "Kontrollera CO-sensor",
-    "c_10": "CO detekterat",
-    "c_2a": "Överhastighet",
-    "c_a2": "Kontrollera styrenhet",
-    "e_00": "Startmotorfel",
-    "e_01": "Startmotor fastnad",
-    "e_02": "Batterispänningsfel",
-    "e_03": "Låg oljenivå",
-    "e_04": "Oljesensorfel",
-    "e_05": "Överhettning",
-    "e_06": "Generatorpulsfel",
-    "e_07": "Onormalt varvtal",
-    "e_0a": "Startfel",
-    "e_0b": "Startkrets",
-    "e_10": "Tändningsfel",
-    "e_11": "Växelriktare komm. (master)",
-    "e_12": "Växelriktarfel",
-    "e_13": "Växelriktare DC-fel",
-    "e_15": "Växelriktare överström",
-    "e_16": "Växelriktare överbelastning",
-    "e_17": "Växelriktare spänningsfel",
-    "e_19": "Utgång överspänning",
-    "e_1a": "Överbelastningsavstängning",
-    "e_1b": "Jordfel",
-    "e_1c": "Växelriktarkommunikation",
-    "e_1e": "Växelriktare överhettning",
-    "e_20": "Växelriktare-GCU komm. (slav)",
-    "e_21": "Växelriktare komm. (slav)",
-    "e_22": "Överströmsavstängning (slav)",
-    "e_23": "Överspänningsavstängning (slav)",
-    "e_25": "Effektmodul överhettning (slav)",
-    "e_26": "A/D-ingångsfel (slav)",
-    "e_27": "FET öppen krets (slav)",
-    "e_29": "FET kortslutning (slav)",
-    "e_2a": "Diod kortslutning (slav)",
-    "e_2b": "SCR kortslutning (slav)",
-    "e_2c": "Växelriktare minnesfel (slav)",
-    "e_2e": "Kortslutning överström (slav)",
-    "e_50": "CO-larm",
-    "e_51": "Atmosfärstrycksensor",
-    "e_52": "Hög CO detekterat",
-    "e_53": "CO-sensorfel",
-    "e_56": "CO-kalibreringsfel",
-    "e_57": "CO-avstängning",
-    "e_70": "BT-enhet kommunikation",
-    "e_71": "BT-anslutningsfel",
-    "e_72": "BT-kommunikationsfel",
-    "e_73": "BT-modulfel"
   }
 }

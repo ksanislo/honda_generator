@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Motorstatus"
+      },
+      "warning_c_01": {
+        "name": "Kontroller motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Kontroller brændstof (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Kontroller inverter (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Kontroller belastning (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Udgangsstrøm høj (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Overstrøm registreret (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Overspænding registreret (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Kortslutning overstrøm (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Kontroller CO-sensor (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO registreret (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Overhastighed (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Kontroller styreenhed (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Overhastighed (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Startmotorfejl (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Startmotor fastklemt (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Batterispændingsfejl (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Lav olie (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Oliesensorfejl (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Overophedning (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Generatorpulsfejl (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Unormalt omdrejningstal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Startfejl (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Startkredsløb (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Tændingsfejl (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Inverter komm. (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Inverterfejl (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Inverter DC-fejl (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Inverter overstrøm (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Inverter overbelastning (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Inverter spændingsfejl (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Udgang overspænding (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Overbelastningsnedlukning (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Jordfejl (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Inverterkommunikation (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Inverter overophedning (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Inverter-GCU komm. (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Inverter komm. (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Overstrømsnedlukning (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Overspændingsnedlukning (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Effektmodul overophedning (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D-inputfejl (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET åbent kredsløb (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET kortslutning (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Diode kortslutning (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR kortslutning (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Inverter hukommelsesfejl (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Kortslutning overstrøm (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO-alarm (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmosfærisk tryksensor (E-51)"
+      },
+      "fault_e_52": {
+        "name": "Høj CO registreret (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO-sensorfejl (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO-kalibreringsfejl (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO-nedlukning (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT-enhed kommunikation (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT-forbindelsesfejl (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT-kommunikationsfejl (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT-modulfejl (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Stop motor",
       "description": "Stopper generatormotoren."
     }
-  },
-  "alert_codes": {
-    "c_01": "Kontroller motor",
-    "c_02": "Kontroller brændstof",
-    "c_03": "Kontroller inverter",
-    "c_04": "Kontroller belastning",
-    "c_05": "Udgangsstrøm høj",
-    "c_06": "Overstrøm registreret (slave)",
-    "c_07": "Overspænding registreret (slave)",
-    "c_08": "Kortslutning overstrøm (slave)",
-    "c_09": "Kontroller CO-sensor",
-    "c_10": "CO registreret",
-    "c_2a": "Overhastighed",
-    "c_a2": "Kontroller styreenhed",
-    "e_00": "Startmotorfejl",
-    "e_01": "Startmotor fastklemt",
-    "e_02": "Batterispændingsfejl",
-    "e_03": "Lav olie",
-    "e_04": "Oliesensorfejl",
-    "e_05": "Overophedning",
-    "e_06": "Generatorpulsfejl",
-    "e_07": "Unormalt omdrejningstal",
-    "e_0a": "Startfejl",
-    "e_0b": "Startkredsløb",
-    "e_10": "Tændingsfejl",
-    "e_11": "Inverter komm. (master)",
-    "e_12": "Inverterfejl",
-    "e_13": "Inverter DC-fejl",
-    "e_15": "Inverter overstrøm",
-    "e_16": "Inverter overbelastning",
-    "e_17": "Inverter spændingsfejl",
-    "e_19": "Udgang overspænding",
-    "e_1a": "Overbelastningsnedlukning",
-    "e_1b": "Jordfejl",
-    "e_1c": "Inverterkommunikation",
-    "e_1e": "Inverter overophedning",
-    "e_20": "Inverter-GCU komm. (slave)",
-    "e_21": "Inverter komm. (slave)",
-    "e_22": "Overstrømsnedlukning (slave)",
-    "e_23": "Overspændingsnedlukning (slave)",
-    "e_25": "Effektmodul overophedning (slave)",
-    "e_26": "A/D-inputfejl (slave)",
-    "e_27": "FET åbent kredsløb (slave)",
-    "e_29": "FET kortslutning (slave)",
-    "e_2a": "Diode kortslutning (slave)",
-    "e_2b": "SCR kortslutning (slave)",
-    "e_2c": "Inverter hukommelsesfejl (slave)",
-    "e_2e": "Kortslutning overstrøm (slave)",
-    "e_50": "CO-alarm",
-    "e_51": "Atmosfærisk tryksensor",
-    "e_52": "Høj CO registreret",
-    "e_53": "CO-sensorfejl",
-    "e_56": "CO-kalibreringsfejl",
-    "e_57": "CO-nedlukning",
-    "e_70": "BT-enhed kommunikation",
-    "e_71": "BT-forbindelsesfejl",
-    "e_72": "BT-kommunikationsfejl",
-    "e_73": "BT-modulfejl"
   }
 }

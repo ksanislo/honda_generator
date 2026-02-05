@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Motorstatus"
+      },
+      "warning_c_01": {
+        "name": "Controleer motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Controleer brandstof (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Controleer omvormer (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Controleer belasting (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Uitgangsstroom hoog (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Overstroom gedetecteerd (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Overspanning gedetecteerd (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Kortsluiting overstroom (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Controleer CO-sensor (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO gedetecteerd (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Overtoeren (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Controleer besturingseenheid (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Overtoeren (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Starterfout (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Starter geblokkeerd (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Accuspanningsfout (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Olie laag (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Oliesensorfout (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Oververhitting (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Generatorpulsfout (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Toerental abnormaal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Starterfalen (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Startcircuit (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Ontstekingsfout (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Omvormer comm. (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Omvormerfout (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Omvormer DC-fout (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Omvormer overstroom (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Omvormer overbelasting (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Omvormer spanningsfout (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Uitgang overspanning (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Overbelasting uitschakeling (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Aardfout (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Omvormer communicatie (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Omvormer oververhitting (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Omvormer-GCU comm. (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Omvormer comm. (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Overstroom uitschakeling (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Overspanning uitschakeling (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Vermogensmodule oververhitting (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D-ingangsfout (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET open circuit (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET kortsluiting (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Diode kortsluiting (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR kortsluiting (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Omvormer geheugenfout (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Kortsluiting overstroom (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO-alarm (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmosferische druksensor (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO hoog gedetecteerd (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO-sensorfout (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO-kalibratiefout (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO-uitschakeling (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT-eenheid communicatie (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT-verbindingsfout (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT-communicatiefout (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT-modulefout (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Motor stoppen",
       "description": "Stopt de generatormotor."
     }
-  },
-  "alert_codes": {
-    "c_01": "Controleer motor",
-    "c_02": "Controleer brandstof",
-    "c_03": "Controleer omvormer",
-    "c_04": "Controleer belasting",
-    "c_05": "Uitgangsstroom hoog",
-    "c_06": "Overstroom gedetecteerd (slave)",
-    "c_07": "Overspanning gedetecteerd (slave)",
-    "c_08": "Kortsluiting overstroom (slave)",
-    "c_09": "Controleer CO-sensor",
-    "c_10": "CO gedetecteerd",
-    "c_2a": "Overtoeren",
-    "c_a2": "Controleer besturingseenheid",
-    "e_00": "Starterfout",
-    "e_01": "Starter geblokkeerd",
-    "e_02": "Accuspanningsfout",
-    "e_03": "Olie laag",
-    "e_04": "Oliesensorfout",
-    "e_05": "Oververhitting",
-    "e_06": "Generatorpulsfout",
-    "e_07": "Toerental abnormaal",
-    "e_0a": "Starterfalen",
-    "e_0b": "Startcircuit",
-    "e_10": "Ontstekingsfout",
-    "e_11": "Omvormer comm. (master)",
-    "e_12": "Omvormerfout",
-    "e_13": "Omvormer DC-fout",
-    "e_15": "Omvormer overstroom",
-    "e_16": "Omvormer overbelasting",
-    "e_17": "Omvormer spanningsfout",
-    "e_19": "Uitgang overspanning",
-    "e_1a": "Overbelasting uitschakeling",
-    "e_1b": "Aardfout",
-    "e_1c": "Omvormer communicatie",
-    "e_1e": "Omvormer oververhitting",
-    "e_20": "Omvormer-GCU comm. (slave)",
-    "e_21": "Omvormer comm. (slave)",
-    "e_22": "Overstroom uitschakeling (slave)",
-    "e_23": "Overspanning uitschakeling (slave)",
-    "e_25": "Vermogensmodule oververhitting (slave)",
-    "e_26": "A/D-ingangsfout (slave)",
-    "e_27": "FET open circuit (slave)",
-    "e_29": "FET kortsluiting (slave)",
-    "e_2a": "Diode kortsluiting (slave)",
-    "e_2b": "SCR kortsluiting (slave)",
-    "e_2c": "Omvormer geheugenfout (slave)",
-    "e_2e": "Kortsluiting overstroom (slave)",
-    "e_50": "CO-alarm",
-    "e_51": "Atmosferische druksensor",
-    "e_52": "CO hoog gedetecteerd",
-    "e_53": "CO-sensorfout",
-    "e_56": "CO-kalibratiefout",
-    "e_57": "CO-uitschakeling",
-    "e_70": "BT-eenheid communicatie",
-    "e_71": "BT-verbindingsfout",
-    "e_72": "BT-communicatiefout",
-    "e_73": "BT-modulefout"
   }
 }

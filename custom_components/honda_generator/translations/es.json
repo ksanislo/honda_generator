@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Estado del motor"
+      },
+      "warning_c_01": {
+        "name": "Revisar motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Revisar combustible (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Revisar inversor (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Revisar carga (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Corriente de salida alta (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Sobrecorriente detectada (esclavo) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Sobretensión detectada (esclavo) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Cortocircuito sobrecorriente (esclavo) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Revisar sensor CO (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO detectado (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Sobrevelocidad (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Revisar unidad de control (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Sobrevelocidad (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Fallo de arranque (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Arrancador bloqueado (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Fallo tensión batería (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Aceite bajo (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Fallo sensor aceite (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Sobrecalentamiento (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Fallo pulso generador (E-06)"
+      },
+      "fault_e_07": {
+        "name": "RPM anormal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Fallo arrancador (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Circuito arrancador (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Fallo encendido (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Comm. inversor (maestro) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Fallo inversor (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Fallo CC inversor (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Sobrecorriente inversor (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Sobrecarga inversor (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Fallo tensión inversor (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Sobretensión salida (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Apagado sobrecarga (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Fallo tierra (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Comunicación inversor (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Sobrecalentamiento inversor (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Comm. inversor-GCU (esclavo) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Comm. inversor (esclavo) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Apagado sobrecorriente (esclavo) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Apagado sobretensión (esclavo) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Sobrecalentamiento módulo (esclavo) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Fallo entrada A/D (esclavo) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "Circuito abierto FET (esclavo) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "Cortocircuito FET (esclavo) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Cortocircuito diodo (esclavo) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Cortocircuito SCR (esclavo) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Fallo memoria inversor (esclavo) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Cortocircuito sobrecorriente (esclavo) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "Alerta CO (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Sensor presión atmosférica (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO alto detectado (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Error sensor CO (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Error calibración CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Apagado CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Comunicación unidad BT (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Error conexión BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Error comunicación BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Error módulo BT (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Detener motor",
       "description": "Detiene el motor del generador."
     }
-  },
-  "alert_codes": {
-    "c_01": "Revisar motor",
-    "c_02": "Revisar combustible",
-    "c_03": "Revisar inversor",
-    "c_04": "Revisar carga",
-    "c_05": "Corriente de salida alta",
-    "c_06": "Sobrecorriente detectada (esclavo)",
-    "c_07": "Sobretensión detectada (esclavo)",
-    "c_08": "Cortocircuito sobrecorriente (esclavo)",
-    "c_09": "Revisar sensor CO",
-    "c_10": "CO detectado",
-    "c_2a": "Sobrevelocidad",
-    "c_a2": "Revisar unidad de control",
-    "e_00": "Fallo de arranque",
-    "e_01": "Arrancador bloqueado",
-    "e_02": "Fallo tensión batería",
-    "e_03": "Aceite bajo",
-    "e_04": "Fallo sensor aceite",
-    "e_05": "Sobrecalentamiento",
-    "e_06": "Fallo pulso generador",
-    "e_07": "RPM anormal",
-    "e_0a": "Fallo arrancador",
-    "e_0b": "Circuito arrancador",
-    "e_10": "Fallo encendido",
-    "e_11": "Comm. inversor (maestro)",
-    "e_12": "Fallo inversor",
-    "e_13": "Fallo CC inversor",
-    "e_15": "Sobrecorriente inversor",
-    "e_16": "Sobrecarga inversor",
-    "e_17": "Fallo tensión inversor",
-    "e_19": "Sobretensión salida",
-    "e_1a": "Apagado sobrecarga",
-    "e_1b": "Fallo tierra",
-    "e_1c": "Comunicación inversor",
-    "e_1e": "Sobrecalentamiento inversor",
-    "e_20": "Comm. inversor-GCU (esclavo)",
-    "e_21": "Comm. inversor (esclavo)",
-    "e_22": "Apagado sobrecorriente (esclavo)",
-    "e_23": "Apagado sobretensión (esclavo)",
-    "e_25": "Sobrecalentamiento módulo (esclavo)",
-    "e_26": "Fallo entrada A/D (esclavo)",
-    "e_27": "Circuito abierto FET (esclavo)",
-    "e_29": "Cortocircuito FET (esclavo)",
-    "e_2a": "Cortocircuito diodo (esclavo)",
-    "e_2b": "Cortocircuito SCR (esclavo)",
-    "e_2c": "Fallo memoria inversor (esclavo)",
-    "e_2e": "Cortocircuito sobrecorriente (esclavo)",
-    "e_50": "Alerta CO",
-    "e_51": "Sensor presión atmosférica",
-    "e_52": "CO alto detectado",
-    "e_53": "Error sensor CO",
-    "e_56": "Error calibración CO",
-    "e_57": "Apagado CO",
-    "e_70": "Comunicación unidad BT",
-    "e_71": "Error conexión BT",
-    "e_72": "Error comunicación BT",
-    "e_73": "Error módulo BT"
   }
 }

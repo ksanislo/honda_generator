@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Status silnika"
+      },
+      "warning_c_01": {
+        "name": "Sprawdź silnik (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Sprawdź paliwo (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Sprawdź falownik (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Sprawdź obciążenie (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Wysoki prąd wyjściowy (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Wykryto nadprąd (slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Wykryto przepięcie (slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Zwarcie nadprądowe (slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Sprawdź czujnik CO (C-09)"
+      },
+      "warning_c_10": {
+        "name": "Wykryto CO (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Przekroczenie obrotów (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Sprawdź jednostkę sterującą (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Przekroczenie obrotów (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Usterka rozrusznika (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Rozrusznik zablokowany (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Usterka napięcia akumulatora (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Niski poziom oleju (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Usterka czujnika oleju (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Przegrzanie (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Usterka impulsu generatora (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Nieprawidłowe obroty (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Awaria rozrusznika (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Obwód rozrusznika (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Usterka zapłonu (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Komunikacja falownika (master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Usterka falownika (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Usterka DC falownika (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Nadprąd falownika (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Przeciążenie falownika (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Usterka napięcia falownika (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Przepięcie wyjściowe (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Wyłączenie przeciążeniowe (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Usterka uziemienia (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Komunikacja falownika (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Przegrzanie falownika (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Komunikacja falownik-GCU (slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Komunikacja falownika (slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Wyłączenie nadprądowe (slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Wyłączenie przepięciowe (slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Przegrzanie modułu mocy (slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Usterka wejścia A/D (slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "Otwarty obwód FET (slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "Zwarcie FET (slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Zwarcie diody (slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Zwarcie SCR (slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Usterka pamięci falownika (slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Zwarcie nadprądowe (slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "Alarm CO (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Czujnik ciśnienia atmosferycznego (E-51)"
+      },
+      "fault_e_52": {
+        "name": "Wysoki poziom CO (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Błąd czujnika CO (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Błąd kalibracji CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Wyłączenie CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Komunikacja jednostki BT (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Błąd połączenia BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Błąd komunikacji BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Błąd modułu BT (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Zatrzymaj silnik",
       "description": "Zatrzymuje silnik generatora."
     }
-  },
-  "alert_codes": {
-    "c_01": "Sprawdź silnik",
-    "c_02": "Sprawdź paliwo",
-    "c_03": "Sprawdź falownik",
-    "c_04": "Sprawdź obciążenie",
-    "c_05": "Wysoki prąd wyjściowy",
-    "c_06": "Wykryto nadprąd (slave)",
-    "c_07": "Wykryto przepięcie (slave)",
-    "c_08": "Zwarcie nadprądowe (slave)",
-    "c_09": "Sprawdź czujnik CO",
-    "c_10": "Wykryto CO",
-    "c_2a": "Przekroczenie obrotów",
-    "c_a2": "Sprawdź jednostkę sterującą",
-    "e_00": "Usterka rozrusznika",
-    "e_01": "Rozrusznik zablokowany",
-    "e_02": "Usterka napięcia akumulatora",
-    "e_03": "Niski poziom oleju",
-    "e_04": "Usterka czujnika oleju",
-    "e_05": "Przegrzanie",
-    "e_06": "Usterka impulsu generatora",
-    "e_07": "Nieprawidłowe obroty",
-    "e_0a": "Awaria rozrusznika",
-    "e_0b": "Obwód rozrusznika",
-    "e_10": "Usterka zapłonu",
-    "e_11": "Komunikacja falownika (master)",
-    "e_12": "Usterka falownika",
-    "e_13": "Usterka DC falownika",
-    "e_15": "Nadprąd falownika",
-    "e_16": "Przeciążenie falownika",
-    "e_17": "Usterka napięcia falownika",
-    "e_19": "Przepięcie wyjściowe",
-    "e_1a": "Wyłączenie przeciążeniowe",
-    "e_1b": "Usterka uziemienia",
-    "e_1c": "Komunikacja falownika",
-    "e_1e": "Przegrzanie falownika",
-    "e_20": "Komunikacja falownik-GCU (slave)",
-    "e_21": "Komunikacja falownika (slave)",
-    "e_22": "Wyłączenie nadprądowe (slave)",
-    "e_23": "Wyłączenie przepięciowe (slave)",
-    "e_25": "Przegrzanie modułu mocy (slave)",
-    "e_26": "Usterka wejścia A/D (slave)",
-    "e_27": "Otwarty obwód FET (slave)",
-    "e_29": "Zwarcie FET (slave)",
-    "e_2a": "Zwarcie diody (slave)",
-    "e_2b": "Zwarcie SCR (slave)",
-    "e_2c": "Usterka pamięci falownika (slave)",
-    "e_2e": "Zwarcie nadprądowe (slave)",
-    "e_50": "Alarm CO",
-    "e_51": "Czujnik ciśnienia atmosferycznego",
-    "e_52": "Wysoki poziom CO",
-    "e_53": "Błąd czujnika CO",
-    "e_56": "Błąd kalibracji CO",
-    "e_57": "Wyłączenie CO",
-    "e_70": "Komunikacja jednostki BT",
-    "e_71": "Błąd połączenia BT",
-    "e_72": "Błąd komunikacji BT",
-    "e_73": "Błąd modułu BT"
   }
 }

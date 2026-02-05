@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Motor-Status"
+      },
+      "warning_c_01": {
+        "name": "Motor prüfen (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Kraftstoff prüfen (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Wechselrichter prüfen (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Last prüfen (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Ausgangsstrom hoch (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Überstrom erkannt (Slave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Überspannung erkannt (Slave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Kurzschluss-Überstrom erkannt (Slave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "CO-Sensor prüfen (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO erkannt (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Überdrehzahl (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Steuergerät prüfen (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Überdrehzahl (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Starterfehler (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Starter blockiert (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Batteriespannungsfehler (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Niedriger Ölstand (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Ölsensorfehler (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Überhitzung (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Generatorimpulsfehler (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Drehzahl abnormal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Starterversagen (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Startkreis (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Zündungsfehler (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Wechselrichter-Komm. (Master) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Wechselrichterfehler (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Wechselrichter-DC-Fehler (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Wechselrichter-Überstrom (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Wechselrichter-Überlast (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Wechselrichter-Spannungsfehler (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Ausgangüberspannung (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Überlastabschaltung (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Erdungsfehler (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Wechselrichter-Kommunikation (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Wechselrichter-Überhitzung (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Wechselrichter-GCU-Komm. (Slave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Wechselrichter-Komm. (Slave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Überstromabschaltung (Slave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Überspannungsabschaltung (Slave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Leistungsmodul-Überhitzung (Slave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D-Eingangsfehler (Slave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET offener Stromkreis (Slave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET Kurzschluss (Slave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Dioden-Kurzschluss (Slave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR-Kurzschluss (Slave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Wechselrichter-Speicherfehler (Slave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Kurzschluss-Überstrom (Slave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO-Warnung (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmosphärendrucksensor (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO-Wert hoch (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO-Sensorfehler (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO-Kalibrierungsfehler (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO-Abschaltung (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT-Einheit-Kommunikation (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT-Verbindungsfehler (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT-Kommunikationsfehler (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT-Modulfehler (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Motor stoppen",
       "description": "Stoppt den Generator-Motor."
     }
-  },
-  "alert_codes": {
-    "c_01": "Motor prüfen",
-    "c_02": "Kraftstoff prüfen",
-    "c_03": "Wechselrichter prüfen",
-    "c_04": "Last prüfen",
-    "c_05": "Ausgangsstrom hoch",
-    "c_06": "Überstrom erkannt (Slave)",
-    "c_07": "Überspannung erkannt (Slave)",
-    "c_08": "Kurzschluss-Überstrom erkannt (Slave)",
-    "c_09": "CO-Sensor prüfen",
-    "c_10": "CO erkannt",
-    "c_2a": "Überdrehzahl",
-    "c_a2": "Steuergerät prüfen",
-    "e_00": "Starterfehler",
-    "e_01": "Starter blockiert",
-    "e_02": "Batteriespannungsfehler",
-    "e_03": "Niedriger Ölstand",
-    "e_04": "Ölsensorfehler",
-    "e_05": "Überhitzung",
-    "e_06": "Generatorimpulsfehler",
-    "e_07": "Drehzahl abnormal",
-    "e_0a": "Starterversagen",
-    "e_0b": "Startkreis",
-    "e_10": "Zündungsfehler",
-    "e_11": "Wechselrichter-Komm. (Master)",
-    "e_12": "Wechselrichterfehler",
-    "e_13": "Wechselrichter-DC-Fehler",
-    "e_15": "Wechselrichter-Überstrom",
-    "e_16": "Wechselrichter-Überlast",
-    "e_17": "Wechselrichter-Spannungsfehler",
-    "e_19": "Ausgangüberspannung",
-    "e_1a": "Überlastabschaltung",
-    "e_1b": "Erdungsfehler",
-    "e_1c": "Wechselrichter-Kommunikation",
-    "e_1e": "Wechselrichter-Überhitzung",
-    "e_20": "Wechselrichter-GCU-Komm. (Slave)",
-    "e_21": "Wechselrichter-Komm. (Slave)",
-    "e_22": "Überstromabschaltung (Slave)",
-    "e_23": "Überspannungsabschaltung (Slave)",
-    "e_25": "Leistungsmodul-Überhitzung (Slave)",
-    "e_26": "A/D-Eingangsfehler (Slave)",
-    "e_27": "FET offener Stromkreis (Slave)",
-    "e_29": "FET Kurzschluss (Slave)",
-    "e_2a": "Dioden-Kurzschluss (Slave)",
-    "e_2b": "SCR-Kurzschluss (Slave)",
-    "e_2c": "Wechselrichter-Speicherfehler (Slave)",
-    "e_2e": "Kurzschluss-Überstrom (Slave)",
-    "e_50": "CO-Warnung",
-    "e_51": "Atmosphärendrucksensor",
-    "e_52": "CO-Wert hoch",
-    "e_53": "CO-Sensorfehler",
-    "e_56": "CO-Kalibrierungsfehler",
-    "e_57": "CO-Abschaltung",
-    "e_70": "BT-Einheit-Kommunikation",
-    "e_71": "BT-Verbindungsfehler",
-    "e_72": "BT-Kommunikationsfehler",
-    "e_73": "BT-Modulfehler"
   }
 }

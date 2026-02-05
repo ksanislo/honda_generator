@@ -183,11 +183,9 @@ class HondaGeneratorAlertBinarySensor(
         self._attr_unique_id = (
             f"{DOMAIN}-{coordinator.data.controller_name}_{prefix}_{alert_code.code}"
         )
-        # Use description if available, otherwise fall back to code
-        if alert_code.description:
-            self._attr_name = f"{alert_code.description} ({alert_code.code})"
-        else:
-            self._attr_name = f"{prefix.title()} {alert_code.code}"
+        # Use translation key for proper HA localization
+        code_key = alert_code.code.lower().replace("-", "_")
+        self._attr_translation_key = f"{prefix}_{code_key}"
         self._attr_device_class = BinarySensorDeviceClass.PROBLEM
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_entity_registry_enabled_default = False

@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Motor Durumu"
+      },
+      "warning_c_01": {
+        "name": "Motoru kontrol et (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Yakıtı kontrol et (C-02)"
+      },
+      "warning_c_03": {
+        "name": "İnvertörü kontrol et (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Yükü kontrol et (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Çıkış akımı yüksek (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Aşırı akım algılandı (köle) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Aşırı gerilim algılandı (köle) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Kısa devre aşırı akım (köle) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "CO sensörünü kontrol et (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO algılandı (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Aşırı hız (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Kontrol ünitesini kontrol et (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Aşırı hız (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Marş arızası (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Marş takıldı (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Akü gerilim arızası (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Düşük yağ (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Yağ sensörü arızası (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Aşırı ısınma (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Jeneratör darbe arızası (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Anormal devir (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Marş hatası (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Marş devresi (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Ateşleme arızası (E-10)"
+      },
+      "fault_e_11": {
+        "name": "İnvertör iletişimi (ana) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "İnvertör arızası (E-12)"
+      },
+      "fault_e_13": {
+        "name": "İnvertör DC arızası (E-13)"
+      },
+      "fault_e_15": {
+        "name": "İnvertör aşırı akım (E-15)"
+      },
+      "fault_e_16": {
+        "name": "İnvertör aşırı yük (E-16)"
+      },
+      "fault_e_17": {
+        "name": "İnvertör gerilim arızası (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Çıkış aşırı gerilimi (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Aşırı yük kapatma (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Toprak arızası (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "İnvertör iletişimi (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "İnvertör aşırı ısınma (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "İnvertör-GCU iletişimi (köle) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "İnvertör iletişimi (köle) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Aşırı akım kapatma (köle) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Aşırı gerilim kapatma (köle) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Güç modülü aşırı ısınma (köle) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "A/D giriş arızası (köle) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "FET açık devre (köle) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "FET kısa devre (köle) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Diyot kısa devre (köle) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "SCR kısa devre (köle) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "İnvertör bellek arızası (köle) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Kısa devre aşırı akım (köle) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "CO alarmı (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Atmosferik basınç sensörü (E-51)"
+      },
+      "fault_e_52": {
+        "name": "Yüksek CO algılandı (E-52)"
+      },
+      "fault_e_53": {
+        "name": "CO sensör hatası (E-53)"
+      },
+      "fault_e_56": {
+        "name": "CO kalibrasyon hatası (E-56)"
+      },
+      "fault_e_57": {
+        "name": "CO kapatma (E-57)"
+      },
+      "fault_e_70": {
+        "name": "BT ünitesi iletişimi (E-70)"
+      },
+      "fault_e_71": {
+        "name": "BT bağlantı hatası (E-71)"
+      },
+      "fault_e_72": {
+        "name": "BT iletişim hatası (E-72)"
+      },
+      "fault_e_73": {
+        "name": "BT modül hatası (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Motoru durdur",
       "description": "Jeneratör motorunu durdurur."
     }
-  },
-  "alert_codes": {
-    "c_01": "Motoru kontrol et",
-    "c_02": "Yakıtı kontrol et",
-    "c_03": "İnvertörü kontrol et",
-    "c_04": "Yükü kontrol et",
-    "c_05": "Çıkış akımı yüksek",
-    "c_06": "Aşırı akım algılandı (köle)",
-    "c_07": "Aşırı gerilim algılandı (köle)",
-    "c_08": "Kısa devre aşırı akım (köle)",
-    "c_09": "CO sensörünü kontrol et",
-    "c_10": "CO algılandı",
-    "c_2a": "Aşırı hız",
-    "c_a2": "Kontrol ünitesini kontrol et",
-    "e_00": "Marş arızası",
-    "e_01": "Marş takıldı",
-    "e_02": "Akü gerilim arızası",
-    "e_03": "Düşük yağ",
-    "e_04": "Yağ sensörü arızası",
-    "e_05": "Aşırı ısınma",
-    "e_06": "Jeneratör darbe arızası",
-    "e_07": "Anormal devir",
-    "e_0a": "Marş hatası",
-    "e_0b": "Marş devresi",
-    "e_10": "Ateşleme arızası",
-    "e_11": "İnvertör iletişimi (ana)",
-    "e_12": "İnvertör arızası",
-    "e_13": "İnvertör DC arızası",
-    "e_15": "İnvertör aşırı akım",
-    "e_16": "İnvertör aşırı yük",
-    "e_17": "İnvertör gerilim arızası",
-    "e_19": "Çıkış aşırı gerilimi",
-    "e_1a": "Aşırı yük kapatma",
-    "e_1b": "Toprak arızası",
-    "e_1c": "İnvertör iletişimi",
-    "e_1e": "İnvertör aşırı ısınma",
-    "e_20": "İnvertör-GCU iletişimi (köle)",
-    "e_21": "İnvertör iletişimi (köle)",
-    "e_22": "Aşırı akım kapatma (köle)",
-    "e_23": "Aşırı gerilim kapatma (köle)",
-    "e_25": "Güç modülü aşırı ısınma (köle)",
-    "e_26": "A/D giriş arızası (köle)",
-    "e_27": "FET açık devre (köle)",
-    "e_29": "FET kısa devre (köle)",
-    "e_2a": "Diyot kısa devre (köle)",
-    "e_2b": "SCR kısa devre (köle)",
-    "e_2c": "İnvertör bellek arızası (köle)",
-    "e_2e": "Kısa devre aşırı akım (köle)",
-    "e_50": "CO alarmı",
-    "e_51": "Atmosferik basınç sensörü",
-    "e_52": "Yüksek CO algılandı",
-    "e_53": "CO sensör hatası",
-    "e_56": "CO kalibrasyon hatası",
-    "e_57": "CO kapatma",
-    "e_70": "BT ünitesi iletişimi",
-    "e_71": "BT bağlantı hatası",
-    "e_72": "BT iletişim hatası",
-    "e_73": "BT modül hatası"
   }
 }

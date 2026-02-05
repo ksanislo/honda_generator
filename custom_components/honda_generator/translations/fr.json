@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "État du moteur"
+      },
+      "warning_c_01": {
+        "name": "Vérifier moteur (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Vérifier carburant (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Vérifier onduleur (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Vérifier charge (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Courant de sortie élevé (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Surintensité détectée (esclave) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Surtension détectée (esclave) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Court-circuit surintensité (esclave) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Vérifier capteur CO (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO détecté (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Survitesse (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Vérifier unité de contrôle (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Survitesse (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Défaut démarreur (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Démarreur bloqué (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Défaut tension batterie (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Niveau huile bas (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Défaut capteur huile (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Surchauffe (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Défaut impulsion générateur (E-06)"
+      },
+      "fault_e_07": {
+        "name": "Régime anormal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Échec démarreur (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Circuit démarreur (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Défaut allumage (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Comm. onduleur (maître) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Défaut onduleur (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Défaut CC onduleur (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Surintensité onduleur (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Surcharge onduleur (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Défaut tension onduleur (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Surtension sortie (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Arrêt surcharge (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Défaut terre (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Communication onduleur (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Surchauffe onduleur (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Comm. onduleur-GCU (esclave) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Comm. onduleur (esclave) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Arrêt surintensité (esclave) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Arrêt surtension (esclave) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Surchauffe module puissance (esclave) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Défaut entrée A/N (esclave) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "Circuit ouvert FET (esclave) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "Court-circuit FET (esclave) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Court-circuit diode (esclave) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Court-circuit SCR (esclave) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Défaut mémoire onduleur (esclave) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Court-circuit surintensité (esclave) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "Alerte CO (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Capteur pression atmosphérique (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO élevé détecté (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Erreur capteur CO (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Erreur calibration CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Arrêt CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Communication unité BT (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Erreur connexion BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Erreur communication BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Erreur module BT (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Arrêter le moteur",
       "description": "Arrête le moteur du générateur."
     }
-  },
-  "alert_codes": {
-    "c_01": "Vérifier moteur",
-    "c_02": "Vérifier carburant",
-    "c_03": "Vérifier onduleur",
-    "c_04": "Vérifier charge",
-    "c_05": "Courant de sortie élevé",
-    "c_06": "Surintensité détectée (esclave)",
-    "c_07": "Surtension détectée (esclave)",
-    "c_08": "Court-circuit surintensité (esclave)",
-    "c_09": "Vérifier capteur CO",
-    "c_10": "CO détecté",
-    "c_2a": "Survitesse",
-    "c_a2": "Vérifier unité de contrôle",
-    "e_00": "Défaut démarreur",
-    "e_01": "Démarreur bloqué",
-    "e_02": "Défaut tension batterie",
-    "e_03": "Niveau huile bas",
-    "e_04": "Défaut capteur huile",
-    "e_05": "Surchauffe",
-    "e_06": "Défaut impulsion générateur",
-    "e_07": "Régime anormal",
-    "e_0a": "Échec démarreur",
-    "e_0b": "Circuit démarreur",
-    "e_10": "Défaut allumage",
-    "e_11": "Comm. onduleur (maître)",
-    "e_12": "Défaut onduleur",
-    "e_13": "Défaut CC onduleur",
-    "e_15": "Surintensité onduleur",
-    "e_16": "Surcharge onduleur",
-    "e_17": "Défaut tension onduleur",
-    "e_19": "Surtension sortie",
-    "e_1a": "Arrêt surcharge",
-    "e_1b": "Défaut terre",
-    "e_1c": "Communication onduleur",
-    "e_1e": "Surchauffe onduleur",
-    "e_20": "Comm. onduleur-GCU (esclave)",
-    "e_21": "Comm. onduleur (esclave)",
-    "e_22": "Arrêt surintensité (esclave)",
-    "e_23": "Arrêt surtension (esclave)",
-    "e_25": "Surchauffe module puissance (esclave)",
-    "e_26": "Défaut entrée A/N (esclave)",
-    "e_27": "Circuit ouvert FET (esclave)",
-    "e_29": "Court-circuit FET (esclave)",
-    "e_2a": "Court-circuit diode (esclave)",
-    "e_2b": "Court-circuit SCR (esclave)",
-    "e_2c": "Défaut mémoire onduleur (esclave)",
-    "e_2e": "Court-circuit surintensité (esclave)",
-    "e_50": "Alerte CO",
-    "e_51": "Capteur pression atmosphérique",
-    "e_52": "CO élevé détecté",
-    "e_53": "Erreur capteur CO",
-    "e_56": "Erreur calibration CO",
-    "e_57": "Arrêt CO",
-    "e_70": "Communication unité BT",
-    "e_71": "Erreur connexion BT",
-    "e_72": "Erreur communication BT",
-    "e_73": "Erreur module BT"
   }
 }

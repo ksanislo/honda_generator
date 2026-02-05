@@ -99,6 +99,177 @@
       },
       "engine_status": {
         "name": "Status do motor"
+      },
+      "warning_c_01": {
+        "name": "Verificar motor (C-01)"
+      },
+      "warning_c_02": {
+        "name": "Verificar combustível (C-02)"
+      },
+      "warning_c_03": {
+        "name": "Verificar inversor (C-03)"
+      },
+      "warning_c_04": {
+        "name": "Verificar carga (C-04)"
+      },
+      "warning_c_05": {
+        "name": "Corrente de saída alta (C-05)"
+      },
+      "warning_c_06": {
+        "name": "Sobrecorrente detectada (escravo) (C-06)"
+      },
+      "warning_c_07": {
+        "name": "Sobretensão detectada (escravo) (C-07)"
+      },
+      "warning_c_08": {
+        "name": "Curto-circuito sobrecorrente (escravo) (C-08)"
+      },
+      "warning_c_09": {
+        "name": "Verificar sensor CO (C-09)"
+      },
+      "warning_c_10": {
+        "name": "CO detectado (C-10)"
+      },
+      "warning_c_2a": {
+        "name": "Sobrevelocidade (C-2A)"
+      },
+      "warning_c_a2": {
+        "name": "Verificar unidade de controle (C-A2)"
+      },
+      "fault_c_2a": {
+        "name": "Sobrevelocidade (C-2A)"
+      },
+      "fault_e_00": {
+        "name": "Falha do motor de partida (E-00)"
+      },
+      "fault_e_01": {
+        "name": "Motor de partida travado (E-01)"
+      },
+      "fault_e_02": {
+        "name": "Falha tensão bateria (E-02)"
+      },
+      "fault_e_03": {
+        "name": "Óleo baixo (E-03)"
+      },
+      "fault_e_04": {
+        "name": "Falha sensor óleo (E-04)"
+      },
+      "fault_e_05": {
+        "name": "Superaquecimento (E-05)"
+      },
+      "fault_e_06": {
+        "name": "Falha pulso gerador (E-06)"
+      },
+      "fault_e_07": {
+        "name": "RPM anormal (E-07)"
+      },
+      "fault_e_0a": {
+        "name": "Falha partida (E-0A)"
+      },
+      "fault_e_0b": {
+        "name": "Circuito partida (E-0B)"
+      },
+      "fault_e_10": {
+        "name": "Falha ignição (E-10)"
+      },
+      "fault_e_11": {
+        "name": "Comm. inversor (mestre) (E-11)"
+      },
+      "fault_e_12": {
+        "name": "Falha inversor (E-12)"
+      },
+      "fault_e_13": {
+        "name": "Falha CC inversor (E-13)"
+      },
+      "fault_e_15": {
+        "name": "Sobrecorrente inversor (E-15)"
+      },
+      "fault_e_16": {
+        "name": "Sobrecarga inversor (E-16)"
+      },
+      "fault_e_17": {
+        "name": "Falha tensão inversor (E-17)"
+      },
+      "fault_e_19": {
+        "name": "Sobretensão saída (E-19)"
+      },
+      "fault_e_1a": {
+        "name": "Desligamento sobrecarga (E-1A)"
+      },
+      "fault_e_1b": {
+        "name": "Falha aterramento (E-1B)"
+      },
+      "fault_e_1c": {
+        "name": "Comunicação inversor (E-1C)"
+      },
+      "fault_e_1e": {
+        "name": "Superaquecimento inversor (E-1E)"
+      },
+      "fault_e_20": {
+        "name": "Comm. inversor-GCU (escravo) (E-20)"
+      },
+      "fault_e_21": {
+        "name": "Comm. inversor (escravo) (E-21)"
+      },
+      "fault_e_22": {
+        "name": "Desligamento sobrecorrente (escravo) (E-22)"
+      },
+      "fault_e_23": {
+        "name": "Desligamento sobretensão (escravo) (E-23)"
+      },
+      "fault_e_25": {
+        "name": "Superaquecimento módulo potência (escravo) (E-25)"
+      },
+      "fault_e_26": {
+        "name": "Falha entrada A/D (escravo) (E-26)"
+      },
+      "fault_e_27": {
+        "name": "Circuito aberto FET (escravo) (E-27)"
+      },
+      "fault_e_29": {
+        "name": "Curto-circuito FET (escravo) (E-29)"
+      },
+      "fault_e_2a": {
+        "name": "Curto-circuito diodo (escravo) (E-2A)"
+      },
+      "fault_e_2b": {
+        "name": "Curto-circuito SCR (escravo) (E-2B)"
+      },
+      "fault_e_2c": {
+        "name": "Falha memória inversor (escravo) (E-2C)"
+      },
+      "fault_e_2e": {
+        "name": "Curto-circuito sobrecorrente (escravo) (E-2E)"
+      },
+      "fault_e_50": {
+        "name": "Alerta CO (E-50)"
+      },
+      "fault_e_51": {
+        "name": "Sensor pressão atmosférica (E-51)"
+      },
+      "fault_e_52": {
+        "name": "CO alto detectado (E-52)"
+      },
+      "fault_e_53": {
+        "name": "Erro sensor CO (E-53)"
+      },
+      "fault_e_56": {
+        "name": "Erro calibração CO (E-56)"
+      },
+      "fault_e_57": {
+        "name": "Desligamento CO (E-57)"
+      },
+      "fault_e_70": {
+        "name": "Comunicação unidade BT (E-70)"
+      },
+      "fault_e_71": {
+        "name": "Erro conexão BT (E-71)"
+      },
+      "fault_e_72": {
+        "name": "Erro comunicação BT (E-72)"
+      },
+      "fault_e_73": {
+        "name": "Erro módulo BT (E-73)"
       }
     },
     "button": {
@@ -120,63 +291,5 @@
       "name": "Parar motor",
       "description": "Para o motor do gerador."
     }
-  },
-  "alert_codes": {
-    "c_01": "Verificar motor",
-    "c_02": "Verificar combustível",
-    "c_03": "Verificar inversor",
-    "c_04": "Verificar carga",
-    "c_05": "Corrente de saída alta",
-    "c_06": "Sobrecorrente detectada (escravo)",
-    "c_07": "Sobretensão detectada (escravo)",
-    "c_08": "Curto-circuito sobrecorrente (escravo)",
-    "c_09": "Verificar sensor CO",
-    "c_10": "CO detectado",
-    "c_2a": "Sobrevelocidade",
-    "c_a2": "Verificar unidade de controle",
-    "e_00": "Falha do motor de partida",
-    "e_01": "Motor de partida travado",
-    "e_02": "Falha tensão bateria",
-    "e_03": "Óleo baixo",
-    "e_04": "Falha sensor óleo",
-    "e_05": "Superaquecimento",
-    "e_06": "Falha pulso gerador",
-    "e_07": "RPM anormal",
-    "e_0a": "Falha partida",
-    "e_0b": "Circuito partida",
-    "e_10": "Falha ignição",
-    "e_11": "Comm. inversor (mestre)",
-    "e_12": "Falha inversor",
-    "e_13": "Falha CC inversor",
-    "e_15": "Sobrecorrente inversor",
-    "e_16": "Sobrecarga inversor",
-    "e_17": "Falha tensão inversor",
-    "e_19": "Sobretensão saída",
-    "e_1a": "Desligamento sobrecarga",
-    "e_1b": "Falha aterramento",
-    "e_1c": "Comunicação inversor",
-    "e_1e": "Superaquecimento inversor",
-    "e_20": "Comm. inversor-GCU (escravo)",
-    "e_21": "Comm. inversor (escravo)",
-    "e_22": "Desligamento sobrecorrente (escravo)",
-    "e_23": "Desligamento sobretensão (escravo)",
-    "e_25": "Superaquecimento módulo potência (escravo)",
-    "e_26": "Falha entrada A/D (escravo)",
-    "e_27": "Circuito aberto FET (escravo)",
-    "e_29": "Curto-circuito FET (escravo)",
-    "e_2a": "Curto-circuito diodo (escravo)",
-    "e_2b": "Curto-circuito SCR (escravo)",
-    "e_2c": "Falha memória inversor (escravo)",
-    "e_2e": "Curto-circuito sobrecorrente (escravo)",
-    "e_50": "Alerta CO",
-    "e_51": "Sensor pressão atmosférica",
-    "e_52": "CO alto detectado",
-    "e_53": "Erro sensor CO",
-    "e_56": "Erro calibração CO",
-    "e_57": "Desligamento CO",
-    "e_70": "Comunicação unidade BT",
-    "e_71": "Erro conexão BT",
-    "e_72": "Erro comunicação BT",
-    "e_73": "Erro módulo BT"
   }
 }
