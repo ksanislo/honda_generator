@@ -1,6 +1,6 @@
 # Honda Generator integration for Home Assistant
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/ksanislo/honda_generator)](https://github.com/ksanislo/honda_generator/releases)
 [![License](https://img.shields.io/github/license/ksanislo/honda_generator)](LICENSE)
 
@@ -36,12 +36,9 @@ Unofficial Home Assistant integration for remote monitoring and control of Honda
 ### HACS (Recommended)
 
 1. Open HACS in Home Assistant
-2. Click the three dots in the top right corner
-3. Select **Custom repositories**
-4. Add `https://github.com/ksanislo/honda_generator` with category **Integration**
-5. Click **Add**
-6. Search for "Honda Generator" and click **Download**
-7. Restart Home Assistant
+2. Search for **Honda Generator**
+3. Click **Download**
+4. Restart Home Assistant
 
 ### Manual Installation
 
