@@ -17,7 +17,7 @@
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from bleak.backends.device import BLEDevice
 from homeassistant.components import bluetooth
@@ -155,6 +155,9 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         # Service tracking: {service_type: {"hours": int, "date": str}}
         self._service_records: dict[str, dict] = {}
 
+        # Runtime history for usage rate estimation: [{"hours": int, "ts": str}]
+        self._runtime_history: list[dict] = []
+
         # Detect architecture from config entry
         self._architecture = Architecture(
             config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
@@ -260,11 +263,18 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             self._service_records = data.get("service_records", {})
             if self._service_records:
                 _LOGGER.debug("Loaded %d service records", len(self._service_records))
+            # Load runtime history
+            self._runtime_history = data.get("runtime_history", [])
+            if self._runtime_history:
+                _LOGGER.debug(
+                    "Loaded %d runtime history entries", len(self._runtime_history)
+                )
 
     async def _async_save_storage(self) -> None:
         """Save all persistent data to storage."""
         data = {
             "service_records": self._service_records,
+            "runtime_history": self._runtime_history,
         }
         if self._stored_runtime_hours is not None:
             data["runtime_hours"] = self._stored_runtime_hours
@@ -287,6 +297,13 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         if first_time or value > self._stored_runtime_hours:
             self._stored_runtime_hours = value
             self._stored_runtime_hours_timestamp = now
+
+            # Append to runtime history and prune entries outside 24-hour window
+            self._runtime_history.append({"hours": value, "ts": now.isoformat()})
+            self._runtime_history = [
+                entry for entry in self._runtime_history if entry["hours"] >= value - 24
+            ]
+
             await self._async_save_storage()
             _LOGGER.debug("Saved runtime hours: %d", value)
 
@@ -430,6 +447,140 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         model = self.config_entry.data.get(CONF_MODEL)
         model_services = get_model_services(model)
         return list(model_services.keys())
+
+    def get_hours_per_day(self) -> float | None:
+        """Compute usage rate in runtime hours per wall-clock day.
+
+        Uses gap-aware adaptive windowing: if a storage gap is detected
+        (an interval whose rate is < 15% of the median recent rate), only
+        data after the last gap is used. This ensures seasonal shifts and
+        storage periods don't drag down the estimate.
+
+        Returns None if fewer than 2 history entries are available.
+        """
+        if len(self._runtime_history) < 2:
+            return None
+
+        # Parse entries into (hours, timestamp) tuples
+        parsed: list[tuple[int, datetime]] = []
+        for entry in self._runtime_history:
+            try:
+                parsed.append((entry["hours"], datetime.fromisoformat(entry["ts"])))
+            except (KeyError, ValueError, TypeError):
+                continue
+
+        if len(parsed) < 2:
+            return None
+
+        # Sort by timestamp
+        parsed.sort(key=lambda x: x[1])
+
+        # Calculate rates for each interval between consecutive entries
+        intervals: list[tuple[float, int]] = []  # (rate_hours_per_day, index)
+        for i in range(1, len(parsed)):
+            delta_hours = parsed[i][0] - parsed[i - 1][0]
+            delta_seconds = (parsed[i][1] - parsed[i - 1][1]).total_seconds()
+            if delta_seconds <= 0:
+                continue
+            rate = delta_hours / (delta_seconds / 86400)
+            intervals.append((rate, i))
+
+        if not intervals:
+            return None
+
+        # Find gap boundary: scan backwards for storage gaps
+        # A gap is an interval with rate < 15% of the median of later intervals
+        gap_index = 0  # Use all data by default
+        if len(intervals) >= 3:
+            # Compute median of the most recent half of intervals
+            recent_start = len(intervals) // 2
+            recent_rates = sorted(r for r, _ in intervals[recent_start:])
+            median_recent = recent_rates[len(recent_rates) // 2]
+
+            if median_recent > 0:
+                threshold = median_recent * 0.15
+                # Scan backwards from the end to find the last storage gap
+                for j in range(len(intervals) - 1, -1, -1):
+                    if intervals[j][0] < threshold:
+                        # Gap found — use data starting after this interval
+                        gap_index = intervals[j][1]
+                        break
+
+        # Compute rate from the post-gap window
+        start_hours, start_ts = parsed[gap_index]
+        end_hours, end_ts = parsed[-1]
+        total_seconds = (end_ts - start_ts).total_seconds()
+
+        if total_seconds <= 0:
+            return None
+
+        return (end_hours - start_hours) / (total_seconds / 86400)
+
+    def get_estimated_service_date(self, service_type: ServiceType) -> datetime | None:
+        """Estimate when a service will become due.
+
+        Considers both hours-based and calendar-based intervals and returns
+        the earlier of the two estimates. For hours-based estimation, uses
+        the runtime usage rate from get_hours_per_day().
+
+        Returns None if no estimate can be computed (no service record, or
+        hours-only service with no rate data).
+        """
+        model = self.config_entry.data.get(CONF_MODEL)
+        model_services = get_model_services(model)
+
+        if service_type not in model_services:
+            return None
+
+        interval = model_services[service_type]
+        record = self.get_service_record(service_type)
+
+        if record is None:
+            return None
+
+        current_hours = self._stored_runtime_hours or 0
+        last_service_hours = record.get("hours", 0)
+        now = datetime.now(tz=timezone.utc)
+
+        # Handle break-in oil change interval
+        if (
+            service_type == ServiceType.OIL_CHANGE
+            and last_service_hours < OIL_CHANGE_BREAKIN_INTERVAL.hours
+        ):
+            interval = OIL_CHANGE_BREAKIN_INTERVAL
+
+        estimates: list[datetime] = []
+
+        # Hours-based estimate
+        if interval.hours is not None:
+            hours_remaining = (last_service_hours + interval.hours) - current_hours
+            if hours_remaining <= 0:
+                estimates.append(now)
+            else:
+                rate = self.get_hours_per_day()
+                if rate is not None and rate > 0:
+                    days_until = hours_remaining / rate
+                    estimates.append(now + timedelta(days=days_until))
+
+        # Calendar-based estimate
+        if interval.days is not None:
+            last_service_date_str = record.get("date")
+            if last_service_date_str:
+                try:
+                    last_service_date = datetime.fromisoformat(last_service_date_str)
+                    # Ensure timezone-aware for HA TIMESTAMP compatibility
+                    if last_service_date.tzinfo is None:
+                        last_service_date = last_service_date.replace(
+                            tzinfo=timezone.utc
+                        )
+                    estimates.append(last_service_date + timedelta(days=interval.days))
+                except (ValueError, TypeError):
+                    pass
+
+        if not estimates:
+            return None
+
+        return min(estimates)
 
     def _validate_runtime_hours(self, value: int, now: datetime) -> bool:
         """Validate that runtime hours increase is plausible.
