@@ -512,7 +512,14 @@ class PollAPI(GeneratorAPIProtocol):
         return data[7] == expected_high and data[8] == expected_low
 
     async def _read_diagnostic(self, register: str, position: str) -> bytes:
-        """Read a diagnostic byte from the generator."""
+        """Read a diagnostic byte from the generator.
+
+        Handles write failures gracefully: even if a write appears to fail at
+        the BLE level, the generator may have received it and queued a response.
+        Rather than immediately retrying the write (which creates duplicate
+        requests and stale responses that desync subsequent reads), we still
+        check for a response after a write failure.
+        """
         if self._shutting_down:
             _LOGGER.debug(
                 "Skipping diagnostic read %s%s: shutting down", register, position
@@ -532,13 +539,25 @@ class PollAPI(GeneratorAPIProtocol):
                 _LOGGER.debug("Aborting diagnostic read: connection lost")
                 raise BleakError("Connection lost")
 
-            # Clear stale queue data
+            # Drain any stale responses sitting in the queue from previous
+            # failed attempts or update cycles
+            drained = 0
             while not self._queue.empty():
                 try:
                     self._queue.get_nowait()
+                    drained += 1
                 except asyncio.QueueEmpty:
                     break
+            if drained:
+                _LOGGER.debug(
+                    "Drained %d stale response(s) before %s%s attempt %d",
+                    drained,
+                    register,
+                    position,
+                    attempt + 1,
+                )
 
+            write_succeeded = True
             try:
                 await asyncio.wait_for(
                     self._client.write_gatt_char(
@@ -549,19 +568,25 @@ class PollAPI(GeneratorAPIProtocol):
                 )
             except Exception as exc:
                 _LOGGER.debug("Write failed (attempt %d): %s", attempt + 1, exc)
+                write_succeeded = False
                 if self._shutting_down:
                     return b"\x00"
-                await asyncio.sleep(0.2)
-                continue
 
             await asyncio.sleep(0.1)
 
-            # Try to get the correct response, allowing for stale responses in the queue
-            for response_attempt in range(3):
+            # Try to get the correct response, discarding stale/mismatched
+            # responses from previous failed writes or update cycles.
+            # Even if the write "failed" at the BLE level, the generator may
+            # have received it, so we still check for a response.
+            for response_attempt in range(5):
                 try:
-                    # Use shorter timeout after first response attempt since we're
-                    # waiting for a potentially queued response
-                    timeout = 2.0 if response_attempt == 0 else 0.5
+                    # First read after successful write: generous timeout
+                    # First read after failed write: moderate timeout
+                    # Subsequent reads: short timeout (draining stale responses)
+                    if response_attempt == 0:
+                        timeout = 2.0 if write_succeeded else 1.0
+                    else:
+                        timeout = 0.5
                     raw = await asyncio.wait_for(self._queue.get(), timeout=timeout)
                     data = bytearray(raw[1:])  # Skip first byte
                     if self._verify_checksum(data):
@@ -570,7 +595,7 @@ class PollAPI(GeneratorAPIProtocol):
                         resp_position = data[3:5].decode()
                         if resp_register != register or resp_position != position:
                             _LOGGER.debug(
-                                "Response mismatch (attempt %d.%d): requested %s%s, got %s%s, waiting for correct response",
+                                "Response mismatch (attempt %d.%d): requested %s%s, got %s%s, discarding stale response",
                                 attempt + 1,
                                 response_attempt + 1,
                                 register,
@@ -581,10 +606,13 @@ class PollAPI(GeneratorAPIProtocol):
                             continue
                         result = bytes.fromhex(data[5:7].decode())
                         _LOGGER.debug(
-                            "Diagnostic read %s%s: 0x%s",
+                            "Diagnostic read %s%s: 0x%s%s",
                             register,
                             position,
                             result.hex().upper(),
+                            " (recovered after write failure)"
+                            if not write_succeeded
+                            else "",
                         )
                         return result
                     _LOGGER.debug(
@@ -594,8 +622,14 @@ class PollAPI(GeneratorAPIProtocol):
                     )
                 except TimeoutError:
                     if response_attempt == 0:
-                        _LOGGER.debug("Timeout (attempt %d)", attempt + 1)
+                        _LOGGER.debug(
+                            "Response timeout (attempt %d%s)",
+                            attempt + 1,
+                            ", write had failed" if not write_succeeded else "",
+                        )
                     break  # No more responses coming, retry with new write
+
+            await asyncio.sleep(0.2)
 
         raise APIReadError(
             f"Diagnostic read {register}{position} failed after 3 attempts"
