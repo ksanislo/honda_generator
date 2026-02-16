@@ -205,6 +205,8 @@ class HondaGeneratorAlertBinarySensor(
         self._attr_entity_registry_enabled_default = False
         self._restored_value: bool | None = None
         self._restored_last_update: datetime | None = None
+        self._last_live_value: bool | None = None
+        self._first_update_attempted = False
 
     async def async_added_to_hass(self) -> None:
         """Restore last state when added to hass."""
@@ -227,32 +229,70 @@ class HondaGeneratorAlertBinarySensor(
     @callback
     def _handle_coordinator_update(self) -> None:
         """Update sensor with latest data from coordinator."""
+        if not self._first_update_attempted:
+            self._first_update_attempted = True
+
+        # When we get live data, save it and clear restored value
+        if self.coordinator.last_update_success and self.coordinator.api:
+            if self._is_fault:
+                self._last_live_value = self.coordinator.api.get_fault_bit(
+                    self._alert_code.bit
+                )
+            else:
+                self._last_live_value = self.coordinator.api.get_warning_bit(
+                    self._alert_code.bit
+                )
+            if self._restored_value is not None:
+                self._restored_value = None
+                self._restored_last_update = None
+
         self.async_write_ha_state()
 
     @property
     def is_on(self) -> bool | None:
         """Return if the binary sensor is on.
 
-        Only returns real data - no restored/fallback values for diagnostics.
+        Returns live data when connected. When offline, persists the last
+        known value so alarm states remain visible after generator shuts off.
         """
         if self.coordinator.last_update_success and self.coordinator.api:
             if self._is_fault:
                 return self.coordinator.api.get_fault_bit(self._alert_code.bit)
             return self.coordinator.api.get_warning_bit(self._alert_code.bit)
+
+        # Don't use persisted value until we've tried to get fresh data
+        if not self._first_update_attempted:
+            return None
+
+        # Use best available offline value
+        if self._last_live_value is not None:
+            return self._last_live_value
+        if self._restored_value is not None:
+            return self._restored_value
         return None
 
     @property
     def available(self) -> bool:
-        """Return True only when we have live data.
+        """Return True when we have live or persisted data.
 
-        Diagnostic sensors show real values or unavailable - no fallbacks.
+        Persists availability after first update so alarm states remain
+        visible when the generator goes offline.
         """
         # Grace periods take priority - show unavailable while reconnecting
         if self.coordinator.in_startup_grace_period:
             return False
         if self.coordinator.in_reconnect_grace_period:
             return False
-        return self.coordinator.last_update_success
+        if self.coordinator.last_update_success:
+            return True
+        # After first update attempt, available if we have persisted data
+        if not self._first_update_attempted:
+            return False
+        if self._last_live_value is not None:
+            return True
+        if self._restored_value is not None:
+            return True
+        return False
 
     @property
     def icon(self) -> str | None:

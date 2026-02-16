@@ -143,6 +143,7 @@ FUEL_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
         icon="mdi:fuel",
+        persist_value=True,
     ),
     HondaGeneratorSensorEntityDescription(
         key="fuel_remaining_time",
@@ -211,6 +212,7 @@ EU3200I_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] =
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
         icon="mdi:fuel",
+        persist_value=True,
     ),
     HondaGeneratorSensorEntityDescription(
         key="fuel_volume",
@@ -220,6 +222,7 @@ EU3200I_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] =
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
         icon="mdi:fuel",
+        persist_value=True,
     ),
     HondaGeneratorSensorEntityDescription(
         key="fuel_gauge_level",
@@ -228,6 +231,7 @@ EU3200I_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] =
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
         icon="mdi:gauge",
+        persist_value=True,
     ),
     HondaGeneratorSensorEntityDescription(
         key="fuel_remaining_time",
@@ -247,6 +251,7 @@ EU3200I_SENSOR_DESCRIPTIONS: tuple[HondaGeneratorSensorEntityDescription, ...] =
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         suggested_display_precision=0,
         icon="mdi:flash",
+        persist_value=True,
     ),
 )
 
@@ -264,37 +269,39 @@ async def async_setup_entry(
         config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
     )
 
+    def _create_sensor(
+        desc: HondaGeneratorSensorEntityDescription,
+    ) -> SensorEntity:
+        """Create the appropriate sensor class based on description flags."""
+        if desc.persist_value and desc.state_class == SensorStateClass.TOTAL_INCREASING:
+            return HondaGeneratorPersistentSensor(coordinator, desc)
+        if desc.persist_value:
+            return HondaGeneratorPersistentMeasurementSensor(coordinator, desc)
+        if desc.enum_keys is not None:
+            return HondaGeneratorPersistentEnumSensor(coordinator, desc)
+        return HondaGeneratorSensor(coordinator, desc)
+
     entities: list[SensorEntity] = []
 
     if architecture == Architecture.PUSH:
         # Push architecture (EU3200i): Use Push-specific sensor descriptions
         for description in PUSH_SENSOR_DESCRIPTIONS:
-            if description.persist_value:
-                entities.append(
-                    HondaGeneratorPersistentSensor(coordinator, description)
-                )
-            else:
-                entities.append(HondaGeneratorSensor(coordinator, description))
+            entities.append(_create_sensor(description))
 
         # Add EU3200i-specific sensors
         for description in EU3200I_SENSOR_DESCRIPTIONS:
-            entities.append(HondaGeneratorSensor(coordinator, description))
+            entities.append(_create_sensor(description))
     else:
         # Poll architecture: Use standard sensor descriptions
         for description in POLL_SENSOR_DESCRIPTIONS:
-            if description.persist_value:
-                entities.append(
-                    HondaGeneratorPersistentSensor(coordinator, description)
-                )
-            else:
-                entities.append(HondaGeneratorSensor(coordinator, description))
+            entities.append(_create_sensor(description))
 
         # Add fuel sensors only for models with fuel sensor support
         if coordinator.api:
             model_spec = get_model_spec(coordinator.api.model)
             if model_spec and model_spec.fuel_sensor:
                 for description in FUEL_SENSOR_DESCRIPTIONS:
-                    entities.append(HondaGeneratorSensor(coordinator, description))
+                    entities.append(_create_sensor(description))
 
     async_add_entities(entities)
 
@@ -541,6 +548,298 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return extra state attributes."""
+        attrs: dict[str, Any] = {}
+
+        if self.coordinator.last_update_success:
+            if self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = False
+        else:
+            if self._restored_last_update:
+                attrs["last_update"] = self._restored_last_update.isoformat()
+            elif self.coordinator.data and self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = True
+
+        return attrs
+
+
+class HondaGeneratorPersistentEnumSensor(
+    HondaGeneratorEntity, RestoreEntity, SensorEntity
+):
+    """Honda Generator enum sensor that persists its last value when unavailable.
+
+    For enum sensors like engine_event and engine_error, the last known value
+    is preserved when the generator goes offline so alarm states remain visible.
+    """
+
+    entity_description: HondaGeneratorSensorEntityDescription
+
+    def __init__(
+        self,
+        coordinator: HondaGeneratorCoordinator,
+        description: HondaGeneratorSensorEntityDescription,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = (
+            f"{DOMAIN}-{coordinator.data.controller_name}_{description.key}"
+        )
+        self._restored_value: str | None = None
+        self._restored_last_update: datetime | None = None
+        self._last_live_value: str | None = None
+        self._first_update_attempted = False
+
+    async def async_added_to_hass(self) -> None:
+        """Restore last state when added to hass."""
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is not None and last_state.state not in (
+            None,
+            "unknown",
+            "unavailable",
+        ):
+            self._restored_value = last_state.state
+            _LOGGER.debug(
+                "Restored %s value: %s",
+                self.entity_description.key,
+                self._restored_value,
+            )
+            if last_state.attributes.get("last_update"):
+                try:
+                    self._restored_last_update = datetime.fromisoformat(
+                        last_state.attributes["last_update"]
+                    )
+                except (ValueError, TypeError):
+                    self._restored_last_update = None
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        if not self._first_update_attempted:
+            self._first_update_attempted = True
+
+        # When we get live data, save the enum value and clear restored value
+        if self.coordinator.last_update_success:
+            live_value = self._get_live_enum_value()
+            if live_value is not None:
+                self._last_live_value = live_value
+            if self._restored_value is not None:
+                self._restored_value = None
+                self._restored_last_update = None
+
+        self.async_write_ha_state()
+
+    def _get_device_state(self) -> int | float | None:
+        """Get the current device state from coordinator."""
+        device = self.coordinator.get_device_by_id(
+            self.entity_description.device_type, 1
+        )
+        if device is None:
+            return 0
+        if device.state is None:
+            return None
+        return device.state
+
+    def _get_live_enum_value(self) -> str | None:
+        """Get the current enum string value from live data."""
+        state = self._get_device_state()
+        if state is None:
+            return None
+        if self.entity_description.enum_keys is not None:
+            int_state = int(state)
+            return self.entity_description.enum_keys.get(
+                int_state, f"unknown_{int_state}"
+            )
+        return None
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the state of the sensor.
+
+        When connected, use live data. When offline, persist the last known
+        enum value so alarm states remain visible.
+        """
+        if self.coordinator.last_update_success:
+            return self._get_live_enum_value()
+
+        # Don't use persisted value until we've tried to get fresh data
+        if not self._first_update_attempted:
+            return None
+
+        # Use best available offline value
+        if self._last_live_value is not None:
+            return self._last_live_value
+        if self._restored_value is not None:
+            return self._restored_value
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Return True if we have any data (live or persisted).
+
+        Respects grace periods during reconnection attempts.
+        """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
+        if self.coordinator.last_update_success:
+            return True
+        # After first update attempt, available if we have persisted data
+        if not self._first_update_attempted:
+            return False
+        if self._last_live_value is not None:
+            return True
+        if self._restored_value is not None:
+            return True
+        return False
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes for persistent enum sensor."""
+        attrs: dict[str, Any] = {}
+
+        if self.coordinator.last_update_success:
+            if self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = False
+        else:
+            if self._restored_last_update:
+                attrs["last_update"] = self._restored_last_update.isoformat()
+            elif self.coordinator.data and self.coordinator.data.last_update:
+                attrs["last_update"] = self.coordinator.data.last_update.isoformat()
+            attrs["data_stale"] = True
+
+        return attrs
+
+
+class HondaGeneratorPersistentMeasurementSensor(
+    HondaGeneratorEntity, RestoreEntity, SensorEntity
+):
+    """Honda Generator measurement sensor that persists its last value when unavailable.
+
+    For measurement sensors like fuel level and voltage setting, the last known
+    value is preserved when the generator goes offline.
+    """
+
+    entity_description: HondaGeneratorSensorEntityDescription
+
+    def __init__(
+        self,
+        coordinator: HondaGeneratorCoordinator,
+        description: HondaGeneratorSensorEntityDescription,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = (
+            f"{DOMAIN}-{coordinator.data.controller_name}_{description.key}"
+        )
+        self._restored_value: int | float | None = None
+        self._restored_last_update: datetime | None = None
+        self._last_live_value: int | float | None = None
+        self._first_update_attempted = False
+
+    async def async_added_to_hass(self) -> None:
+        """Restore last state when added to hass."""
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is not None and last_state.state not in (
+            None,
+            "unknown",
+            "unavailable",
+        ):
+            try:
+                self._restored_value = float(last_state.state)
+                _LOGGER.debug(
+                    "Restored %s value: %s",
+                    self.entity_description.key,
+                    self._restored_value,
+                )
+                if last_state.attributes.get("last_update"):
+                    self._restored_last_update = datetime.fromisoformat(
+                        last_state.attributes["last_update"]
+                    )
+            except (ValueError, TypeError):
+                self._restored_value = None
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Update sensor with latest data from coordinator."""
+        if not self._first_update_attempted:
+            self._first_update_attempted = True
+
+        # When we get live data, save it and clear restored value
+        if self.coordinator.last_update_success:
+            live_value = self._get_device_state()
+            if live_value is not None:
+                self._last_live_value = live_value
+            if self._restored_value is not None:
+                self._restored_value = None
+                self._restored_last_update = None
+
+        self.async_write_ha_state()
+
+    def _get_device_state(self) -> int | float | None:
+        """Get the current device state from coordinator."""
+        device = self.coordinator.get_device_by_id(
+            self.entity_description.device_type, 1
+        )
+        if device is None:
+            return None
+        if device.state is None:
+            return None
+        return device.state
+
+    @property
+    def native_value(self) -> int | float | None:
+        """Return the state of the sensor.
+
+        When connected, use live data. When offline, persist the last known
+        measurement value.
+        """
+        if self.coordinator.last_update_success:
+            return self._get_device_state()
+
+        # Don't use persisted value until we've tried to get fresh data
+        if not self._first_update_attempted:
+            return None
+
+        # Use best available offline value
+        if self._last_live_value is not None:
+            return self._last_live_value
+        if self._restored_value is not None:
+            return self._restored_value
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Return True if we have any data (live or persisted).
+
+        Respects grace periods during reconnection attempts.
+        """
+        # Grace periods take priority - show unavailable while reconnecting
+        if self.coordinator.in_startup_grace_period:
+            return False
+        if self.coordinator.in_reconnect_grace_period:
+            return False
+        if self.coordinator.last_update_success:
+            return True
+        # After first update attempt, available if we have persisted data
+        if not self._first_update_attempted:
+            return False
+        if self._last_live_value is not None:
+            return True
+        if self._restored_value is not None:
+            return True
+        return False
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return extra state attributes for persistent measurement sensor."""
         attrs: dict[str, Any] = {}
 
         if self.coordinator.last_update_success:
