@@ -224,6 +224,8 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         """
         _LOGGER.debug("Intentional disconnect flagged (grace period will be skipped)")
         self._intentional_disconnect = True
+        if self.api is not None:
+            self.api.stop_diagnostics()
 
     @property
     def in_reconnect_grace_period(self) -> bool:

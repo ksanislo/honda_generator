@@ -355,6 +355,13 @@ class GeneratorAPIProtocol(ABC):
         """Start the generator engine (optional, only for models with remote start)."""
         return False
 
+    def stop_diagnostics(self) -> None:
+        """Suppress diagnostic reads (e.g., during engine shutdown sequence).
+
+        Sets the shutdown flag so in-flight polling yields to BLE notifications.
+        No-op by default; overridden where applicable.
+        """
+
     async def set_eco_mode(self, enabled: bool) -> bool:
         """Set the ECO mode state (optional, only for models with ECO control)."""
         return False
@@ -873,6 +880,11 @@ class PollAPI(GeneratorAPIProtocol):
             _LOGGER.debug("Connection setup complete for %s", self._ble_device.address)
             return True
 
+    def stop_diagnostics(self) -> None:
+        """Suppress diagnostic reads during engine shutdown sequence."""
+        _LOGGER.debug("Suppressing diagnostic reads for shutdown sequence")
+        self._shutting_down = True
+
     async def disconnect(self) -> bool:
         """Disconnect from the generator.
 
@@ -1195,6 +1207,7 @@ class PollAPI(GeneratorAPIProtocol):
         _LOGGER.debug(
             "Engine stop command sent (%d attempts, connection still active)", attempts
         )
+        self._shutting_down = False
         return True
 
     async def engine_start(self) -> bool:
