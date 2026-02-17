@@ -414,10 +414,10 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
     def get_hours_per_day(self) -> float | None:
         """Compute usage rate in runtime hours per wall-clock day.
 
-        Uses gap-aware adaptive windowing: if a storage gap is detected
-        (an interval whose rate is < 15% of the median recent rate), only
-        data after the last gap is used. This ensures seasonal shifts and
-        storage periods don't drag down the estimate.
+        Uses time-based gap detection: if consecutive entries are more than
+        7 days apart (indicating the generator was in storage), only data
+        after the last such gap is used. Normal overnight idle periods are
+        included in the calculation since they reflect actual usage patterns.
 
         Returns None if fewer than 2 history entries are available.
         """
@@ -438,41 +438,19 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         # Sort by timestamp
         parsed.sort(key=lambda x: x[1])
 
-        # Calculate rates for each interval between consecutive entries
-        intervals: list[tuple[float, int]] = []  # (rate_hours_per_day, index)
-        for i in range(1, len(parsed)):
-            delta_hours = parsed[i][0] - parsed[i - 1][0]
-            delta_seconds = (parsed[i][1] - parsed[i - 1][1]).total_seconds()
-            if delta_seconds <= 0:
-                continue
-            rate = delta_hours / (delta_seconds / 86400)
-            intervals.append((rate, i))
+        # Find the last storage gap (entries more than 7 days apart)
+        # and only use data after it
+        start_idx = 0
+        for i in range(len(parsed) - 1, 0, -1):
+            gap_days = (parsed[i][1] - parsed[i - 1][1]).total_seconds() / 86400
+            if gap_days >= 7:
+                start_idx = i
+                break
 
-        if not intervals:
-            return None
+        if start_idx >= len(parsed) - 1:
+            return None  # Not enough data after the gap
 
-        # Find gap boundary: scan backwards for storage gaps
-        # A gap is an interval with rate < 15% of the median of later intervals
-        gap_index = 0  # Use all data by default
-        if len(intervals) >= 3:
-            # Compute median of the most recent half of intervals
-            recent_start = len(intervals) // 2
-            recent_rates = sorted(r for r, _ in intervals[recent_start:])
-            median_recent = recent_rates[len(recent_rates) // 2]
-
-            if median_recent > 0:
-                threshold = median_recent * 0.15
-                # Scan backwards to find the last storage gap, skipping the
-                # final interval — flagging it would leave only 1 data point,
-                # and short idle periods (overnight) aren't true storage gaps
-                for j in range(len(intervals) - 2, -1, -1):
-                    if intervals[j][0] < threshold:
-                        # Gap found — use data starting after this interval
-                        gap_index = intervals[j][1]
-                        break
-
-        # Compute rate from the post-gap window
-        start_hours, start_ts = parsed[gap_index]
+        start_hours, start_ts = parsed[start_idx]
         end_hours, end_ts = parsed[-1]
         total_seconds = (end_ts - start_ts).total_seconds()
 
