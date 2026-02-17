@@ -20,5 +20,5 @@
   "issue_tracker": "https://github.com/ksanislo/honda_generator/issues",
   "requirements": ["bleak-retry-connector>=3.0.0"],
   "single_config_entry": false,
-  "version": "1.2.10"
+  "version": "1.3.0"
 }

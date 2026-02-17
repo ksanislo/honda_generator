@@ -62,8 +62,11 @@ Unofficial Home Assistant integration for remote monitoring and control of Honda
 After setup, you can configure:
 
 - **Scan Interval**: How often to poll the generator (default: 10 seconds) - *Poll architecture only*
+- **Reconnect after consecutive failures**: Force a Bluetooth reconnection after this many consecutive failed updates (0 to disable, 1-10 to enable)
+- **Startup grace period**: Time in seconds to wait for generator discovery after Home Assistant restart before showing offline defaults (0 to disable)
+- **Stop command attempts**: Number of times to send the stop command (1-30) - *Poll architecture only*
 
-Note: EU3200i (Push architecture) streams data continuously, so scan interval does not apply.
+Note: EU3200i (Push architecture) streams data continuously, so scan interval and stop attempts do not apply.
 
 ## Entities
 
@@ -71,7 +74,7 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 
 | Entity | Description | Unit | Notes |
 |--------|-------------|------|-------|
-| Runtime Hours | Total engine runtime | hours | |
+| Runtime Hours | Total engine runtime | hours | Includes `usage_rate_hours_per_day` attribute |
 | Output Current | Current electrical output | A | |
 | Output Power | Apparent power output | VA | |
 | Output Voltage | Output voltage | V | |
@@ -90,7 +93,7 @@ Note: EU3200i (Push architecture) streams data continuously, so scan interval do
 | ECO Mode | Whether ECO throttle mode is active | Read-only; excluded on models with ECO switch |
 | Engine Running | Whether the engine is currently running | |
 | Warning/Fault Codes | Individual warning and fault flags | Disabled by default |
-| Service Due | Whether a maintenance service is due | See [Service Tracking](#service-tracking) |
+| Service Due | Whether a maintenance service is due | See [Service Tracking](#service-tracking); includes scheduling attributes |
 
 ### Buttons
 
@@ -149,6 +152,20 @@ Service intervals vary by model. See [SERVICE_SCHEDULE.md](SERVICE_SCHEDULE.md) 
 Each service has two entities:
 - **Binary Sensor** (`binary_sensor.*_service_due`): Shows `on` when the service is due based on runtime hours OR calendar time (whichever threshold is reached first)
 - **Button** (`button.*_mark_service_complete`): Press to record the service as complete at the current runtime hours and date
+
+The service due binary sensor includes attributes for use in automations and dashboards:
+
+| Attribute | Description |
+|-----------|-------------|
+| `estimated_date` | Estimated date when service will be due, based on current usage rate |
+| `hours_remaining` | Runtime hours remaining until service is due (negative = overdue) |
+| `days_remaining` | Calendar days remaining until service is due by date (negative = overdue) |
+| `last_service_hours` | Runtime hours at last service |
+| `last_service_date` | Date of last service |
+| `interval_hours` | Service interval in runtime hours |
+| `interval_days` | Service interval in calendar days |
+| `service_type` | Service type identifier |
+| `dealer_service` | Present when the service requires a dealer |
 
 ### Importing Service History
 

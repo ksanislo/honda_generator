@@ -41,21 +41,16 @@ class HondaGeneratorEntity(CoordinatorEntity[HondaGeneratorCoordinator]):
     def available(self) -> bool:
         """Return if entity is available.
 
-        During grace periods, entities report as unavailable to preserve
-        dashboard state:
-        - Startup grace period: waiting for initial connection after restart
-        - Reconnect grace period: attempting to reconnect after connection loss
+        During the startup grace period, entities report as unavailable to
+        preserve dashboard state while waiting for the initial connection.
 
-        After grace periods expire, availability depends on coordinator's
+        After the grace period expires, availability depends on coordinator's
         last_update_success. Entities that want to show offline defaults
         (e.g., false_when_unavailable, zero_when_unavailable) must override
         this method to return True in those cases.
         """
         # Startup grace period - waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        # Reconnect grace period - attempting to reconnect after disconnect
-        if self.coordinator.in_reconnect_grace_period:
             return False
         return super().available
 

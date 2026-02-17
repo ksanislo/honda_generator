@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.binary_sensor import (
@@ -35,7 +35,12 @@ from .api import DeviceType, get_model_spec
 from .codes import AlertCode, get_fault_codes, get_warning_codes
 from .const import DOMAIN
 from .entity import HondaGeneratorEntity
-from .services import ServiceType, get_model_services, get_service_definition
+from .services import (
+    OIL_CHANGE_BREAKIN_INTERVAL,
+    ServiceType,
+    get_model_services,
+    get_service_definition,
+)
 
 if TYPE_CHECKING:
     from . import HondaGeneratorConfigEntry
@@ -158,10 +163,8 @@ class HondaGeneratorBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
         defaults (False) when not connected. Other sensors (like ECO mode)
         become unavailable when not connected.
         """
-        # Grace periods take priority - show unavailable while reconnecting
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
         # Sensors with false_when_unavailable stay available to show offline default
         if self.entity_description.false_when_unavailable:
@@ -278,10 +281,8 @@ class HondaGeneratorAlertBinarySensor(
         Persists availability after first update so alarm states remain
         visible when the generator goes offline.
         """
-        # Grace periods take priority - show unavailable while reconnecting
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
         if self.coordinator.last_update_success:
             return True
@@ -367,23 +368,64 @@ class ServiceDueBinarySensor(HondaGeneratorEntity, BinarySensorEntity):
         model_services = get_model_services(self.coordinator.data.model)
         interval = model_services.get(self._service_type)
 
+        # Estimated date (actionable — when is service due)
+        estimated = self.coordinator.get_estimated_service_date(self._service_type)
         attrs: dict[str, Any] = {
-            "service_type": self._service_type.value,
+            "estimated_date": estimated.date().isoformat() if estimated else None,
         }
 
+        # Remaining counters
+        if record:
+            last_service_hours = record.get("hours", 0)
+
+            # Use break-in interval for oil change on new engines
+            effective_interval = interval
+            if (
+                effective_interval
+                and self._service_type == ServiceType.OIL_CHANGE
+                and last_service_hours < OIL_CHANGE_BREAKIN_INTERVAL.hours
+            ):
+                effective_interval = OIL_CHANGE_BREAKIN_INTERVAL
+
+            if effective_interval:
+                # Hours remaining until service is due (negative = overdue)
+                if effective_interval.hours is not None:
+                    current_hours = self.coordinator.stored_runtime_hours or 0
+                    attrs["hours_remaining"] = (
+                        last_service_hours + effective_interval.hours
+                    ) - current_hours
+
+                # Days remaining until service is due by date (negative = overdue)
+                if effective_interval.days is not None:
+                    last_service_date_str = record.get("date")
+                    if last_service_date_str:
+                        try:
+                            last_service_date = datetime.fromisoformat(
+                                last_service_date_str
+                            )
+                            due_date = last_service_date + timedelta(
+                                days=effective_interval.days
+                            )
+                            attrs["days_remaining"] = (due_date - datetime.now()).days
+                        except (ValueError, TypeError):
+                            pass
+
+            # Last service history
+            attrs["last_service_hours"] = last_service_hours
+            attrs["last_service_date"] = record.get("date")
+        else:
+            attrs["last_service_hours"] = None
+            attrs["last_service_date"] = None
+
+        # Service schedule reference
         if interval:
             if interval.hours:
                 attrs["interval_hours"] = interval.hours
             if interval.days:
                 attrs["interval_days"] = interval.days
 
-        if record:
-            attrs["last_service_hours"] = record.get("hours")
-            attrs["last_service_date"] = record.get("date")
-        else:
-            attrs["last_service_hours"] = None
-            attrs["last_service_date"] = None
-
+        # Metadata
+        attrs["service_type"] = self._service_type.value
         if service_def.is_dealer_service:
             attrs["dealer_service"] = True
 

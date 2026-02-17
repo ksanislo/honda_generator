@@ -49,7 +49,6 @@ from .api import (
 )
 from .const import CONF_ARCHITECTURE, DOMAIN
 from .entity import HondaGeneratorEntity
-from .services import ServiceType, get_model_services, get_service_definition
 
 if TYPE_CHECKING:
     from . import HondaGeneratorConfigEntry
@@ -304,13 +303,6 @@ async def async_setup_entry(
                 for description in FUEL_SENSOR_DESCRIPTIONS:
                     entities.append(_create_sensor(description))
 
-    # Service estimated date sensors (model-specific)
-    model_services = get_model_services(
-        coordinator.data.model if coordinator.data else None
-    )
-    for service_type in model_services:
-        entities.append(ServiceEstimatedDateSensor(coordinator, service_type))
-
     async_add_entities(entities)
 
 
@@ -381,10 +373,8 @@ class HondaGeneratorSensor(HondaGeneratorEntity, SensorEntity):
         Sensors with zero_when_unavailable stay available to show offline
         defaults (0) when not connected. Other sensors become unavailable.
         """
-        # Grace periods take priority - show unavailable while reconnecting
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
         # Sensors with zero_when_unavailable stay available to show offline default
         if self.entity_description.zero_when_unavailable:
@@ -526,12 +516,9 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
 
         Returns unavailable until we've attempted the first update, to prevent
         restored values from being recorded before we've tried to get fresh data.
-        Respects grace periods during reconnection attempts.
         """
-        # Grace periods take priority - show unavailable while reconnecting
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
 
         if self.coordinator.last_update_success:
@@ -568,6 +555,13 @@ class HondaGeneratorPersistentSensor(HondaGeneratorEntity, RestoreEntity, Sensor
             elif self.coordinator.data and self.coordinator.data.last_update:
                 attrs["last_update"] = self.coordinator.data.last_update.isoformat()
             attrs["data_stale"] = True
+
+        # Usage rate attribute on runtime hours sensor
+        if self.entity_description.device_type == DeviceType.RUNTIME_HOURS:
+            rate = self.coordinator.get_hours_per_day()
+            attrs["usage_rate_hours_per_day"] = (
+                round(rate, 2) if rate is not None else None
+            )
 
         return attrs
 
@@ -685,14 +679,9 @@ class HondaGeneratorPersistentEnumSensor(
 
     @property
     def available(self) -> bool:
-        """Return True if we have any data (live or persisted).
-
-        Respects grace periods during reconnection attempts.
-        """
-        # Grace periods take priority - show unavailable while reconnecting
+        """Return True if we have any data (live or persisted)."""
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
         if self.coordinator.last_update_success:
             return True
@@ -825,14 +814,9 @@ class HondaGeneratorPersistentMeasurementSensor(
 
     @property
     def available(self) -> bool:
-        """Return True if we have any data (live or persisted).
-
-        Respects grace periods during reconnection attempts.
-        """
-        # Grace periods take priority - show unavailable while reconnecting
+        """Return True if we have any data (live or persisted)."""
+        # Startup grace period - show unavailable while waiting for first connection
         if self.coordinator.in_startup_grace_period:
-            return False
-        if self.coordinator.in_reconnect_grace_period:
             return False
         if self.coordinator.last_update_success:
             return True
@@ -861,53 +845,4 @@ class HondaGeneratorPersistentMeasurementSensor(
                 attrs["last_update"] = self.coordinator.data.last_update.isoformat()
             attrs["data_stale"] = True
 
-        return attrs
-
-
-class ServiceEstimatedDateSensor(HondaGeneratorEntity, SensorEntity):
-    """Sensor that estimates when a service will become due."""
-
-    def __init__(
-        self,
-        coordinator: HondaGeneratorCoordinator,
-        service_type: ServiceType,
-    ) -> None:
-        """Initialize the service estimated date sensor."""
-        super().__init__(coordinator)
-        self._service_type = service_type
-        service_def = get_service_definition(service_type)
-        self._attr_unique_id = (
-            f"{DOMAIN}-{coordinator.data.controller_name}"
-            f"_service_{service_type.value}_estimated_date"
-        )
-        self._attr_name = f"{service_def.name} Estimated Date"
-        self._attr_device_class = SensorDeviceClass.TIMESTAMP
-        self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self._attr_icon = service_def.icon
-        self._attr_entity_registry_enabled_default = service_def.enabled_by_default
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Update sensor with latest data from coordinator."""
-        self.async_write_ha_state()
-
-    @property
-    def native_value(self) -> datetime | None:
-        """Return the estimated service date."""
-        return self.coordinator.get_estimated_service_date(self._service_type)
-
-    @property
-    def available(self) -> bool:
-        """Return True if an estimate can be computed."""
-        return self.native_value is not None
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return extra state attributes."""
-        attrs: dict[str, Any] = {
-            "service_type": self._service_type.value,
-        }
-        rate = self.coordinator.get_hours_per_day()
-        if rate is not None:
-            attrs["usage_rate_hours_per_day"] = round(rate, 2)
         return attrs

@@ -39,13 +39,11 @@
           "scan_interval": "Scan Interval (seconds)",
           "reconnect_after_failures": "Reconnect after consecutive failures",
           "startup_grace_period": "Startup grace period (seconds)",
-          "reconnect_grace_period": "Reconnect grace period (seconds)",
           "stop_attempts": "Stop command attempts"
         },
         "data_description": {
           "reconnect_after_failures": "Force a Bluetooth reconnection after this many consecutive failed updates (0 to disable, 1-10 to enable)",
           "startup_grace_period": "Time to wait for generator discovery after restart before showing offline defaults (0 to disable)",
-          "reconnect_grace_period": "Time to wait for reconnection after connection loss before showing offline defaults (0 to disable)",
           "stop_attempts": "Number of times to send the stop command (1-30)"
         },
         "description": "Configure Honda Generator settings.",

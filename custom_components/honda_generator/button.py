@@ -83,9 +83,9 @@ class EngineStopButton(HondaGeneratorEntity, ButtonEntity):
             _LOGGER.error("Cannot stop engine: not connected")
             return
         _LOGGER.info("Stopping generator engine")
-        # Flag intentional disconnect to skip grace period when generator shuts down
-        # This must be set BEFORE the command as the BT controller may disconnect immediately
-        self.coordinator.set_intentional_disconnect()
+        # Stop diagnostic writes before sending stop command, as the BT controller
+        # may disconnect immediately after the engine stops
+        self.coordinator.api.stop_diagnostics()
         success = await self.coordinator.api.engine_stop(
             max_attempts=self.coordinator.stop_attempts
         )

@@ -50,12 +50,10 @@ from .const import (
     CONF_ARCHITECTURE,
     CONF_MODEL,
     CONF_RECONNECT_AFTER_FAILURES,
-    CONF_RECONNECT_GRACE_PERIOD,
     CONF_SERIAL,
     CONF_STARTUP_GRACE_PERIOD,
     CONF_STOP_ATTEMPTS,
     DEFAULT_RECONNECT_AFTER_FAILURES,
-    DEFAULT_RECONNECT_GRACE_PERIOD,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_STARTUP_GRACE_PERIOD,
     DEFAULT_STOP_ATTEMPTS,
@@ -124,23 +122,6 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 self._startup_grace_period,
             )
 
-        # Reconnect grace period - keep entities unavailable after disconnect
-        self._disconnect_time: float | None = None
-        self._reconnect_grace_period: int = int(
-            config_entry.options.get(
-                CONF_RECONNECT_GRACE_PERIOD, DEFAULT_RECONNECT_GRACE_PERIOD
-            )
-        )
-        self._reconnect_grace_logged_expired: bool = False
-        if self._reconnect_grace_period > 0:
-            _LOGGER.debug(
-                "Reconnect grace period: %ds (entities unavailable after disconnect)",
-                self._reconnect_grace_period,
-            )
-
-        # Flag to skip grace period for intentional disconnects (e.g., stop engine)
-        self._intentional_disconnect: bool = False
-
         # Number of stop command attempts (Poll architecture only)
         self._stop_attempts: int = int(
             config_entry.options.get(CONF_STOP_ATTEMPTS, DEFAULT_STOP_ATTEMPTS)
@@ -157,6 +138,9 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
 
         # Runtime history for usage rate estimation: [{"hours": int, "ts": str}]
         self._runtime_history: list[dict] = []
+
+        # Snapshotted estimated dates for overdue services: {service_type: str (ISO)}
+        self._service_due_dates: dict[str, str] = {}
 
         # Detect architecture from config entry
         self._architecture = Architecture(
@@ -215,33 +199,6 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         elapsed = time.monotonic() - self._startup_time
         return elapsed < self._startup_grace_period
 
-    def set_intentional_disconnect(self) -> None:
-        """Mark that the next disconnect is intentional (e.g., stop engine command).
-
-        This prevents the reconnect grace period from activating when the
-        generator is intentionally stopped, allowing entities to immediately
-        show offline defaults rather than "unavailable".
-        """
-        _LOGGER.debug("Intentional disconnect flagged (grace period will be skipped)")
-        self._intentional_disconnect = True
-        if self.api is not None:
-            self.api.stop_diagnostics()
-
-    @property
-    def in_reconnect_grace_period(self) -> bool:
-        """Return True if we're in the reconnect grace period after a disconnect.
-
-        During this period, entities should report as unavailable rather than
-        showing default offline values. This preserves dashboard state while
-        attempting to reconnect after a connection loss.
-        """
-        if self._disconnect_time is None:
-            return False
-        if self._reconnect_grace_period <= 0:
-            return False
-        elapsed = time.monotonic() - self._disconnect_time
-        return elapsed < self._reconnect_grace_period
-
     async def async_load_stored_data(self) -> None:
         """Load persisted data from storage."""
         data = await self._store.async_load()
@@ -271,12 +228,15 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 _LOGGER.debug(
                     "Loaded %d runtime history entries", len(self._runtime_history)
                 )
+            # Load snapshotted service due dates
+            self._service_due_dates = data.get("service_due_dates", {})
 
     async def _async_save_storage(self) -> None:
         """Save all persistent data to storage."""
         data = {
             "service_records": self._service_records,
             "runtime_history": self._runtime_history,
+            "service_due_dates": self._service_due_dates,
         }
         if self._stored_runtime_hours is not None:
             data["runtime_hours"] = self._stored_runtime_hours
@@ -365,6 +325,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             "hours": current_hours,
             "date": now.isoformat(),
         }
+        self._service_due_dates.pop(service_type.value, None)
         await self._async_save_storage()
         _LOGGER.info(
             "Marked %s complete at %d hours on %s",
@@ -501,8 +462,10 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
 
             if median_recent > 0:
                 threshold = median_recent * 0.15
-                # Scan backwards from the end to find the last storage gap
-                for j in range(len(intervals) - 1, -1, -1):
+                # Scan backwards to find the last storage gap, skipping the
+                # final interval — flagging it would leave only 1 data point,
+                # and short idle periods (overnight) aren't true storage gaps
+                for j in range(len(intervals) - 2, -1, -1):
                     if intervals[j][0] < threshold:
                         # Gap found — use data starting after this interval
                         gap_index = intervals[j][1]
@@ -556,13 +519,13 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         # Hours-based estimate
         if interval.hours is not None:
             hours_remaining = (last_service_hours + interval.hours) - current_hours
-            if hours_remaining <= 0:
+            rate = self.get_hours_per_day()
+            if rate is not None and rate > 0:
+                days_offset = hours_remaining / rate
+                estimates.append(now + timedelta(days=days_offset))
+            elif hours_remaining <= 0:
+                # Overdue but no rate data to back-calculate when it became due
                 estimates.append(now)
-            else:
-                rate = self.get_hours_per_day()
-                if rate is not None and rate > 0:
-                    days_until = hours_remaining / rate
-                    estimates.append(now + timedelta(days=days_until))
 
         # Calendar-based estimate
         if interval.days is not None:
@@ -582,7 +545,30 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         if not estimates:
             return None
 
-        return min(estimates)
+        # Round down to the nearest hour to avoid churning state on every
+        # poll cycle when the underlying estimate hasn't meaningfully changed
+        result = min(estimates)
+        result = result.replace(minute=0, second=0, microsecond=0)
+
+        # Snapshot persistence: once a service becomes due, lock the estimated
+        # date so it doesn't drift as the usage rate window shifts.
+        if self.is_service_due(service_type):
+            snapshot = self._service_due_dates.get(service_type.value)
+            if snapshot is not None:
+                try:
+                    return datetime.fromisoformat(snapshot)
+                except (ValueError, TypeError):
+                    pass
+            # First time crossing the threshold — snapshot the computed estimate
+            self._service_due_dates[service_type.value] = result.isoformat()
+            self.hass.async_create_task(self._async_save_storage())
+        else:
+            # Service not due — clear any stale snapshot
+            if service_type.value in self._service_due_dates:
+                self._service_due_dates.pop(service_type.value)
+                self.hass.async_create_task(self._async_save_storage())
+
+        return result
 
     def _validate_runtime_hours(self, value: int, now: datetime) -> bool:
         """Validate that runtime hours increase is plausible.
@@ -937,25 +923,28 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                     elapsed,
                 )
                 self._has_connected_once = True
-            # Clear disconnect time on successful reconnection
-            if self._disconnect_time is not None:
-                elapsed = time.monotonic() - self._disconnect_time
-                _LOGGER.debug(
-                    "Reconnected after %.1fs, ending reconnect grace period",
-                    elapsed,
-                )
-                self._disconnect_time = None
-                self._reconnect_grace_logged_expired = False
-            # Clear intentional disconnect flag if it was set but disconnect didn't happen
-            if self._intentional_disconnect:
-                _LOGGER.debug("Clearing unused intentional disconnect flag")
-                self._intentional_disconnect = False
             return self._last_successful_data
 
         except APIAuthError as err:
             _LOGGER.error("Authentication error: %s", err)
             raise UpdateFailed(err) from err
-        except (APIConnectionError, APIReadError, UpdateFailed) as err:
+        except APIReadError as err:
+            self._consecutive_failures += 1
+            if (
+                self.api is not None
+                and self.api.connected
+                and self._last_successful_data is not None
+            ):
+                _LOGGER.debug(
+                    "Transient read error for %s (%d consecutive), returning stale data: %s",
+                    self.config_entry.unique_id,
+                    self._consecutive_failures,
+                    err,
+                )
+                return self._last_successful_data
+            # Connection actually lost — fall through to UpdateFailed
+            raise UpdateFailed(err) from err
+        except (APIConnectionError, UpdateFailed) as err:
             self._consecutive_failures += 1
             if self.api is None:
                 _LOGGER.debug(
@@ -970,24 +959,6 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                     self._consecutive_failures,
                     self._reconnect_after_failures,
                     err,
-                )
-
-            # Start reconnect grace period on first failure after being connected
-            # Skip grace period if this is an intentional disconnect (e.g., stop engine)
-            if self._intentional_disconnect:
-                _LOGGER.debug("Skipping grace period due to intentional disconnect")
-                self._intentional_disconnect = False
-                # Also clear any grace period that may have started during disconnect
-                self._disconnect_time = None
-            elif (
-                self._has_connected_once
-                and self._disconnect_time is None
-                and self._reconnect_grace_period > 0
-            ):
-                self._disconnect_time = time.monotonic()
-                _LOGGER.debug(
-                    "Connection lost, starting reconnect grace period (%ds)",
-                    self._reconnect_grace_period,
                 )
 
             # Force reconnect after threshold (0 disables this feature)
@@ -1018,19 +989,6 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 )
                 # Notify entities to re-evaluate availability without marking
                 # update as successful (which would make entities think we have data)
-                self.async_update_listeners()
-
-            # Check if reconnect grace period just expired
-            if (
-                self._disconnect_time is not None
-                and not self._reconnect_grace_logged_expired
-                and not self.in_reconnect_grace_period
-            ):
-                self._reconnect_grace_logged_expired = True
-                _LOGGER.debug(
-                    "Reconnect grace period expired after %ds, notifying entities",
-                    self._reconnect_grace_period,
-                )
                 self.async_update_listeners()
 
             raise UpdateFailed(err) from err
