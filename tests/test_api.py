@@ -578,3 +578,191 @@ class TestPushAPICAN:
         assert mock_push_api._state["fuel_ml"] == 2000
         assert mock_push_api._state["fuel_remaining_min"] == 180
         assert mock_push_api._state["fuel_level_discrete"] == 10
+
+    def test_parse_can_message_output_setting(self, mock_push_api: PushAPI) -> None:
+        """Test parsing OUTPUT_SETTING CAN message."""
+        # OUTPUT_SETTING (0x5D2): setting=4 -> 120V
+        payload = bytes([0x04, 0x00])
+        mock_push_api._parse_can_message(0x5D2, payload)
+
+        assert mock_push_api._state["voltage_setting"] == 120
+
+    def test_parse_can_message_ecu_error(self, mock_push_api: PushAPI) -> None:
+        """Test parsing ECU_ERROR CAN message."""
+        # ECU_ERROR (0x3A2): byte 0 = 0x08 -> bit 3 set
+        payload = bytes([0x08, 0x00])
+        mock_push_api._parse_can_message(0x3A2, payload)
+
+        assert 3 in mock_push_api._state["ecu_errors"]
+
+    def test_parse_can_message_inv_error(self, mock_push_api: PushAPI) -> None:
+        """Test parsing INV_ERROR CAN message."""
+        # INV_ERROR (0x3B2): byte 1 = 0x01 -> bit 8 set
+        payload = bytes([0x00, 0x01])
+        mock_push_api._parse_can_message(0x3B2, payload)
+
+        assert 8 in mock_push_api._state["inv_errors"]
+
+    def test_parse_can_message_bt_error(self, mock_push_api: PushAPI) -> None:
+        """Test parsing BT_ERROR CAN message."""
+        # BT_ERROR (0x3A5): byte 0 = 0x03 -> bits 0 and 1 set (need >= 2 bytes)
+        payload = bytes([0x03, 0x00])
+        mock_push_api._parse_can_message(0x3A5, payload)
+
+        assert 0 in mock_push_api._state["bt_errors"]
+        assert 1 in mock_push_api._state["bt_errors"]
+
+    def test_parse_can_message_short_payload_ignored(
+        self, mock_push_api: PushAPI
+    ) -> None:
+        """Test that short payload is ignored."""
+        # Only 1 byte -> should be ignored (need at least 2)
+        mock_push_api._parse_can_message(0x332, bytes([0x01]))
+
+        # Should remain at defaults
+        assert mock_push_api._state["power_watts"] == 0
+
+    def test_parse_can_message_unknown_id(self, mock_push_api: PushAPI) -> None:
+        """Test that unknown CAN ID is silently ignored."""
+        mock_push_api._parse_can_message(0xFFF, bytes([0x01, 0x02, 0x03]))
+
+        # State should remain at defaults
+        assert mock_push_api._state["power_watts"] == 0
+
+
+class TestCreateCommand:
+    """Test PollAPI._create_command."""
+
+    def test_command_length(self, mock_api: PollAPI) -> None:
+        """Test command is always 10 bytes."""
+        cmd = mock_api._create_command("B", "00")
+        assert len(cmd) == 10
+
+    def test_command_structure_b00(self, mock_api: PollAPI) -> None:
+        """Test command byte structure for B'00."""
+        cmd = mock_api._create_command("B", "00")
+        assert cmd[0] == 0x01  # Start byte
+        assert cmd[1] == 0x42  # 'B' in ASCII... actually 0x42 is fixed
+        assert cmd[2] == ord("B")  # Register
+        assert cmd[3] == ord("0")  # Position high
+        assert cmd[4] == ord("0")  # Position low
+        assert cmd[5] == 0x30  # '0'
+        assert cmd[6] == 0x30  # '0'
+        assert cmd[9] == 0x04  # End byte
+
+    def test_command_structure_c10(self, mock_api: PollAPI) -> None:
+        """Test command byte structure for C'10."""
+        cmd = mock_api._create_command("C", "10")
+        assert cmd[2] == ord("C")
+        assert cmd[3] == ord("1")
+        assert cmd[4] == ord("0")
+
+    def test_checksum_valid(self, mock_api: PollAPI) -> None:
+        """Test that created command has valid checksum."""
+        cmd = mock_api._create_command("B", "00")
+        assert mock_api._verify_checksum(cmd) is True
+
+    def test_different_commands_different_checksums(self, mock_api: PollAPI) -> None:
+        """Test that different commands have different checksums."""
+        cmd1 = mock_api._create_command("B", "00")
+        cmd2 = mock_api._create_command("B", "01")
+        # Different positions should produce different checksums
+        assert cmd1[7:9] != cmd2[7:9]
+
+
+class TestVerifyChecksum:
+    """Test PollAPI._verify_checksum."""
+
+    def test_valid_checksum(self, mock_api: PollAPI) -> None:
+        """Test valid checksum passes."""
+        cmd = mock_api._create_command("B", "00")
+        assert mock_api._verify_checksum(cmd) is True
+
+    def test_invalid_checksum(self, mock_api: PollAPI) -> None:
+        """Test invalid checksum fails."""
+        cmd = mock_api._create_command("B", "00")
+        cmd[7] = 0x00  # Corrupt checksum
+        cmd[8] = 0x00
+        assert mock_api._verify_checksum(cmd) is False
+
+    def test_round_trip(self, mock_api: PollAPI) -> None:
+        """Test create then verify round-trip."""
+        for reg, pos in [("B", "00"), ("B", "01"), ("C", "10"), ("D", "10")]:
+            cmd = mock_api._create_command(reg, pos)
+            assert mock_api._verify_checksum(cmd) is True
+
+
+class TestEngineControl:
+    """Test engine control methods when not connected."""
+
+    @pytest.mark.asyncio
+    async def test_engine_stop_not_connected(self, mock_api: PollAPI) -> None:
+        """Test engine_stop returns False when not connected."""
+        mock_api._client = None
+        result = await mock_api.engine_stop()
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_engine_start_not_connected(self, mock_api: PollAPI) -> None:
+        """Test engine_start returns False when not connected."""
+        mock_api._client = None
+        result = await mock_api.engine_start()
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_engine_start_unsupported_model(self, mock_api: PollAPI) -> None:
+        """Test engine_start returns False for unsupported model."""
+        mock_client = AsyncMock()
+        mock_client.is_connected = True
+        mock_api._client = mock_client
+        mock_api._model = "EU2200i"  # No remote start
+
+        result = await mock_api.engine_start()
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_set_eco_mode_not_connected(self, mock_api: PollAPI) -> None:
+        """Test set_eco_mode returns False when not connected."""
+        mock_api._client = None
+        result = await mock_api.set_eco_mode(True)
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_set_eco_mode_unsupported_model(self, mock_api: PollAPI) -> None:
+        """Test set_eco_mode returns False for unsupported model."""
+        mock_client = AsyncMock()
+        mock_client.is_connected = True
+        mock_api._client = mock_client
+        mock_api._model = "EU2200i"  # No ECO control
+
+        result = await mock_api.set_eco_mode(True)
+        assert result is False
+
+
+class TestParseErrorBytes:
+    """Test PushAPI._parse_error_bytes."""
+
+    def test_empty_payload(self) -> None:
+        """Test empty payload returns empty list."""
+        assert PushAPI._parse_error_bytes(b"") == []
+
+    def test_single_bit_set(self) -> None:
+        """Test single bit in single byte."""
+        assert PushAPI._parse_error_bytes(bytes([0x01])) == [0]
+        assert PushAPI._parse_error_bytes(bytes([0x02])) == [1]
+        assert PushAPI._parse_error_bytes(bytes([0x80])) == [7]
+
+    def test_multiple_bits_single_byte(self) -> None:
+        """Test multiple bits in single byte."""
+        result = PushAPI._parse_error_bytes(bytes([0x05]))  # bits 0 and 2
+        assert result == [0, 2]
+
+    def test_multi_byte(self) -> None:
+        """Test bits across multiple bytes."""
+        result = PushAPI._parse_error_bytes(bytes([0x01, 0x01]))  # bit 0 and bit 8
+        assert result == [0, 8]
+
+    def test_all_bits_set(self) -> None:
+        """Test all bits set in a byte."""
+        result = PushAPI._parse_error_bytes(bytes([0xFF]))
+        assert result == [0, 1, 2, 3, 4, 5, 6, 7]

@@ -20,6 +20,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from homeassistant.components.button import ButtonEntity
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -143,6 +144,7 @@ class ServiceCompleteButton(HondaGeneratorEntity, ButtonEntity):
         self._attr_unique_id = f"{DOMAIN}-{coordinator.data.controller_name}_service_complete_{service_type.value}"
         self._attr_name = f"Mark {service_def.name} Complete"
         self._attr_icon = "mdi:check-circle"
+        self._attr_entity_category = EntityCategory.CONFIG
         # Only oil change services enabled by default
         self._attr_entity_registry_enabled_default = service_def.enabled_by_default
 

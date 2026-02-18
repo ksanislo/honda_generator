@@ -60,8 +60,8 @@ set_service_record:
               value: "fuel_system_check"
     hours:
       name: Runtime Hours
-      description: The runtime hours when the service was performed.
-      required: true
+      description: The runtime hours when the service was performed. Defaults to current runtime hours if not specified.
+      required: false
       selector:
         number:
           min: 0
@@ -70,7 +70,7 @@ set_service_record:
           unit_of_measurement: hours
     date:
       name: Service Date
-      description: The date when the service was performed.
-      required: true
+      description: The date when the service was performed. Defaults to today if not specified.
+      required: false
       selector:
         date:

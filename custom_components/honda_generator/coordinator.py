@@ -142,6 +142,9 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
         # Snapshotted estimated dates for overdue services: {service_type: str (ISO)}
         self._service_due_dates: dict[str, str] = {}
 
+        # Track whether missing service records have been initialized this session
+        self._services_initialized: bool = False
+
         # Detect architecture from config entry
         self._architecture = Architecture(
             config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
@@ -269,8 +272,10 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
             await self._async_save_storage()
             _LOGGER.debug("Saved runtime hours: %d", value)
 
-        # Initialize service records on first runtime hours reading
-        if first_time:
+        # Initialize service records for any applicable services missing records.
+        # Runs on first connection, and also catches services added in upgrades.
+        if not self._services_initialized:
+            self._services_initialized = True
             await self._async_initialize_service_records(value, now)
 
     async def _async_initialize_service_records(

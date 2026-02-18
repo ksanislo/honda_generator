@@ -7,9 +7,15 @@ import pytest
 from custom_components.honda_generator.codes import (
     EU2200I_FAULT_CODES,
     EU2200I_WARNING_CODES,
+    EU3200I_FAULT_CODES,
+    EU3200I_WARNING_CODES,
+    EU7000IS_FAULT_CODES,
+    EU7000IS_WARNING_CODES,
     MODEL_FAULT_CODES,
     MODEL_WARNING_CODES,
     AlertCode,
+    get_code_description,
+    get_code_translation_key,
     get_fault_codes,
     get_warning_codes,
 )
@@ -112,3 +118,79 @@ class TestGetCodes:
         """Test getting fault codes for empty model."""
         codes = get_fault_codes("")
         assert codes == []
+
+
+class TestEU3200ICodes:
+    """Test EU3200i specific codes."""
+
+    def test_warning_codes_count(self) -> None:
+        """Test EU3200i has 8 warning codes."""
+        assert len(EU3200I_WARNING_CODES) == 8
+
+    def test_fault_codes_count(self) -> None:
+        """Test EU3200i has 25 fault codes."""
+        assert len(EU3200I_FAULT_CODES) == 25
+
+    def test_warning_bits_unique(self) -> None:
+        """Test EU3200i warning code bits are unique."""
+        bits = [c.bit for c in EU3200I_WARNING_CODES]
+        assert len(bits) == len(set(bits))
+
+    def test_fault_codes_all_have_codes(self) -> None:
+        """Test all EU3200i fault codes have code strings."""
+        for code in EU3200I_FAULT_CODES:
+            assert code.code  # Not empty
+
+
+class TestEU7000isCodes:
+    """Test EU7000is specific codes."""
+
+    def test_warning_codes_count(self) -> None:
+        """Test EU7000is has 10 warning codes."""
+        assert len(EU7000IS_WARNING_CODES) == 10
+
+    def test_fault_codes_count(self) -> None:
+        """Test EU7000is has 37 fault codes."""
+        assert len(EU7000IS_FAULT_CODES) == 37
+
+    def test_warning_bits_unique(self) -> None:
+        """Test EU7000is warning code bits are unique."""
+        bits = [c.bit for c in EU7000IS_WARNING_CODES]
+        assert len(bits) == len(set(bits))
+
+    def test_fault_bits_unique(self) -> None:
+        """Test EU7000is fault code bits are unique."""
+        bits = [c.bit for c in EU7000IS_FAULT_CODES]
+        assert len(bits) == len(set(bits))
+
+
+class TestCodeDescriptions:
+    """Test code description and translation functions."""
+
+    def test_get_code_description_known(self) -> None:
+        """Test getting description for known code."""
+        assert get_code_description("C-01") == "Check engine"
+        assert get_code_description("E-03") == "Low oil"
+
+    def test_get_code_description_unknown(self) -> None:
+        """Test getting description for unknown code returns None."""
+        assert get_code_description("X-99") is None
+
+    def test_get_code_translation_key_known(self) -> None:
+        """Test getting translation key for known code."""
+        assert get_code_translation_key("C-01") == "c_01"
+        assert get_code_translation_key("E-03") == "e_03"
+
+    def test_get_code_translation_key_unknown(self) -> None:
+        """Test getting translation key for unknown code returns None."""
+        assert get_code_translation_key("X-99") is None
+
+    def test_alert_code_description_property(self) -> None:
+        """Test AlertCode.description property."""
+        code = AlertCode(bit=0, code="C-01")
+        assert code.description == "Check engine"
+
+    def test_alert_code_description_unknown(self) -> None:
+        """Test AlertCode.description for unknown code."""
+        code = AlertCode(bit=0, code="X-99")
+        assert code.description is None

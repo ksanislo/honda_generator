@@ -122,8 +122,21 @@ async def _async_set_service_record(
     except ValueError:
         raise HomeAssistantError(f"Invalid service type: {service_type_str}")
 
-    # Parse date - can be datetime.date or string
-    if isinstance(date_value, str):
+    coordinator = config_entry.runtime_data.coordinator
+
+    # Default hours to current runtime hours if not provided
+    if hours is None:
+        hours = coordinator.stored_runtime_hours
+        if hours is None:
+            raise HomeAssistantError(
+                "Runtime hours not yet available. Specify hours manually or "
+                "wait for the generator to connect."
+            )
+
+    # Default date to today if not provided
+    if date_value is None:
+        service_date = datetime.now()
+    elif isinstance(date_value, str):
         try:
             service_date = datetime.fromisoformat(date_value)
         except ValueError:
@@ -131,8 +144,6 @@ async def _async_set_service_record(
     else:
         # datetime.date from selector
         service_date = datetime.combine(date_value, datetime.min.time())
-
-    coordinator = config_entry.runtime_data.coordinator
 
     # Directly set the service record
     coordinator._service_records[service_type.value] = {

@@ -167,9 +167,18 @@ The service due binary sensor includes attributes for use in automations and das
 | `service_type` | Service type identifier |
 | `dealer_service` | Present when the service requires a dealer |
 
-### Importing Service History
+### Recording and Importing Service History
 
-To import existing service records (e.g., from the Honda app), use the `honda_generator.set_service_record` service:
+To record a service you just performed, use the `honda_generator.set_service_record` service with just the device and service type — hours and date default to the current runtime hours and today:
+
+```yaml
+service: honda_generator.set_service_record
+data:
+  device_id: <your_device_id>
+  service_type: oil_change
+```
+
+To import historical service records (e.g., from the Honda app), specify `hours` and `date` explicitly:
 
 ```yaml
 service: honda_generator.set_service_record

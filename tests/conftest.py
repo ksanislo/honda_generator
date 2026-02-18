@@ -22,6 +22,10 @@ from custom_components.honda_generator.api import (
     PushAPI,
 )
 from custom_components.honda_generator.const import DOMAIN
+from custom_components.honda_generator.coordinator import (
+    HondaGeneratorCoordinator,
+    HondaGeneratorData,
+)
 
 # Home Assistant constants (defined locally to avoid HA dependency in tests)
 CONF_ADDRESS = "address"
@@ -246,3 +250,48 @@ def mock_push_config_entry() -> MagicMock:
     entry.options = {}
     entry.version = 3
     return entry
+
+
+@pytest.fixture
+def entity_coordinator(mock_config_entry: MagicMock) -> HondaGeneratorCoordinator:
+    """Create a coordinator suitable for entity tests.
+
+    Provides a coordinator with populated data, a mock API, and
+    properties configured to simulate a successful first connection.
+    """
+    hass = MagicMock()
+    coordinator = HondaGeneratorCoordinator(hass, mock_config_entry)
+
+    # Populate data with mock devices
+    devices = create_mock_devices(controller_name=TEST_ADDRESS)
+    coordinator.data = HondaGeneratorData(
+        controller_name=TEST_ADDRESS,
+        serial_number=TEST_SERIAL,
+        model=TEST_MODEL,
+        firmware_version=TEST_FIRMWARE,
+        devices=devices,
+    )
+
+    # Simulate successful first connection
+    coordinator.last_update_success = True
+    coordinator._has_connected_once = True
+
+    # Mock API
+    mock_api = MagicMock()
+    mock_api.connected = True
+    mock_api.get_warning_bit = MagicMock(return_value=False)
+    mock_api.get_fault_bit = MagicMock(return_value=False)
+    mock_api.engine_stop = AsyncMock(return_value=True)
+    mock_api.engine_start = AsyncMock(return_value=True)
+    mock_api.set_eco_mode = AsyncMock(return_value=True)
+    mock_api.stop_diagnostics = MagicMock()
+    mock_api.model = TEST_MODEL
+    coordinator.api = mock_api
+
+    # Mock async_request_refresh
+    coordinator.async_request_refresh = AsyncMock()
+
+    # Mock async_write_ha_state on the coordinator (entities call this)
+    coordinator.async_write_ha_state = MagicMock()
+
+    return coordinator
