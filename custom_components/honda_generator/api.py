@@ -1560,6 +1560,25 @@ class PushAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
+            # === Pair ===
+            _LOGGER.debug(
+                "Push API: Attempting BLE pairing with %s",
+                self._ble_device.address,
+            )
+            try:
+                await self._client.pair()
+                _LOGGER.debug(
+                    "Push API: Pairing completed with %s",
+                    self._ble_device.address,
+                )
+            except Exception as exc:
+                _LOGGER.debug(
+                    "Push API: Pairing skipped (may already be paired): %s", exc
+                )
+
+            if self._shutting_down:
+                return False
+
             # === Subscribe to notifications ===
             _LOGGER.debug("Push API: Subscribing to data notifications")
             try:
