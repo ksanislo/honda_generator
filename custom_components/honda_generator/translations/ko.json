@@ -6,7 +6,7 @@
       "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
-      "cannot_connect": "연결 실패",
+      "cannot_connect": "연결에 실패했습니다. Honda 발전기는 엔진 시동 후 처음 ~30초 동안 매우 낮은 전력의 Bluetooth를 사용합니다. Bluetooth 어댑터가 발전기에서 ~1미터(3피트) 이내에 있어야 하며, 이 30초 이내에 설정을 시작해야 합니다. 페어링이 완료되면 일반적인 Bluetooth 범위에서 작동합니다. 자세한 내용은 문서의 문제 해결 섹션을 참조하세요.",
       "invalid_auth": "인증이 유효하지 않습니다",
       "unknown": "예기치 않은 오류"
     },

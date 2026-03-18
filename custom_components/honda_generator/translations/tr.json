@@ -6,7 +6,7 @@
       "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
-      "cannot_connect": "Bağlantı başarısız",
+      "cannot_connect": "Bağlantı başarısız oldu. Honda jeneratörleri, motor çalıştırıldıktan sonraki ilk ~30 saniye boyunca çok düşük güçlü Bluetooth kullanır. Bluetooth adaptörünüz jeneratörün ~1 metre (3 fit) yakınında olmalı ve kuruluma bu 30 saniyelik süre içinde başlamalısınız. Eşleştirme tamamlandıktan sonra normal Bluetooth menzili çalışacaktır. Daha fazla ayrıntı için belgelerdeki sorun giderme bölümüne bakın.",
       "invalid_auth": "Geçersiz kimlik doğrulama",
       "unknown": "Beklenmeyen hata"
     },

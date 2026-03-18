@@ -6,7 +6,7 @@
       "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
-      "cannot_connect": "連線失敗",
+      "cannot_connect": "連線失敗。Honda 發電機在引擎啟動後的前 ~30 秒內使用非常低功率的 Bluetooth。您的 Bluetooth 適配器必須在發電機 ~1 公尺（3 英尺）範圍內，且您必須在該 30 秒視窗內開始設定。配對完成後，正常的 Bluetooth 範圍即可運作。詳情請參閱文件中的疑難排解章節。",
       "invalid_auth": "身份驗證無效",
       "unknown": "意外錯誤"
     },

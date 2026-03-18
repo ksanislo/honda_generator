@@ -6,7 +6,7 @@
       "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
-      "cannot_connect": "Yhteys epäonnistui",
+      "cannot_connect": "Yhteyden muodostaminen epäonnistui. Honda-generaattorit käyttävät erittäin matalatehoista Bluetooth-yhteyttä ensimmäisten ~30 sekunnin ajan moottorin käynnistyksen jälkeen. Bluetooth-sovittimesi on oltava ~1 metrin (3 jalkaa) etäisyydellä generaattorista, ja sinun on aloitettava asennus tuon 30 sekunnin aikaikkunan sisällä. Pariliitoksen jälkeen normaali Bluetooth-kantama toimii. Katso lisätietoja dokumentaation vianmääritysosiosta.",
       "invalid_auth": "Virheellinen todennus",
       "unknown": "Odottamaton virhe"
     },

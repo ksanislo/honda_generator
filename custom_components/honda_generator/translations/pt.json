@@ -6,7 +6,7 @@
       "no_devices_found": "No Honda generators found. Make sure your generator is powered on and within Bluetooth range."
     },
     "error": {
-      "cannot_connect": "Falha na conexão",
+      "cannot_connect": "Falha na ligação. Os geradores Honda utilizam Bluetooth de muito baixa potência durante os primeiros ~30 segundos após o arranque do motor. O seu adaptador Bluetooth deve estar a ~1 metro (3 pés) do gerador, e deve iniciar a configuração dentro dessa janela de 30 segundos. Após o emparelhamento, o alcance normal do Bluetooth funcionará. Consulte a secção de resolução de problemas na documentação para mais detalhes.",
       "invalid_auth": "Autenticação inválida",
       "unknown": "Erro inesperado"
     },
