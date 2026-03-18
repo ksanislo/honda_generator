@@ -1579,16 +1579,14 @@ class PushAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # === Subscribe to notifications ===
-            _LOGGER.debug("Push API: Subscribing to data notifications")
+            # === Subscribe to pre-auth indications ===
+            # Data Response and Error/Warning are subscribed before auth,
+            # matching the Honda app's Z45A connection sequence.
+            _LOGGER.debug("Push API: Subscribing to pre-auth notifications")
             try:
                 await self._client.start_notify(
                     GENERATOR_DATA_RESPONSE_CHAR,
                     self._handle_data_response,
-                )
-                await self._client.start_notify(
-                    GENERATOR_CAN_DATA_CHAR,
-                    self._handle_can_data,
                 )
                 await self._client.start_notify(
                     GENERATOR_ERROR_WARNING_CHAR,
@@ -1621,10 +1619,19 @@ class PushAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # === Start data stream ===
+            # === Subscribe to CAN data drip and start stream ===
+            # CAN Data Drip requires auth, so subscribe after authentication,
+            # matching the Honda app's Z45A sequence.
             _LOGGER.debug("Push API: Starting data stream")
             try:
+                await self._client.start_notify(
+                    GENERATOR_CAN_DATA_CHAR,
+                    self._handle_can_data,
+                )
                 await self._start_data_stream()
+            except BleakError as exc:
+                _LOGGER.error("Push API: Failed to start data stream: %s", exc)
+                raise APIConnectionError(f"Data stream start failed: {exc}") from exc
             except Exception as exc:
                 _LOGGER.error("Push API: Failed to start data stream: %s", exc)
                 raise APIConnectionError(f"Data stream start failed: {exc}") from exc
