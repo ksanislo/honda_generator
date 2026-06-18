@@ -51,11 +51,13 @@ Unofficial Home Assistant integration for remote monitoring and control of Honda
 
 ## Configuration
 
+> **Prerequisite:** Complete your generator's initial Bluetooth setup in the official Honda app at least once before adding it here. A factory-fresh generator ships with Bluetooth access inactive; that first-time setup activates it. Until then this integration cannot connect, even with the default PIN. This integration does not perform first-time setup itself.
+
 1. Ensure Bluetooth is enabled on your Home Assistant host
 2. Power on your Honda generator within Bluetooth range
 3. Go to **Settings** → **Devices & Services**
 4. The generator should be auto-discovered, or click **Add Integration** and search for "Honda Generator"
-5. Enter your generator's Bluetooth password (default: `00000000`)
+5. Enter your generator's Bluetooth PIN (the default is `0000`; enter your own if you changed it). The EU2200i has no PIN and connects automatically.
 
 ### Options
 
@@ -223,8 +225,9 @@ Find your device ID in **Settings** → **Devices & Services** → **Honda Gener
 
 ### Authentication Failed
 
-- Verify you're using the correct Bluetooth password
-- The default password is `00000000` (eight zeros)
+- Make sure you have completed initial setup in the official Honda app at least once — a generator that has never been set up there will reject the connection (see the prerequisite under [Configuration](#configuration))
+- Verify you're using the correct Bluetooth PIN (the default is `0000`)
+- After ten wrong attempts the generator locks out commanding until it is power-cycled (turn it off for ~2 minutes, then on)
 - Try removing and re-adding the integration
 
 ### Download Diagnostics

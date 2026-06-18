@@ -10,9 +10,15 @@ generator's persistent configuration.
 ## Background: what "setup" means
 
 A factory-fresh Bluetooth module is generic and not yet bound to a specific
-generator. Two pieces of persistent state distinguish a provisioned unit from a
-fresh one:
+generator. Provisioning involves at least three things:
 
+- **Activation.** A never-set-up generator appears to ship with Bluetooth access
+  **inactive** and rejects connections until a first-time setup activates it.
+  Evidence: a user whose generator had no PIN, and who set the PIN to the default
+  `0000` (i.e. made no real credential change), could only connect *after*
+  completing first-time setup — indicating that setup **activates access**, not
+  merely sets a password. First-time setup is currently performed in the
+  manufacturer's app; this integration does not perform it.
 - **Frame serial number** (`066B0005`): the 12-character identifier
   (`LLLL-DDDDDDD`) for the specific generator. On a fresh unit this may be blank.
 - **Control sequence** (`066B0004`): the model-specific engine-control profile.
@@ -21,7 +27,7 @@ fresh one:
 
 The integration detects the **model** independently from the BLE advertised name
 (the 4-letter serial prefix), so it always knows which generator family it is
-talking to before reading either of the above.
+talking to before reading any of the above.
 
 ## Current behavior (read-only connect)
 
@@ -42,6 +48,11 @@ It deliberately does **not** write the serial or the control sequence, because:
   misidentified unit could be unrecoverable.
 
 ## Deferred: first-time setup flow
+
+The gating prerequisite is **activation**, not PIN-setting: until a unit has been
+activated it will not connect at all, so a full first-time-setup flow must
+reproduce whatever activation does before serial registration or control-sequence
+configuration is even reachable. The exact activation step is not yet identified.
 
 Provisioning a fresh unit from the integration must be a deliberate, one-time
 action with these guarantees:
@@ -76,6 +87,10 @@ action with these guarantees:
 
 ## Open questions
 
+- **Activation step.** What first-time setup does to activate Bluetooth access is
+  not identified. This is the prerequisite for any integration-owned setup flow and
+  needs to be determined (ideally from logs of a genuinely un-activated unit) before
+  the rest is worth building.
 - **Blank-serial wire form.** The exact bytes a fresh `066B0005` returns (empty vs.
   null/space padding vs. prefix-only) should be confirmed from real logs of an
   un-provisioned unit before finalizing blank detection.
