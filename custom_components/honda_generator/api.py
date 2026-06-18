@@ -190,6 +190,11 @@ class ModelSpec:
     control_sequence: bytes | None
     architecture: Architecture = Architecture.POLL
     can_set_password: bool = False
+    # Whether the user must supply a credential. The EU2200i has no settable PIN
+    # and no factory Bluetooth code, so it always uses the default - we can skip
+    # prompting for it. The EU3200i, despite not having a settable PIN, ships with
+    # a factory Bluetooth code (printed in the manual), so it still needs one.
+    requires_password: bool = True
 
 
 MODEL_SPECS: dict[str, ModelSpec] = {
@@ -203,6 +208,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         False,
         bytes([0x01, 0x50, 0x3C, 0x00, 0x00]),
         Architecture.POLL,
+        requires_password=False,
     ),
     "EU3200i": ModelSpec(
         "EU3200i", 3200, 4.7, False, True, False, False, None, Architecture.PUSH
@@ -2103,3 +2109,20 @@ def get_architecture_from_device_name(device_name: str | None) -> Architecture:
         if device_name.startswith(prefix):
             return arch
     return Architecture.POLL
+
+
+def get_model_from_device_name(device_name: str | None) -> str | None:
+    """Determine the model name from a BLE device name (the serial prefix).
+
+    Args:
+        device_name: The BLE advertised name (4-letter serial prefix, e.g., "EAMT").
+
+    Returns:
+        The model name, or None if the prefix is unknown.
+    """
+    if not device_name:
+        return None
+    for prefix, model in SERIAL_PREFIX_TO_MODEL.items():
+        if device_name.startswith(prefix):
+            return model
+    return None

@@ -40,6 +40,7 @@ from custom_components.honda_generator.api import (
     build_unlock_frame,
     create_api,
     get_architecture_from_device_name,
+    get_model_from_device_name,
     get_model_spec,
     is_valid_credential,
     normalize_password,
@@ -244,6 +245,18 @@ class TestUnlockFrame:
         """A real 4-digit PIN is ASCII, zero-padded to 9 bytes."""
         frame = build_unlock_frame(Permission.OWNER, "1234")
         assert frame == bytes([0x01, 0x31, 0x32, 0x33, 0x34, 0x00, 0x00, 0x00, 0x00])
+
+    def test_short_alphanumeric_zero_padded(self) -> None:
+        """A password shorter than 8 chars (EU3200i) is null-padded to 9 bytes."""
+        frame = build_unlock_frame(Permission.OWNER, "ABC")
+        assert frame == bytes([0x01, 0x41, 0x42, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00])
+        assert len(frame) == UNLOCK_FRAME_LEN
+
+    def test_full_eight_char_password(self) -> None:
+        """A full 8-char alphanumeric password (EU3200i) fills all password bytes."""
+        frame = build_unlock_frame(Permission.OWNER, "A1B2C3D4")
+        assert frame == bytes([0x01, 0x41, 0x31, 0x42, 0x32, 0x43, 0x33, 0x44, 0x34])
+        assert len(frame) == UNLOCK_FRAME_LEN
 
     def test_permission_bytes(self) -> None:
         """Permission levels match the protocol."""
@@ -711,6 +724,22 @@ class TestModelSpecs:
         assert get_model_spec("EM5000SX").can_set_password is True
         assert get_model_spec("EM6500SX").can_set_password is True
         assert get_model_spec("EU7000is").can_set_password is True
+
+    def test_requires_password_capability(self) -> None:
+        """Only the EU2200i is credential-free; every other model needs one."""
+        assert get_model_spec("EU2200i").requires_password is False
+        assert get_model_spec("EU3200i").requires_password is True
+        assert get_model_spec("EM5000SX").requires_password is True
+        assert get_model_spec("EM6500SX").requires_password is True
+        assert get_model_spec("EU7000is").requires_password is True
+
+    def test_get_model_from_device_name(self) -> None:
+        """The BLE advertised name (serial prefix) maps to the model."""
+        assert get_model_from_device_name("EAMT") == "EU2200i"
+        assert get_model_from_device_name("EBKJ") == "EU3200i"
+        assert get_model_from_device_name("EEJD") == "EU7000is"
+        assert get_model_from_device_name("ZZZZ") is None
+        assert get_model_from_device_name(None) is None
 
 
 class TestEcoModeConstants:

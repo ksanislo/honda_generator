@@ -52,6 +52,8 @@ from .api import (
     Architecture,
     create_api,
     get_architecture_from_device_name,
+    get_model_from_device_name,
+    get_model_spec,
     is_valid_credential,
 )
 from .const import (
@@ -218,6 +220,19 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
             if self._discovery_info is not None
             else Architecture.POLL
         )
+
+        # Models with no settable PIN and no factory Bluetooth code (the EU2200i)
+        # always use the default credential, so there is nothing to ask for - skip
+        # the prompt and connect with the default. If that unexpectedly fails we
+        # fall through to the form below so a credential can still be entered.
+        model = (
+            get_model_from_device_name(self._discovery_info.name)
+            if self._discovery_info is not None
+            else None
+        )
+        spec = get_model_spec(model) if model else None
+        if user_input is None and spec is not None and not spec.requires_password:
+            user_input = {CONF_PASSWORD: DEFAULT_CREDENTIAL}
 
         if user_input is not None and self._discovery_info is not None:
             _LOGGER.debug(
