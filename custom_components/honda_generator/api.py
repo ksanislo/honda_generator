@@ -914,37 +914,23 @@ class PollAPI(GeneratorAPIProtocol):
                     actual_profile_id = config_data[0] if config_data else None
 
                     if actual_profile_id != expected_profile_id:
+                        # A mismatch means the unit is fresh, configured for a
+                        # different model, or misidentified. We deliberately do NOT
+                        # write the control sequence: it is unknown whether this
+                        # characteristic is write-once or has side effects when
+                        # rewritten on an already-programmed unit, and the official
+                        # app only writes it after an ECU machine-code verification
+                        # we do not yet replicate. Writing the wrong sequence to a
+                        # misidentified unit could be unrecoverable, so we log and
+                        # leave the unit untouched. Auto-correction (with the ECU
+                        # guard) is deferred to a future first-time-setup flow.
                         _LOGGER.warning(
-                            "Control sequence profile ID mismatch: got 0x%02X, expected 0x%02X",
+                            "Control sequence profile ID mismatch: got 0x%02X, "
+                            "expected 0x%02X. Not writing - the generator may need "
+                            "initial setup via the official Honda app.",
                             actual_profile_id,
                             expected_profile_id,
                         )
-                        # Try to write correct sequence (only works as owner)
-                        _LOGGER.debug("Attempting to write correct control sequence")
-                        try:
-                            await asyncio.wait_for(
-                                self._client.write_gatt_char(
-                                    CONTROL_SEQUENCE_CONFIG_CHAR, bytearray(expected)
-                                ),
-                                timeout=5.0,
-                            )
-                            # Read back to verify
-                            config_data = await asyncio.wait_for(
-                                self._client.read_gatt_char(
-                                    CONTROL_SEQUENCE_CONFIG_CHAR
-                                ),
-                                timeout=5.0,
-                            )
-                            actual_profile_id = config_data[0] if config_data else None
-                            if actual_profile_id != expected_profile_id:
-                                _LOGGER.error(
-                                    "Control sequence profile ID still mismatched after write: 0x%02X",
-                                    actual_profile_id,
-                                )
-                        except (TimeoutError, BleakError) as exc:
-                            _LOGGER.warning(
-                                "Failed to correct control sequence: %s", exc
-                            )
                     else:
                         _LOGGER.debug(
                             "Control sequence verified: profile ID 0x%02X, data %s",
