@@ -8,6 +8,8 @@
     "error": {
       "cannot_connect": "Failed to connect",
       "invalid_auth": "Invalid authentication",
+      "invalid_pin": "PIN must be exactly 4 digits",
+      "invalid_password": "Password must be 1-8 letters or digits",
       "unknown": "Unexpected error"
     },
     "step": {
@@ -19,7 +21,7 @@
         }
       },
       "password": {
-        "description": "Enter the Bluetooth password for your Honda generator (default is 00000000).",
+        "description": "Enter the Bluetooth password for your Honda generator. The default PIN is 0000; set your PIN in the official Honda app first if you have changed it.",
         "data": {
           "password": "Password"
         }

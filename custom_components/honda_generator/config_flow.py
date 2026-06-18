@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -51,6 +52,7 @@ from .api import (
     Architecture,
     create_api,
     get_architecture_from_device_name,
+    is_valid_credential,
 )
 from .const import (
     CONF_ARCHITECTURE,
@@ -75,11 +77,29 @@ HONDA_SERVICE_UUIDS = {
     "01b60001-875a-4c56-b8bf-5103cafaeec7",  # Push architecture
 }
 
-STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_PASSWORD, description={"suggested_value": "00000000"}): str,
-    }
-)
+# Default credential shown to the user (a fresh generator's PIN is "0000").
+DEFAULT_CREDENTIAL = "0000"
+
+_ALL_ZERO_PATTERN = re.compile(r"^[0]+$")
+
+
+def _credential_error(architecture: Architecture, value: str) -> str | None:
+    """Return an error key if the credential is not valid for the architecture."""
+    if is_valid_credential(architecture, value):
+        return None
+    return "invalid_password" if architecture == Architecture.PUSH else "invalid_pin"
+
+
+def _display_credential(value: str) -> str:
+    """Prefill value for the form: show the short default for any all-zeros value."""
+    return DEFAULT_CREDENTIAL if _ALL_ZERO_PATTERN.fullmatch(value or "") else value
+
+
+def _credential_schema(default: str) -> vol.Schema:
+    """Build the credential form schema with the given prefilled default."""
+    return vol.Schema(
+        {vol.Required(CONF_PASSWORD, description={"suggested_value": default}): str}
+    )
 
 
 def _is_honda_generator(service_info: BluetoothServiceInfoBleak) -> bool:
@@ -192,45 +212,58 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the password entry step."""
         errors: dict[str, str] = {}
 
+        # Detect architecture from device name; it selects the credential format.
+        architecture = (
+            get_architecture_from_device_name(self._discovery_info.name)
+            if self._discovery_info is not None
+            else Architecture.POLL
+        )
+
         if user_input is not None and self._discovery_info is not None:
-            # Detect architecture from device name
-            architecture = get_architecture_from_device_name(self._discovery_info.name)
             _LOGGER.debug(
                 "Detected architecture %s from device name %s",
                 architecture,
                 self._discovery_info.name,
             )
 
-            try:
-                info = await validate_input(
-                    self.hass,
-                    self._discovery_info.device,
-                    user_input,
-                    architecture=architecture,
-                )
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            cred_error = _credential_error(
+                architecture, user_input.get(CONF_PASSWORD, "")
+            )
+            if cred_error:
+                errors["base"] = cred_error
+            else:
+                try:
+                    info = await validate_input(
+                        self.hass,
+                        self._discovery_info.device,
+                        user_input,
+                        architecture=architecture,
+                    )
+                except CannotConnect:
+                    errors["base"] = "cannot_connect"
+                except InvalidAuth:
+                    errors["base"] = "invalid_auth"
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
 
-            if "base" not in errors:
-                await self.async_set_unique_id(self._discovery_info.address)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=f"{info[CONF_MODEL]} ({info[CONF_SERIAL]})",
-                    data={
-                        **user_input,
-                        CONF_SERIAL: info[CONF_SERIAL],
-                        CONF_MODEL: info[CONF_MODEL],
-                        CONF_ARCHITECTURE: info[CONF_ARCHITECTURE],
-                    },
-                )
+                if "base" not in errors:
+                    await self.async_set_unique_id(self._discovery_info.address)
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title=f"{info[CONF_MODEL]} ({info[CONF_SERIAL]})",
+                        data={
+                            **user_input,
+                            CONF_SERIAL: info[CONF_SERIAL],
+                            CONF_MODEL: info[CONF_MODEL],
+                            CONF_ARCHITECTURE: info[CONF_ARCHITECTURE],
+                        },
+                    )
 
         return self.async_show_form(
-            step_id="password", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="password",
+            data_schema=_credential_schema(DEFAULT_CREDENTIAL),
+            errors=errors,
         )
 
     async def async_step_reconfigure(
@@ -242,45 +275,51 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
             self.context["entry_id"]
         )
 
+        # Use existing architecture from config entry; it selects the format.
+        architecture = Architecture(
+            config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
+        )
+
         if user_input is not None:
-            # Get BLE device from the config entry's unique_id (BLE address)
-            ble_device = bluetooth.async_ble_device_from_address(
-                self.hass, config_entry.unique_id
+            cred_error = _credential_error(
+                architecture, user_input.get(CONF_PASSWORD, "")
             )
-            if ble_device is None:
-                errors["base"] = "cannot_connect"
+            if cred_error:
+                errors["base"] = cred_error
             else:
-                # Use existing architecture from config entry
-                architecture = Architecture(
-                    config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
+                # Get BLE device from the config entry's unique_id (BLE address)
+                ble_device = bluetooth.async_ble_device_from_address(
+                    self.hass, config_entry.unique_id
                 )
-                try:
-                    await validate_input(
-                        self.hass, ble_device, user_input, architecture=architecture
-                    )
-                except CannotConnect:
+                if ble_device is None:
                     errors["base"] = "cannot_connect"
-                except InvalidAuth:
-                    errors["base"] = "invalid_auth"
-                except Exception:  # pylint: disable=broad-except
-                    _LOGGER.exception("Unexpected exception")
-                    errors["base"] = "unknown"
                 else:
-                    return self.async_update_reload_and_abort(
-                        config_entry,
-                        unique_id=config_entry.unique_id,
-                        data={**config_entry.data, **user_input},
-                        reason="reconfigure_successful",
-                    )
+                    try:
+                        await validate_input(
+                            self.hass,
+                            ble_device,
+                            user_input,
+                            architecture=architecture,
+                        )
+                    except CannotConnect:
+                        errors["base"] = "cannot_connect"
+                    except InvalidAuth:
+                        errors["base"] = "invalid_auth"
+                    except Exception:  # pylint: disable=broad-except
+                        _LOGGER.exception("Unexpected exception")
+                        errors["base"] = "unknown"
+                    else:
+                        return self.async_update_reload_and_abort(
+                            config_entry,
+                            unique_id=config_entry.unique_id,
+                            data={**config_entry.data, **user_input},
+                            reason="reconfigure_successful",
+                        )
 
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        CONF_PASSWORD, default=config_entry.data[CONF_PASSWORD]
-                    ): str,
-                }
+            data_schema=_credential_schema(
+                _display_credential(config_entry.data[CONF_PASSWORD])
             ),
             errors=errors,
         )

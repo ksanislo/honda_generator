@@ -8,11 +8,14 @@ import pytest
 
 from custom_components.honda_generator.api import (
     API,
+    AUTHENTICATION_CHAR,
     BOUNDS_CURRENT,
     BOUNDS_FUEL_LEVEL,
     BOUNDS_FUEL_REMAINING,
     BOUNDS_POWER,
     BOUNDS_RUNTIME_HOURS,
+    CHANGE_PASSWORD_CHAR,
+    DEFAULT_PASSWORD,
     DEVICE_NAMES,
     DEVICE_TYPE_TO_DIAGNOSTIC,
     DEVICE_TYPES_POLL,
@@ -20,18 +23,26 @@ from custom_components.honda_generator.api import (
     FUNC_START_ECO,
     FUNC_STOP_ECO,
     MODEL_SPECS,
+    SERIAL_NUMBER_CHAR,
+    UNLOCK_FRAME_LEN,
     APIAuthError,
     APIConnectionError,
     APIReadError,
     Architecture,
+    ChangePasswordFlag,
     DeviceType,
     DiagnosticCategory,
     GeneratorAPIProtocol,
+    Permission,
     PollAPI,
     PushAPI,
+    build_change_password_frame,
+    build_unlock_frame,
     create_api,
     get_architecture_from_device_name,
     get_model_spec,
+    is_valid_credential,
+    normalize_password,
 )
 
 from .conftest import TEST_ADDRESS, TEST_PASSWORD
@@ -199,6 +210,174 @@ class TestAPIConnect:
         await api.disconnect()
 
         mock_client.disconnect.assert_called_once()
+
+
+class TestUnlockFrame:
+    """Test password normalization and the 9-byte unlock-frame builder."""
+
+    def test_normalize_all_zero_variants(self) -> None:
+        """All-zero or empty passwords collapse to the 8-char default."""
+        assert normalize_password("") == DEFAULT_PASSWORD
+        assert normalize_password("0") == DEFAULT_PASSWORD
+        assert normalize_password("0000") == DEFAULT_PASSWORD
+        assert normalize_password("00000000") == DEFAULT_PASSWORD
+
+    def test_normalize_non_zero_unchanged(self) -> None:
+        """A password with any non-zero digit is left untouched."""
+        assert normalize_password("1234") == "1234"
+        assert normalize_password("0012") == "0012"
+
+    def test_legacy_default_byte_for_byte(self) -> None:
+        """The 8-zero default must match the historical write exactly (no regression)."""
+        frame = build_unlock_frame(Permission.OWNER, "00000000")
+        assert frame == bytearray([0x01]) + b"00000000"
+        assert frame == bytes.fromhex("013030303030303030")
+        assert len(frame) == UNLOCK_FRAME_LEN
+
+    def test_four_digit_default_matches_legacy(self) -> None:
+        """A 4-digit '0000' produces the same bytes as the legacy 8-zero default."""
+        assert build_unlock_frame(Permission.OWNER, "0000") == build_unlock_frame(
+            Permission.OWNER, "00000000"
+        )
+
+    def test_pin_frame_layout(self) -> None:
+        """A real 4-digit PIN is ASCII, zero-padded to 9 bytes."""
+        frame = build_unlock_frame(Permission.OWNER, "1234")
+        assert frame == bytes([0x01, 0x31, 0x32, 0x33, 0x34, 0x00, 0x00, 0x00, 0x00])
+
+    def test_permission_bytes(self) -> None:
+        """Permission levels match the protocol."""
+        assert Permission.OWNER == 0x01
+        assert Permission.GUEST == 0x02
+        assert Permission.RESET == 0x03
+        assert build_unlock_frame(Permission.GUEST, "1234")[0] == 0x02
+
+
+class TestChangePasswordFrame:
+    """Test the change-password frame builder and PollAPI.change_password."""
+
+    def test_change_flags(self) -> None:
+        """Change-password flags match the protocol."""
+        assert ChangePasswordFlag.OWNER == 0x10
+        assert ChangePasswordFlag.GUEST == 0x20
+        assert ChangePasswordFlag.GUEST_WITH_VALIDITY == 0x21
+
+    def test_change_frame_layout(self) -> None:
+        """The change frame is [flag][ASCII new password, zero-padded]."""
+        frame = build_change_password_frame(ChangePasswordFlag.OWNER, "1234")
+        assert frame == bytes([0x10, 0x31, 0x32, 0x33, 0x34, 0x00, 0x00, 0x00, 0x00])
+
+    @pytest.mark.asyncio
+    async def test_change_password_owner(self, mock_ble_device: MagicMock) -> None:
+        """An owner change writes the 0x10 frame to the change-password char."""
+        api = PollAPI(mock_ble_device, TEST_PASSWORD)
+        client = AsyncMock()
+        client.is_connected = True
+        api._client = client
+
+        result = await api.change_password("1234", Permission.OWNER)
+
+        assert result is True
+        char, frame = client.write_gatt_char.call_args.args
+        assert char == CHANGE_PASSWORD_CHAR
+        assert frame == build_change_password_frame(ChangePasswordFlag.OWNER, "1234")
+
+    @pytest.mark.asyncio
+    async def test_change_password_guest_enable(
+        self, mock_ble_device: MagicMock
+    ) -> None:
+        """Guest change with enable uses the 0x21 flag."""
+        api = PollAPI(mock_ble_device, TEST_PASSWORD)
+        client = AsyncMock()
+        client.is_connected = True
+        api._client = client
+
+        await api.change_password("5678", Permission.GUEST, enable_guest=True)
+
+        _, frame = client.write_gatt_char.call_args.args
+        assert frame[0] == ChangePasswordFlag.GUEST_WITH_VALIDITY
+
+    @pytest.mark.asyncio
+    async def test_change_password_not_connected(
+        self, mock_ble_device: MagicMock
+    ) -> None:
+        """change_password returns False when not connected."""
+        api = PollAPI(mock_ble_device, TEST_PASSWORD)
+        assert await api.change_password("1234") is False
+
+    @pytest.mark.asyncio
+    async def test_push_change_password_unsupported(
+        self, mock_eu3200i_ble_device: MagicMock
+    ) -> None:
+        """PushAPI does not support changing passwords."""
+        api = PushAPI(mock_eu3200i_ble_device, TEST_PASSWORD)
+        assert await api.change_password("1234") is False
+
+
+class TestCredentialValidation:
+    """Test architecture-aware credential validation (matches the Honda app)."""
+
+    def test_poll_requires_four_digits(self) -> None:
+        """Poll models accept exactly 4 numeric digits."""
+        assert is_valid_credential(Architecture.POLL, "0000") is True
+        assert is_valid_credential(Architecture.POLL, "1234") is True
+        assert is_valid_credential(Architecture.POLL, "123") is False
+        assert is_valid_credential(Architecture.POLL, "12345") is False
+        assert is_valid_credential(Architecture.POLL, "12a4") is False
+        assert is_valid_credential(Architecture.POLL, "00000000") is False
+        assert is_valid_credential(Architecture.POLL, "") is False
+
+    def test_push_allows_alphanumeric(self) -> None:
+        """The Push EU3200i accepts up to 8 alphanumeric characters."""
+        assert is_valid_credential(Architecture.PUSH, "0000") is True
+        assert is_valid_credential(Architecture.PUSH, "1A2b3C4d") is True
+        assert is_valid_credential(Architecture.PUSH, "abc") is True
+        assert is_valid_credential(Architecture.PUSH, "123456789") is False
+        assert is_valid_credential(Architecture.PUSH, "12 34") is False
+        assert is_valid_credential(Architecture.PUSH, "") is False
+
+
+class TestAuthSequence:
+    """Test the two-step unlock and auth-failure handling on connect."""
+
+    @pytest.mark.asyncio
+    async def test_poll_connect_priming_then_owner(
+        self, mock_ble_device: MagicMock, mock_establish_connection: AsyncMock
+    ) -> None:
+        """Connect writes an all-zero priming frame then the owner unlock frame."""
+        api = PollAPI(mock_ble_device, TEST_PASSWORD)
+        client = mock_establish_connection.return_value
+        client.read_gatt_char = AsyncMock(return_value=b"\x01")
+
+        await api.connect()
+
+        auth_writes = [
+            call.args[1]
+            for call in client.write_gatt_char.call_args_list
+            if call.args[0] == AUTHENTICATION_CHAR
+        ]
+        assert auth_writes[0] == bytearray(UNLOCK_FRAME_LEN)
+        assert auth_writes[1] == build_unlock_frame(Permission.OWNER, TEST_PASSWORD)
+
+    @pytest.mark.asyncio
+    async def test_poll_connect_wrong_password_raises_auth(
+        self, mock_ble_device: MagicMock, mock_establish_connection: AsyncMock
+    ) -> None:
+        """A permission-denied serial read surfaces as APIAuthError."""
+        api = PollAPI(mock_ble_device, TEST_PASSWORD)
+        client = mock_establish_connection.return_value
+
+        def read(char: str, *args: object, **kwargs: object) -> bytes:
+            if char == SERIAL_NUMBER_CHAR:
+                raise Exception(
+                    "Bluetooth GATT Error handle=23 error=2 Read not permitted"
+                )
+            return b"\x01"
+
+        client.read_gatt_char = AsyncMock(side_effect=read)
+
+        with pytest.raises(APIAuthError):
+            await api.connect()
 
 
 class TestAPIWarningsFaults:
@@ -524,6 +703,14 @@ class TestModelSpecs:
         assert spec.eco_control is False
         assert spec.guest_mode is True
         assert spec.architecture == Architecture.POLL
+
+    def test_can_set_password_capability(self) -> None:
+        """Only the guest-capable PIN models advertise password setting."""
+        assert get_model_spec("EU2200i").can_set_password is False
+        assert get_model_spec("EU3200i").can_set_password is False
+        assert get_model_spec("EM5000SX").can_set_password is True
+        assert get_model_spec("EM6500SX").can_set_password is True
+        assert get_model_spec("EU7000is").can_set_password is True
 
 
 class TestEcoModeConstants:

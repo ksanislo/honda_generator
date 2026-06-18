@@ -24,12 +24,13 @@ Two architectures are supported:
 
 import asyncio
 import logging
+import re
 import struct
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 from bleak import BleakClient
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -72,6 +73,90 @@ class Architecture(StrEnum):
     PUSH = "push"  # Continuous CAN data stream
 
 
+# === Authentication / unlock protocol ===
+# The generator unlocks via a fixed 9-byte frame written to the authentication
+# (unlock) characteristic: byte 0 is the permission level, bytes 1-8 are the
+# password as ASCII, zero-padded to fill the buffer. Changing a password uses the
+# same 9-byte layout written to the change-password characteristic, with byte 0
+# being a change flag instead of a permission level.
+UNLOCK_FRAME_LEN = 9
+DEFAULT_PASSWORD = "00000000"
+_ALL_ZERO_RE = re.compile(r"^[0]*$")
+
+
+class Permission(IntEnum):
+    """Unlock permission level (byte 0 of the unlock frame)."""
+
+    OWNER = 0x01
+    GUEST = 0x02
+    RESET = 0x03
+
+
+class ChangePasswordFlag(IntEnum):
+    """Change-password flag (byte 0 of the change-password frame)."""
+
+    OWNER = 0x10  # Change owner password
+    GUEST = 0x20  # Change guest password
+    GUEST_WITH_VALIDITY = 0x21  # Change guest password and enable guest validity
+
+
+def normalize_password(pwd: str) -> str:
+    """Normalize a password to the form the generator expects.
+
+    An all-zero or empty password is the "unset"/default credential; the generator
+    treats it as the 8-character default regardless of how many zeros were entered.
+    """
+    return DEFAULT_PASSWORD if _ALL_ZERO_RE.fullmatch(pwd or "") else pwd
+
+
+def _build_password_frame(flag: int, pwd: str) -> bytearray:
+    """Build a 9-byte frame: [flag/permission][ASCII password, zero-padded]."""
+    frame = bytearray(UNLOCK_FRAME_LEN)
+    frame[0] = int(flag)
+    encoded = normalize_password(pwd).encode("ascii")[: UNLOCK_FRAME_LEN - 1]
+    frame[1 : 1 + len(encoded)] = encoded
+    return frame
+
+
+def build_unlock_frame(permission: Permission, pwd: str) -> bytearray:
+    """Build the 9-byte unlock frame: [permission][ASCII password, zero-padded].
+
+    For the legacy default "00000000" this is byte-for-byte identical to the
+    historical write ``bytearray([0x01]) + b"00000000"``.
+    """
+    return _build_password_frame(int(permission), pwd)
+
+
+def build_change_password_frame(flag: ChangePasswordFlag, new_pwd: str) -> bytearray:
+    """Build the 9-byte change-password frame: [flag][ASCII new password, padded]."""
+    return _build_password_frame(int(flag), new_pwd)
+
+
+# Credential formats accepted by the official Honda app. Poll models use a 4-digit
+# numeric PIN; the Push EU3200i uses an up-to-8 alphanumeric factory password. We
+# enforce these so a user can never configure a value the app itself could not use
+# (which would otherwise risk setting an unrecoverable credential on the device).
+PIN_PATTERN = re.compile(r"^[0-9]{4}$")
+PASSWORD_PATTERN = re.compile(r"^[A-Za-z0-9]{1,8}$")
+
+
+def is_valid_credential(architecture: Architecture, value: str) -> bool:
+    """Return True if the credential is valid for the given architecture."""
+    pattern = PASSWORD_PATTERN if architecture == Architecture.PUSH else PIN_PATTERN
+    return bool(pattern.fullmatch(value or ""))
+
+
+# GATT error phrases that indicate the read was rejected because the unlock did
+# not succeed (wrong password), rather than a transient connection problem.
+_AUTH_ERROR_PHRASES = ("not permitted", "authoriz", "authentication", "insufficient")
+
+
+def _is_permission_error(exc: BaseException) -> bool:
+    """Return True if a BLE error indicates the unlock/password was rejected."""
+    message = str(exc).lower()
+    return any(phrase in message for phrase in _AUTH_ERROR_PHRASES)
+
+
 # Serial number prefix to model name mapping
 SERIAL_PREFIX_TO_MODEL: dict[str, str] = {
     "EAMT": "EU2200i",
@@ -104,6 +189,7 @@ class ModelSpec:
     guest_mode: bool
     control_sequence: bytes | None
     architecture: Architecture = Architecture.POLL
+    can_set_password: bool = False
 
 
 MODEL_SPECS: dict[str, ModelSpec] = {
@@ -131,6 +217,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x03, 0x3C, 0x28, 0x3C, 0x28]),
         Architecture.POLL,
+        can_set_password=True,
     ),
     "EM6500SX": ModelSpec(
         "EM6500SX",
@@ -142,6 +229,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x03, 0x3C, 0x28, 0x3C, 0x28]),
         Architecture.POLL,
+        can_set_password=True,
     ),
     "EU7000is": ModelSpec(
         "EU7000is",
@@ -153,6 +241,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x02, 0x3C, 0x28, 0x28, 0x3C]),
         Architecture.POLL,
+        can_set_password=True,
     ),
 }
 
@@ -364,6 +453,15 @@ class GeneratorAPIProtocol(ABC):
 
     async def set_eco_mode(self, enabled: bool) -> bool:
         """Set the ECO mode state (optional, only for models with ECO control)."""
+        return False
+
+    async def change_password(
+        self,
+        new_password: str,
+        permission: Permission = Permission.OWNER,
+        enable_guest: bool = False,
+    ) -> bool:
+        """Change the owner or guest password (optional, capable models only)."""
         return False
 
     @staticmethod
@@ -746,12 +844,22 @@ class PollAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # Step 2: Authenticate
+            # Step 2: Authenticate (two-step, matching the Honda app: an all-zero
+            # priming frame followed by the owner unlock frame, both to the same
+            # characteristic). Authenticate exactly once - the generator disables
+            # commanding after ~10 wrong password attempts, so we must never retry.
             _LOGGER.debug("Sending authentication to %s", self._ble_device.address)
             try:
                 await asyncio.wait_for(
                     self._client.write_gatt_char(
-                        AUTHENTICATION_CHAR, bytearray([0x01]) + self.pwd.encode()
+                        AUTHENTICATION_CHAR, bytearray(UNLOCK_FRAME_LEN)
+                    ),
+                    timeout=5.0,
+                )
+                await asyncio.wait_for(
+                    self._client.write_gatt_char(
+                        AUTHENTICATION_CHAR,
+                        build_unlock_frame(Permission.OWNER, self.pwd),
                     ),
                     timeout=5.0,
                 )
@@ -763,7 +871,9 @@ class PollAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # Step 3: Read serial number and determine model
+            # Step 3: Read serial number and determine model. The serial
+            # characteristic only becomes readable after a successful unlock, so a
+            # permission error here means the password was rejected.
             _LOGGER.debug("Reading serial number")
             try:
                 serial_data = await asyncio.wait_for(
@@ -775,6 +885,9 @@ class PollAPI(GeneratorAPIProtocol):
                 self._model = self.get_model_from_serial(self._serial)
                 _LOGGER.debug("Serial: %s, Model: %s", self._serial, self._model)
             except (TimeoutError, BleakError) as exc:
+                if _is_permission_error(exc):
+                    _LOGGER.debug("Serial read rejected (unlock failed): %s", exc)
+                    raise APIAuthError("Incorrect password") from exc
                 _LOGGER.debug("Failed to read serial number: %s", exc)
                 raise APIConnectionError("Failed to read serial number") from exc
 
@@ -1292,6 +1405,60 @@ class PollAPI(GeneratorAPIProtocol):
             _LOGGER.error("ECO mode command failed: %s", exc)
             return False
 
+    async def change_password(
+        self,
+        new_password: str,
+        permission: Permission = Permission.OWNER,
+        enable_guest: bool = False,
+    ) -> bool:
+        """Change the owner or guest password on the generator.
+
+        NOTE: This is implemented at the protocol level but is not yet exposed to
+        users through any Home Assistant service or entity. It is unverified
+        against real hardware. A failed change can leave the stored credential out
+        of sync with the device, so callers must confirm the new password works
+        before persisting it. Do not enable user access without that safeguard.
+
+        Writes a 9-byte frame to the change-password characteristic. Byte 0 is the
+        change flag (owner / guest / guest-with-validity); bytes 1-8 are the new
+        password as ASCII, zero-padded.
+
+        Args:
+            new_password: The new password to set.
+            permission: OWNER to change the owner password, GUEST for the guest.
+            enable_guest: When changing the guest password, also enable guest
+                validity (ignored for owner changes).
+
+        Returns:
+            True if the change frame was written successfully.
+        """
+        if not self._client or not self._client.is_connected:
+            _LOGGER.error("Cannot change password: not connected")
+            return False
+
+        if permission == Permission.OWNER:
+            flag = ChangePasswordFlag.OWNER
+        elif enable_guest:
+            flag = ChangePasswordFlag.GUEST_WITH_VALIDITY
+        else:
+            flag = ChangePasswordFlag.GUEST
+
+        frame = build_change_password_frame(flag, new_password)
+        async with self._lock:
+            try:
+                await asyncio.wait_for(
+                    self._client.write_gatt_char(CHANGE_PASSWORD_CHAR, frame),
+                    timeout=5.0,
+                )
+                _LOGGER.info("Password change command sent (%s)", permission.name)
+                return True
+            except TimeoutError as exc:
+                _LOGGER.error("Password change timed out: %s", exc)
+                return False
+            except BleakError as exc:
+                _LOGGER.error("Password change failed: %s", exc)
+                return False
+
 
 # CAN message IDs for Push architecture (EU3200i)
 CAN_ECU_STATUS = 0x312
@@ -1600,12 +1767,21 @@ class PushAPI(GeneratorAPIProtocol):
                 return False
 
             # === Authenticate via BT Unit Service ===
+            # Two-step, matching the Honda app: an all-zero priming frame followed
+            # by the owner unlock frame. Authenticate exactly once - the generator
+            # disables commanding after ~10 wrong password attempts.
             _LOGGER.debug("Push API: Authenticating")
             try:
-                # Password format: [0x01] + password bytes
-                auth_data = bytearray([0x01]) + self.pwd.encode()
                 await asyncio.wait_for(
-                    self._client.write_gatt_char(BT_AUTH_CHAR, auth_data),
+                    self._client.write_gatt_char(
+                        BT_AUTH_CHAR, bytearray(UNLOCK_FRAME_LEN)
+                    ),
+                    timeout=5.0,
+                )
+                await asyncio.wait_for(
+                    self._client.write_gatt_char(
+                        BT_AUTH_CHAR, build_unlock_frame(Permission.OWNER, self.pwd)
+                    ),
                     timeout=5.0,
                 )
                 _LOGGER.debug("Push API: Authentication sent")
@@ -1656,8 +1832,15 @@ class PushAPI(GeneratorAPIProtocol):
                         self._model,
                     )
             except (TimeoutError, BleakError) as exc:
+                if _is_permission_error(exc):
+                    # The serial read is gated behind a successful unlock; a
+                    # permission error means the password was rejected.
+                    _LOGGER.debug(
+                        "Push API: Serial read rejected (unlock failed): %s", exc
+                    )
+                    raise APIAuthError("Incorrect password") from exc
                 _LOGGER.warning("Push API: Failed to read serial number: %s", exc)
-                # Fall back to defaults
+                # Genuine transient read failure - fall back to defaults
                 self._model = "EU3200i"
                 self._serial = "Unknown"
 
