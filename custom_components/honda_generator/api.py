@@ -943,24 +943,15 @@ class PollAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # Step 5: Write serial number to register (owner only)
-            if self._serial:
-                _LOGGER.debug("Registering serial number")
-                try:
-                    # Format: serial + 0x20 (space) + null padding
-                    serial_bytes = self._serial.encode()
-                    write_data = bytearray(17)
-                    write_data[: len(serial_bytes)] = serial_bytes
-                    write_data[len(serial_bytes)] = 0x20  # Space delimiter
-                    # Remaining bytes are already 0x00
-
-                    await asyncio.wait_for(
-                        self._client.write_gatt_char(SERIAL_NUMBER_CHAR, write_data),
-                        timeout=5.0,
-                    )
-                    _LOGGER.debug("Serial number registered")
-                except (TimeoutError, BleakError) as exc:
-                    _LOGGER.debug("Failed to register serial number: %s", exc)
+            # Step 5: (Disabled) Register serial number.
+            # We previously rewrote the serial back to the device on every connect.
+            # That is unnecessary for an already-registered unit (we just read the
+            # value) and carries the same risk as the control sequence: it is
+            # unknown whether this characteristic is write-once or has side effects
+            # when rewritten. The official app only writes the serial once, during
+            # owner setup, with a user-confirmed value. Registering an unknown or
+            # blank serial belongs in a future first-time-setup flow, not on every
+            # connect, so we no longer write here.
 
             if self._shutting_down:
                 return False
