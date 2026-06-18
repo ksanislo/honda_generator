@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from custom_components.honda_generator.api import Device, DeviceType
+from custom_components.honda_generator.api import (
+    Device,
+    DeviceType,
+    DiagnosticCategory,
+)
 from custom_components.honda_generator.coordinator import HondaGeneratorCoordinator
 from custom_components.honda_generator.services import ServiceType
 
@@ -791,3 +795,55 @@ class TestMarkServiceComplete:
         await coordinator.async_mark_service_complete(ServiceType.OIL_CHANGE)
 
         assert "oil_change" not in coordinator._service_due_dates
+
+
+def _registry_entry(unique_id: str, disabled: bool = False) -> MagicMock:
+    """Build a mock entity-registry entry for category-mapping tests."""
+    entry = MagicMock()
+    entry.unique_id = unique_id
+    entry.disabled_by = "user" if disabled else None
+    return entry
+
+
+class TestEnabledDiagnosticCategories:
+    """Test _get_enabled_diagnostic_categories maps every category."""
+
+    def test_all_categories_mapped(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """Every enabled entity, including fuel, maps to its category."""
+        entries = [
+            _registry_entry("abc_runtime_hours"),
+            _registry_entry("abc_output_current"),
+            _registry_entry("abc_output_power"),
+            _registry_entry("abc_eco_mode"),
+            _registry_entry("abc_fuel_level"),
+            _registry_entry("abc_fuel_remaining_time"),
+            _registry_entry("abc_warning_0"),
+        ]
+        with patch(
+            "homeassistant.helpers.entity_registry.async_entries_for_config_entry",
+            return_value=entries,
+        ):
+            categories = coordinator._get_enabled_diagnostic_categories()
+
+        # All six categories must be represented (fuel was previously missing).
+        assert categories == set(DiagnosticCategory)
+        assert DiagnosticCategory.FUEL in categories
+
+    def test_disabled_fuel_entity_excluded(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """A disabled fuel entity does not enable the fuel category."""
+        entries = [
+            _registry_entry("abc_fuel_level", disabled=True),
+            _registry_entry("abc_runtime_hours"),
+        ]
+        with patch(
+            "homeassistant.helpers.entity_registry.async_entries_for_config_entry",
+            return_value=entries,
+        ):
+            categories = coordinator._get_enabled_diagnostic_categories()
+
+        assert DiagnosticCategory.FUEL not in categories
+        assert DiagnosticCategory.RUNTIME_HOURS in categories

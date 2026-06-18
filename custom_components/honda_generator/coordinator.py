@@ -825,6 +825,8 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                 enabled.add(DiagnosticCategory.POWER)
             elif "eco_mode" in uid:
                 enabled.add(DiagnosticCategory.ECO_MODE)
+            elif "fuel" in uid:
+                enabled.add(DiagnosticCategory.FUEL)
 
         return enabled
 
