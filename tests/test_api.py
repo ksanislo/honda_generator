@@ -328,7 +328,7 @@ class TestChangePasswordFrame:
 
 
 class TestCredentialValidation:
-    """Test architecture-aware credential validation (matches the Honda app)."""
+    """Test architecture-aware credential validation."""
 
     def test_poll_requires_four_digits(self) -> None:
         """Poll models accept exactly 4 numeric digits."""

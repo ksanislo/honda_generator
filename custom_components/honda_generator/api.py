@@ -132,10 +132,10 @@ def build_change_password_frame(flag: ChangePasswordFlag, new_pwd: str) -> bytea
     return _build_password_frame(int(flag), new_pwd)
 
 
-# Credential formats accepted by the official Honda app. Poll models use a 4-digit
-# numeric PIN; the Push EU3200i uses an up-to-8 alphanumeric factory password. We
-# enforce these so a user can never configure a value the app itself could not use
-# (which would otherwise risk setting an unrecoverable credential on the device).
+# Credential formats the generators accept. Poll models use a 4-digit numeric PIN;
+# the Push EU3200i uses an up-to-8 alphanumeric factory password. We enforce these
+# so a user cannot configure a value the generator would reject, which could
+# otherwise risk setting an unrecoverable credential on the device.
 PIN_PATTERN = re.compile(r"^[0-9]{4}$")
 PASSWORD_PATTERN = re.compile(r"^[A-Za-z0-9]{1,8}$")
 
@@ -850,10 +850,10 @@ class PollAPI(GeneratorAPIProtocol):
             if self._shutting_down:
                 return False
 
-            # Step 2: Authenticate (two-step, matching the Honda app: an all-zero
-            # priming frame followed by the owner unlock frame, both to the same
-            # characteristic). Authenticate exactly once - the generator disables
-            # commanding after ~10 wrong password attempts, so we must never retry.
+            # Step 2: Authenticate. Two-step: an all-zero priming frame followed by
+            # the owner unlock frame, both written to the same characteristic.
+            # Authenticate exactly once - the generator disables commanding after
+            # ~10 wrong password attempts, so we must never retry.
             _LOGGER.debug("Sending authentication to %s", self._ble_device.address)
             try:
                 await asyncio.wait_for(
@@ -918,16 +918,15 @@ class PollAPI(GeneratorAPIProtocol):
                         # different model, or misidentified. We deliberately do NOT
                         # write the control sequence: it is unknown whether this
                         # characteristic is write-once or has side effects when
-                        # rewritten on an already-programmed unit, and the official
-                        # app only writes it after an ECU machine-code verification
-                        # we do not yet replicate. Writing the wrong sequence to a
-                        # misidentified unit could be unrecoverable, so we log and
-                        # leave the unit untouched. Auto-correction (with the ECU
-                        # guard) is deferred to a future first-time-setup flow.
+                        # rewritten on an already-programmed unit. Writing the wrong
+                        # sequence to a misidentified unit could be unrecoverable, so
+                        # we log and leave the unit untouched. Safe auto-correction
+                        # (gated on first verifying the unit's identity) is deferred
+                        # to a future first-time-setup flow.
                         _LOGGER.warning(
                             "Control sequence profile ID mismatch: got 0x%02X, "
-                            "expected 0x%02X. Not writing - the generator may need "
-                            "initial setup via the official Honda app.",
+                            "expected 0x%02X. Not writing; the generator may need "
+                            "initial setup.",
                             actual_profile_id,
                             expected_profile_id,
                         )
@@ -948,10 +947,9 @@ class PollAPI(GeneratorAPIProtocol):
             # That is unnecessary for an already-registered unit (we just read the
             # value) and carries the same risk as the control sequence: it is
             # unknown whether this characteristic is write-once or has side effects
-            # when rewritten. The official app only writes the serial once, during
-            # owner setup, with a user-confirmed value. Registering an unknown or
-            # blank serial belongs in a future first-time-setup flow, not on every
-            # connect, so we no longer write here.
+            # when rewritten. Registering a user-confirmed serial belongs in a
+            # future first-time-setup flow, written once, not on every connect, so
+            # we no longer write here.
 
             if self._shutting_down:
                 return False
@@ -1730,8 +1728,8 @@ class PushAPI(GeneratorAPIProtocol):
                 return False
 
             # === Subscribe to pre-auth indications ===
-            # Data Response and Error/Warning are subscribed before auth,
-            # matching the Honda app's Z45A connection sequence.
+            # Data Response and Error/Warning are subscribed before auth; the
+            # generator delivers these without requiring an unlock first.
             _LOGGER.debug("Push API: Subscribing to pre-auth notifications")
             try:
                 await self._client.start_notify(
@@ -1750,9 +1748,9 @@ class PushAPI(GeneratorAPIProtocol):
                 return False
 
             # === Authenticate via BT Unit Service ===
-            # Two-step, matching the Honda app: an all-zero priming frame followed
-            # by the owner unlock frame. Authenticate exactly once - the generator
-            # disables commanding after ~10 wrong password attempts.
+            # Two-step: an all-zero priming frame followed by the owner unlock
+            # frame. Authenticate exactly once - the generator disables commanding
+            # after ~10 wrong password attempts.
             _LOGGER.debug("Push API: Authenticating")
             try:
                 await asyncio.wait_for(
@@ -1779,8 +1777,8 @@ class PushAPI(GeneratorAPIProtocol):
                 return False
 
             # === Subscribe to CAN data drip and start stream ===
-            # CAN Data Drip requires auth, so subscribe after authentication,
-            # matching the Honda app's Z45A sequence.
+            # The CAN data drip requires a successful unlock, so we subscribe to it
+            # only after authentication.
             _LOGGER.debug("Push API: Starting data stream")
             try:
                 await self._client.start_notify(
