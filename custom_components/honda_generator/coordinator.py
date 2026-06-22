@@ -27,11 +27,13 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import (
     API,
+    DEFAULT_PASSWORD,
     DEVICE_NAMES,
     DEVICE_TYPES,
     DEVICE_TYPES_PUSH,
@@ -45,6 +47,7 @@ from .api import (
     GeneratorAPIProtocol,
     create_api,
     get_model_spec,
+    normalize_password,
 )
 from .const import (
     CONF_ARCHITECTURE,
@@ -830,6 +833,69 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
 
         return enabled
 
+    def _create_api(self, ble_device, pwd: str) -> GeneratorAPIProtocol:
+        """Create an API instance for the configured architecture."""
+        if self._architecture == Architecture.PUSH:
+            return create_api(
+                ble_device,
+                pwd=pwd,
+                architecture=self._architecture,
+                on_data_update=self._handle_push_data_update,
+            )
+        return create_api(
+            ble_device,
+            pwd=pwd,
+            architecture=self._architecture,
+            on_engine_status_update=self._handle_engine_status_update,
+        )
+
+    async def _connect(self, ble_device) -> None:
+        """Connect, recovering from a removed PIN and prompting reauth otherwise.
+
+        Tries the stored credential first. If it is rejected and was a real PIN,
+        the PIN may have been removed, so the no-PIN default is tried once; if that
+        works it is adopted and persisted (the generator is now unprotected). If
+        every credential is rejected, ConfigEntryAuthFailed is raised to start a
+        reauth flow. At most two unlock attempts are made per connect, well under
+        the generator's wrong-attempt lockout threshold.
+        """
+        candidates = [self.pwd]
+        if normalize_password(self.pwd) != DEFAULT_PASSWORD:
+            candidates.append(DEFAULT_PASSWORD)
+
+        auth_error: APIAuthError | None = None
+        for credential in candidates:
+            api = self._create_api(ble_device, credential)
+            try:
+                connected = await api.connect()
+            except APIAuthError as err:
+                auth_error = err
+                await api.disconnect()
+                continue
+            if not connected:
+                _LOGGER.debug("Connection returned False (possibly shutting down)")
+                raise UpdateFailed("Connection failed or shutting down")
+            self.api = api
+            if credential != self.pwd:
+                _LOGGER.warning(
+                    "Stored PIN was rejected but the generator now accepts no PIN; "
+                    "adopting the no-PIN credential"
+                )
+                self.pwd = credential
+                self.hass.async_create_task(self._async_persist_credential(credential))
+            return
+
+        raise ConfigEntryAuthFailed(
+            "Generator rejected the stored PIN (it may have been changed)"
+        ) from auth_error
+
+    async def _async_persist_credential(self, credential: str) -> None:
+        """Persist an adopted credential to the config entry (triggers a reload)."""
+        self.hass.config_entries.async_update_entry(
+            self.config_entry,
+            data={**self.config_entry.data, CONF_PASSWORD: credential},
+        )
+
     async def async_update_data(self) -> HondaGeneratorData:
         """Fetch data from the generator."""
         try:
@@ -845,27 +911,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
                     "exists" if self.api else "none",
                 )
 
-                # Use factory to create appropriate API based on architecture
-                if self._architecture == Architecture.PUSH:
-                    self.api = create_api(
-                        ble_device,
-                        pwd=self.pwd,
-                        architecture=self._architecture,
-                        on_data_update=self._handle_push_data_update,
-                    )
-                else:
-                    self.api = create_api(
-                        ble_device,
-                        pwd=self.pwd,
-                        architecture=self._architecture,
-                        on_engine_status_update=self._handle_engine_status_update,
-                    )
-
-                _LOGGER.debug("API created, attempting to connect")
-                connected = await self.api.connect()
-                if not connected:
-                    _LOGGER.debug("Connection returned False (possibly shutting down)")
-                    raise UpdateFailed("Connection failed or shutting down")
+                await self._connect(ble_device)
 
                 # Cache device info from API (populated during connect)
                 self._cached_serial = self.api.serial or "unknown"
@@ -912,7 +958,7 @@ class HondaGeneratorCoordinator(DataUpdateCoordinator[HondaGeneratorData]):
 
         except APIAuthError as err:
             _LOGGER.error("Authentication error: %s", err)
-            raise UpdateFailed(err) from err
+            raise ConfigEntryAuthFailed(str(err)) from err
         except APIReadError as err:
             self._consecutive_failures += 1
             if (

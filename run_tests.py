@@ -221,6 +221,9 @@ def setup_mocks():
     _mock_ha.components.switch.SwitchEntity = _MockSwitchEntity
     _mock_ha.exceptions = MagicMock()
     _mock_ha.exceptions.HomeAssistantError = Exception
+    _mock_ha.exceptions.ConfigEntryAuthFailed = type(
+        "ConfigEntryAuthFailed", (Exception,), {}
+    )
 
     sys.modules["homeassistant"] = _mock_ha
     sys.modules["homeassistant.config_entries"] = _mock_ha.config_entries

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
@@ -363,6 +364,67 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
                 _display_credential(config_entry.data[CONF_PASSWORD])
             ),
             errors=errors,
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Handle reauth when the generator rejects the stored credential."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Prompt for the updated credential after an authentication failure."""
+        errors: dict[str, str] = {}
+        config_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+        architecture = Architecture(
+            config_entry.data.get(CONF_ARCHITECTURE, Architecture.POLL)
+        )
+
+        if user_input is not None:
+            credential = _resolve_credential(user_input)
+            user_input = {**user_input, CONF_PASSWORD: credential}
+            cred_error = _credential_error(architecture, credential)
+            if cred_error:
+                errors["base"] = cred_error
+            else:
+                ble_device = bluetooth.async_ble_device_from_address(
+                    self.hass, config_entry.unique_id
+                )
+                if ble_device is None:
+                    errors["base"] = "cannot_connect"
+                else:
+                    try:
+                        await validate_input(
+                            self.hass,
+                            ble_device,
+                            user_input,
+                            architecture=architecture,
+                        )
+                    except CannotConnect:
+                        errors["base"] = "cannot_connect"
+                    except InvalidAuth:
+                        errors["base"] = "invalid_auth"
+                    except Exception:  # pylint: disable=broad-except
+                        _LOGGER.exception("Unexpected exception")
+                        errors["base"] = "unknown"
+                    else:
+                        return self.async_update_reload_and_abort(
+                            config_entry,
+                            data={**config_entry.data, **user_input},
+                            reason="reauth_successful",
+                        )
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=_credential_schema(""),
+            errors=errors,
+            description_placeholders={
+                "credential_hint": _credential_hint(architecture)
+            },
         )
 
 

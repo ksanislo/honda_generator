@@ -7,7 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from homeassistant.exceptions import ConfigEntryAuthFailed
+
 from custom_components.honda_generator.api import (
+    DEFAULT_PASSWORD,
+    APIAuthError,
     Device,
     DeviceType,
     DiagnosticCategory,
@@ -847,3 +851,77 @@ class TestEnabledDiagnosticCategories:
 
         assert DiagnosticCategory.FUEL not in categories
         assert DiagnosticCategory.RUNTIME_HOURS in categories
+
+
+class TestCredentialFallbackAndReauth:
+    """Test PIN-removal fallback and reauth on auth failure."""
+
+    @pytest.mark.asyncio
+    async def test_auth_fail_at_default_raises_reauth(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """No-PIN stored credential rejected -> reauth (a PIN was set)."""
+        coordinator.pwd = DEFAULT_PASSWORD  # already default, no fallback candidate
+        api = MagicMock()
+        api.connect = AsyncMock(side_effect=APIAuthError("bad"))
+        api.disconnect = AsyncMock()
+        with patch(
+            "custom_components.honda_generator.coordinator.create_api",
+            return_value=api,
+        ):
+            with pytest.raises(ConfigEntryAuthFailed):
+                await coordinator._connect(MagicMock())
+
+    @pytest.mark.asyncio
+    async def test_removed_pin_adopts_default(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """Stored PIN rejected but no-PIN works -> adopt the default, no prompt."""
+        coordinator.pwd = "1234"  # real PIN -> default is tried as fallback
+        api_fail = MagicMock()
+        api_fail.connect = AsyncMock(side_effect=APIAuthError("bad"))
+        api_fail.disconnect = AsyncMock()
+        api_ok = MagicMock()
+        api_ok.connect = AsyncMock(return_value=True)
+        with patch(
+            "custom_components.honda_generator.coordinator.create_api",
+            side_effect=[api_fail, api_ok],
+        ):
+            await coordinator._connect(MagicMock())
+
+        assert coordinator.api is api_ok
+        assert coordinator.pwd == DEFAULT_PASSWORD
+
+    @pytest.mark.asyncio
+    async def test_changed_pin_raises_reauth(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """Stored PIN and the default both rejected -> reauth (PIN changed)."""
+        coordinator.pwd = "1234"
+        api_fail = MagicMock()
+        api_fail.connect = AsyncMock(side_effect=APIAuthError("bad"))
+        api_fail.disconnect = AsyncMock()
+        with patch(
+            "custom_components.honda_generator.coordinator.create_api",
+            return_value=api_fail,
+        ):
+            with pytest.raises(ConfigEntryAuthFailed):
+                await coordinator._connect(MagicMock())
+        # Two attempts: the stored PIN and the default.
+        assert api_fail.connect.await_count == 2
+
+    @pytest.mark.asyncio
+    async def test_get_devices_auth_error_raises_reauth(
+        self, coordinator: HondaGeneratorCoordinator
+    ) -> None:
+        """An auth error during a read also surfaces as reauth."""
+        api = MagicMock()
+        api.connected = True
+        api.get_devices = AsyncMock(side_effect=APIAuthError("bad"))
+        coordinator.api = api
+        with patch(
+            "homeassistant.helpers.entity_registry.async_entries_for_config_entry",
+            return_value=[],
+        ):
+            with pytest.raises(ConfigEntryAuthFailed):
+                await coordinator.async_update_data()
