@@ -21,7 +21,7 @@
         }
       },
       "password": {
-        "description": "Complete your generator's initial setup in the official Honda app at least once first - a generator that has never been set up there will reject the connection. Then enter its Bluetooth PIN here (the default is 0000; enter your own if you changed it).",
+        "description": "Complete your generator's initial setup in the official Honda app at least once first - a generator that has never been set up there will reject the connection. Then enter its Bluetooth PIN here. The default PIN 0000 means no PIN has been set, so anyone in range can connect; enter your own PIN if you set one in the Honda app.",
         "data": {
           "password": "Password"
         }
