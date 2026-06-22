@@ -104,6 +104,24 @@ def _credential_schema(default: str) -> vol.Schema:
     )
 
 
+def _credential_hint(architecture: Architecture) -> str:
+    """Help text describing the expected credential for the architecture."""
+    if architecture == Architecture.PUSH:
+        return (
+            "Enter the Bluetooth code printed in your generator's manual. The "
+            "default 0000 means no code has been set, so anyone in range can connect."
+        )
+    return (
+        "The default PIN 0000 means no PIN has been set, so anyone in range can "
+        "connect; enter your own PIN if you set one in the Honda app."
+    )
+
+
+def _suggested_credential(architecture: Architecture) -> str:
+    """Prefill value for a new setup. Push models use a manual-printed code."""
+    return "" if architecture == Architecture.PUSH else DEFAULT_CREDENTIAL
+
+
 def _is_honda_generator(service_info: BluetoothServiceInfoBleak) -> bool:
     """Check if a service info is from a Honda generator."""
     for uuid in service_info.service_uuids:
@@ -277,8 +295,11 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="password",
-            data_schema=_credential_schema(DEFAULT_CREDENTIAL),
+            data_schema=_credential_schema(_suggested_credential(architecture)),
             errors=errors,
+            description_placeholders={
+                "credential_hint": _credential_hint(architecture)
+            },
         )
 
     async def async_step_reconfigure(
