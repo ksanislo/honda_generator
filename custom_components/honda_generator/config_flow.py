@@ -97,29 +97,34 @@ def _display_credential(value: str) -> str:
     return DEFAULT_CREDENTIAL if _ALL_ZERO_PATTERN.fullmatch(value or "") else value
 
 
-def _credential_schema(default: str) -> vol.Schema:
-    """Build the credential form schema with the given prefilled default."""
+def _credential_schema(suggested: str) -> vol.Schema:
+    """Build the credential form schema.
+
+    The field is optional: a blank submission is treated as the default (no
+    password set), so the user can leave it empty rather than typing zeros.
+    """
     return vol.Schema(
-        {vol.Required(CONF_PASSWORD, description={"suggested_value": default}): str}
+        {vol.Optional(CONF_PASSWORD, description={"suggested_value": suggested}): str}
     )
+
+
+def _resolve_credential(user_input: dict[str, Any]) -> str:
+    """Return the submitted credential, treating a blank value as the default."""
+    return (user_input.get(CONF_PASSWORD) or "").strip() or DEFAULT_CREDENTIAL
 
 
 def _credential_hint(architecture: Architecture) -> str:
     """Help text describing the expected credential for the architecture."""
     if architecture == Architecture.PUSH:
         return (
-            "Enter the Bluetooth code printed in your generator's manual. The "
-            "default 0000 means no code has been set, so anyone in range can connect."
+            "Enter the Bluetooth code printed in your generator's manual, or leave "
+            "blank if no code is set. A blank/default means anyone in range can "
+            "connect."
         )
     return (
-        "The default PIN 0000 means no PIN has been set, so anyone in range can "
-        "connect; enter your own PIN if you set one in the Honda app."
+        "Leave blank if no PIN is set (the default), or enter your PIN if you set "
+        "one in the Honda app. A blank/default PIN means anyone in range can connect."
     )
-
-
-def _suggested_credential(architecture: Architecture) -> str:
-    """Prefill value for a new setup. Push models use a manual-printed code."""
-    return "" if architecture == Architecture.PUSH else DEFAULT_CREDENTIAL
 
 
 def _is_honda_generator(service_info: BluetoothServiceInfoBleak) -> bool:
@@ -259,9 +264,9 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._discovery_info.name,
             )
 
-            cred_error = _credential_error(
-                architecture, user_input.get(CONF_PASSWORD, "")
-            )
+            credential = _resolve_credential(user_input)
+            user_input = {**user_input, CONF_PASSWORD: credential}
+            cred_error = _credential_error(architecture, credential)
             if cred_error:
                 errors["base"] = cred_error
             else:
@@ -295,7 +300,7 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="password",
-            data_schema=_credential_schema(_suggested_credential(architecture)),
+            data_schema=_credential_schema(""),
             errors=errors,
             description_placeholders={
                 "credential_hint": _credential_hint(architecture)
@@ -317,9 +322,9 @@ class HondaGeneratorConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
         if user_input is not None:
-            cred_error = _credential_error(
-                architecture, user_input.get(CONF_PASSWORD, "")
-            )
+            credential = _resolve_credential(user_input)
+            user_input = {**user_input, CONF_PASSWORD: credential}
+            cred_error = _credential_error(architecture, credential)
             if cred_error:
                 errors["base"] = cred_error
             else:
