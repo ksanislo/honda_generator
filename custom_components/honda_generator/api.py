@@ -1884,7 +1884,11 @@ class PushAPI(GeneratorAPIProtocol):
         try:
             yield
         finally:
-            if was_active and self._connected:
+            # Resume unless we're tearing down. We must NOT gate this on
+            # self._connected: during the initial connect the serial-number read
+            # pauses the stream before self._connected is set, so that guard left
+            # the stream stopped and no CAN data ever arrived.
+            if was_active and not self._shutting_down:
                 try:
                     await self._start_data_stream()
                 except Exception as exc:

@@ -982,3 +982,45 @@ class TestParseErrorBytes:
         """Test all bits set in a byte."""
         result = PushAPI._parse_error_bytes(bytes([0xFF]))
         assert result == [0, 1, 2, 3, 4, 5, 6, 7]
+
+
+class TestPushStreamPause:
+    """Test the Push data-stream pause/resume guard."""
+
+    @pytest.mark.asyncio
+    async def test_resumes_during_initial_connect(
+        self, mock_eu3200i_ble_device: MagicMock
+    ) -> None:
+        """The stream must resume after a pause even before _connected is set.
+
+        During the initial connect the serial read pauses the stream before
+        _connected becomes True; the resume must not be gated on _connected.
+        """
+        api = PushAPI(mock_eu3200i_ble_device, TEST_PASSWORD)
+        api._stream_active = True
+        api._connected = False
+        api._shutting_down = False
+        api._stop_data_stream = AsyncMock()
+        api._start_data_stream = AsyncMock()
+
+        async with api._with_stream_paused():
+            pass
+
+        api._stop_data_stream.assert_awaited_once()
+        api._start_data_stream.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_no_resume_when_shutting_down(
+        self, mock_eu3200i_ble_device: MagicMock
+    ) -> None:
+        """The stream must not resume while shutting down."""
+        api = PushAPI(mock_eu3200i_ble_device, TEST_PASSWORD)
+        api._stream_active = True
+        api._shutting_down = True
+        api._stop_data_stream = AsyncMock()
+        api._start_data_stream = AsyncMock()
+
+        async with api._with_stream_paused():
+            pass
+
+        api._start_data_stream.assert_not_awaited()
