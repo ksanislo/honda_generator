@@ -443,7 +443,7 @@ class GeneratorAPIProtocol(ABC):
         """Get all device states."""
 
     @abstractmethod
-    async def engine_stop(self) -> bool:
+    async def engine_stop(self, max_attempts: int = 3) -> bool:
         """Stop the generator engine."""
 
     async def engine_start(self) -> bool:
@@ -1981,10 +1981,12 @@ class PushAPI(GeneratorAPIProtocol):
 
         return devices
 
-    async def engine_stop(self) -> bool:
+    async def engine_stop(self, max_attempts: int = 3) -> bool:
         """Stop the generator engine.
 
         Pauses the data stream, sends the function command, then resumes the stream.
+        max_attempts is accepted for protocol compatibility but unused (Push sends
+        a single function command rather than retrying like the Poll architecture).
         """
         if not self._client or not self._client.is_connected:
             _LOGGER.error("Push API: Cannot stop engine - not connected")
