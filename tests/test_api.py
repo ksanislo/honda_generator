@@ -760,8 +760,9 @@ class TestPushAPICAN:
 
     def test_parse_can_message_inv_info(self, mock_push_api: PushAPI) -> None:
         """Test parsing INV_INFO CAN message."""
-        # INV_INFO (0x332): power=1000W, voltage=120V, current=8.33A (4165/500)
-        payload = bytes([0xE8, 0x03, 0x78, 0x00, 0x45, 0x10])
+        # INV_INFO (0x332): power=1000W, voltage=120V, current=8.33A (4165/500),
+        # big-endian: 03E8, 0078, 1045
+        payload = bytes([0x03, 0xE8, 0x00, 0x78, 0x10, 0x45])
         mock_push_api._parse_can_message(0x332, payload)
 
         assert mock_push_api._state["power_watts"] == 1000
@@ -779,16 +780,17 @@ class TestPushAPICAN:
 
     def test_parse_can_message_inv_info2(self, mock_push_api: PushAPI) -> None:
         """Test parsing INV_INFO2 CAN message."""
-        # INV_INFO2 (0x352): runtime_hours=500 at bytes 4-5
-        payload = bytes([0x00, 0x00, 0x00, 0x00, 0xF4, 0x01])
+        # INV_INFO2 (0x352): runtime_hours=500 at bytes 4-5, big-endian: 01F4
+        payload = bytes([0x00, 0x00, 0x00, 0x00, 0x01, 0xF4])
         mock_push_api._parse_can_message(0x352, payload)
 
         assert mock_push_api._state["runtime_hours"] == 500
 
     def test_parse_can_message_fuel_info(self, mock_push_api: PushAPI) -> None:
         """Test parsing ECU_INFO_ETC CAN message."""
-        # ECU_INFO_ETC (0x362): fuel_ml=2000, fuel_remaining=180min, fuel_level=10
-        payload = bytes([0xD0, 0x07, 0xB4, 0x00, 0x00, 0x0A])
+        # ECU_INFO_ETC (0x362): fuel_ml=2000, fuel_remaining=180min, fuel_level=10,
+        # big-endian: 07D0, 00B4, .., 0A
+        payload = bytes([0x07, 0xD0, 0x00, 0xB4, 0x00, 0x0A])
         mock_push_api._parse_can_message(0x362, payload)
 
         assert mock_push_api._state["fuel_ml"] == 2000
@@ -1024,3 +1026,46 @@ class TestPushStreamPause:
             pass
 
         api._start_data_stream.assert_not_awaited()
+
+
+class TestPushFrameDispatch:
+    """Test the Push frame dispatcher (big-endian CAN ID + last-8-byte payload)."""
+
+    def test_real_ecu_status_frame(self, mock_push_api: PushAPI) -> None:
+        """A real ECU_STATUS frame from the error/warning channel parses correctly."""
+        # CAN ID big-endian at offset 3 (0x312); payload = last 8 bytes.
+        frame = bytearray.fromhex("08000003120301000ce9110000")
+        mock_push_api._dispatch_frame(frame, 3)
+        assert mock_push_api._state["engine_mode"] == 0x03  # running
+        assert mock_push_api._state["eco_status"] is True  # byte 2 == 0
+
+    def test_response_channel_offset(self, mock_push_api: PushAPI) -> None:
+        """The response channel carries the CAN ID one byte later (offset 4)."""
+        # INV_INFO (0x332) with power=1000 (03E8) in the last 8 bytes.
+        frame = bytearray([0x00, 0x00, 0x00, 0x00, 0x03, 0x32]) + bytes(
+            [0x03, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        )
+        mock_push_api._dispatch_frame(frame, 4)
+        assert mock_push_api._state["power_watts"] == 1000
+
+    def test_short_frame_ignored(self, mock_push_api: PushAPI) -> None:
+        """A frame too short to hold the CAN ID is ignored."""
+        mock_push_api._dispatch_frame(bytearray([0x08, 0x00]), 3)  # no raise
+
+    def test_status_request_format(self) -> None:
+        """A status request encodes the CAN ID big-endian at bytes 4-5."""
+        req = PushAPI._status_request(0x312)
+        assert req[0] == 0x02
+        assert req[1] == 0x08
+        assert req[4] == 0x03
+        assert req[5] == 0x12
+        assert len(req) == 14
+
+    def test_error_frame_populates_fault_bits(self, mock_push_api: PushAPI) -> None:
+        """An error frame populates the state the fault/warning sensors read."""
+        # CAN 0x3A2 (ECU error); payload byte 2 bit 1 set -> error bit 17.
+        frame = bytearray.fromhex("08000003A20000020000000000")
+        mock_push_api._dispatch_frame(frame, 3)
+        assert 17 in mock_push_api._state["ecu_errors"]
+        assert mock_push_api.get_warning_bit(17) is True
+        assert mock_push_api.get_fault_bit(17) is True

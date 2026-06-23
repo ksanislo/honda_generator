@@ -1451,6 +1451,19 @@ CAN_ECU_ERROR = 0x3A2
 CAN_INV_ERROR = 0x3B2
 CAN_BT_ERROR = 0x3A5
 
+# CAN IDs to actively request after starting the stream so the generator reports
+# each metric's current value (it does not always emit them unprompted).
+STATUS_REQUEST_CAN_IDS: tuple[int, ...] = (
+    0x102,  # insufficient oil
+    CAN_ECU_STATUS,  # engine mode / eco
+    0x322,  # inverter status
+    CAN_INV_INFO,  # power / voltage / current
+    0x342,  # ecu info
+    CAN_INV_INFO2,  # engine hours
+    CAN_ECU_INFO_ETC,  # fuel
+    CAN_OUTPUT_SETTING,  # output voltage setting
+)
+
 # Function command codes for Push architecture
 FUNC_ENGINE_STOP = 0x0402
 
@@ -1567,41 +1580,42 @@ class PushAPI(GeneratorAPIProtocol):
     def _handle_data_response(
         self, _sender: BleakGATTCharacteristic, data: bytearray
     ) -> None:
-        """Handle data response characteristic notification (01B60003)."""
-        _LOGGER.debug("Push API: Data response: %s", data.hex())
-        self._response_queue.put_nowait(data)
+        """Handle a data-response notification (01B60003)."""
+        self._dispatch_frame(data, 4)
 
     def _handle_can_data(
         self, _sender: BleakGATTCharacteristic, data: bytearray
     ) -> None:
-        """Handle CAN data characteristic notification (01B60004).
-
-        Parses CAN messages and updates internal state.
-        """
-        if len(data) < 3:
-            return
-
-        # First byte is packet type, next two bytes are CAN ID (little-endian)
-        packet_type = data[0]
-        if packet_type != 0x01:  # Only process data packets
-            return
-
-        can_id = struct.unpack("<H", data[1:3])[0]
-        payload = data[3:]
-
-        _LOGGER.debug("Push API: CAN data ID=0x%03X payload=%s", can_id, payload.hex())
-
-        self._parse_can_message(can_id, payload)
-
-        # Notify callback of state update
-        if self._on_data_update:
-            self._on_data_update(self._state.copy())
+        """Handle a CAN data-drip notification (01B60004)."""
+        self._dispatch_frame(data, 3)
 
     def _handle_error_warning(
         self, _sender: BleakGATTCharacteristic, data: bytearray
     ) -> None:
-        """Handle error/warning characteristic notification (01B60005)."""
-        _LOGGER.debug("Push API: Error/warning notification: %s", data.hex())
+        """Handle an error/warning notification (01B60005).
+
+        This channel also carries periodic status frames, so it is parsed the
+        same way as the data-drip channel.
+        """
+        self._dispatch_frame(data, 3)
+
+    def _dispatch_frame(self, data: bytearray, id_offset: int) -> None:
+        """Parse a generator-data frame and notify the state callback.
+
+        Frame layout: the 16-bit CAN ID is big-endian at byte ``id_offset`` (3 on
+        the data-drip and error/warning channels, 4 on the request-response
+        channel), and the value is carried in the last 8 bytes of the frame.
+        """
+        if len(data) < id_offset + 2:
+            return
+        can_id = int.from_bytes(data[id_offset : id_offset + 2], "big")
+        payload = bytes(data[-8:])
+        _LOGGER.debug(
+            "Push API: data frame ID=0x%03X payload=%s", can_id, payload.hex()
+        )
+        self._parse_can_message(can_id, payload)
+        if self._on_data_update:
+            self._on_data_update(self._state.copy())
 
     def _parse_can_message(self, can_id: int, payload: bytes) -> None:
         """Parse a CAN message and update internal state."""
@@ -1619,24 +1633,24 @@ class PushAPI(GeneratorAPIProtocol):
         elif can_id == CAN_INV_INFO:
             # INV_INFO: power (bytes 0-1), voltage (bytes 2-3), current (bytes 4-5)
             if len(payload) >= 2:
-                self._state["power_watts"] = struct.unpack("<H", payload[0:2])[0]
+                self._state["power_watts"] = struct.unpack(">H", payload[0:2])[0]
             if len(payload) >= 4:
-                self._state["voltage"] = struct.unpack("<H", payload[2:4])[0]
+                self._state["voltage"] = struct.unpack(">H", payload[2:4])[0]
             if len(payload) >= 6:
-                raw_current = struct.unpack("<H", payload[4:6])[0]
+                raw_current = struct.unpack(">H", payload[4:6])[0]
                 self._state["current"] = raw_current / 500.0
 
         elif can_id == CAN_INV_INFO2:
             # INV_INFO2: engine_hours (bytes 4-5)
             if len(payload) >= 6:
-                self._state["runtime_hours"] = struct.unpack("<H", payload[4:6])[0]
+                self._state["runtime_hours"] = struct.unpack(">H", payload[4:6])[0]
 
         elif can_id == CAN_ECU_INFO_ETC:
             # ECU_INFO_ETC: fuel_ml (0-1), fuel_remains_min (2-3), fuel_level_discrete (5)
             if len(payload) >= 2:
-                self._state["fuel_ml"] = struct.unpack("<H", payload[0:2])[0]
+                self._state["fuel_ml"] = struct.unpack(">H", payload[0:2])[0]
             if len(payload) >= 4:
-                self._state["fuel_remaining_min"] = struct.unpack("<H", payload[2:4])[0]
+                self._state["fuel_remaining_min"] = struct.unpack(">H", payload[2:4])[0]
             if len(payload) >= 6:
                 self._state["fuel_level_discrete"] = payload[5]
 
@@ -1825,9 +1839,42 @@ class PushAPI(GeneratorAPIProtocol):
                 self._model = "EU3200i"
                 self._serial = "Unknown"
 
+            # Ask the generator to report each metric's current value.
+            await self._request_status_values()
+
             self._connected = True
             _LOGGER.debug("Push API: Connection complete")
             return True
+
+    @staticmethod
+    def _status_request(can_id: int) -> bytearray:
+        """Build a status-request command for a CAN ID."""
+        packet = bytearray(14)
+        packet[0] = 0x02  # status request
+        packet[1] = 0x08
+        packet[4] = (can_id >> 8) & 0xFF
+        packet[5] = can_id & 0xFF
+        return packet
+
+    async def _request_status_values(self) -> None:
+        """Request a one-shot report of each metric value.
+
+        The generator does not always emit every metric on the stream on its own,
+        so we explicitly request each one; replies arrive on the response channel
+        and are parsed like stream frames.
+        """
+        if not self._client or not self._client.is_connected:
+            return
+        for can_id in STATUS_REQUEST_CAN_IDS:
+            try:
+                await asyncio.wait_for(
+                    self._client.write_gatt_char(
+                        GENERATOR_DATA_REQUEST_CHAR, self._status_request(can_id)
+                    ),
+                    timeout=5.0,
+                )
+            except (TimeoutError, BleakError) as exc:
+                _LOGGER.debug("Push API: status request 0x%03X failed: %s", can_id, exc)
 
     async def _start_data_stream(self) -> None:
         """Start the CAN data stream.
