@@ -374,16 +374,20 @@ class TestIsServiceDue:
 
     def test_hours_not_reached(self, coordinator: HondaGeneratorCoordinator) -> None:
         coordinator._stored_runtime_hours = 150
+        # Recent date so the calendar interval does not also trip; isolate hours.
+        recent_date = (datetime.now() - timedelta(days=1)).isoformat()
         coordinator._service_records = {
-            "oil_change": {"hours": 100, "date": "2026-01-01T00:00:00"}
+            "oil_change": {"hours": 100, "date": recent_date}
         }
         # 50h since service, interval 100h → not due
         assert coordinator.is_service_due(ServiceType.OIL_CHANGE) is False
 
     def test_hours_reached(self, coordinator: HondaGeneratorCoordinator) -> None:
         coordinator._stored_runtime_hours = 200
+        # Recent date so this exercises the hours path, not the calendar path.
+        recent_date = (datetime.now() - timedelta(days=1)).isoformat()
         coordinator._service_records = {
-            "oil_change": {"hours": 100, "date": "2026-01-01T00:00:00"}
+            "oil_change": {"hours": 100, "date": recent_date}
         }
         # 100h since service, interval 100h → due
         assert coordinator.is_service_due(ServiceType.OIL_CHANGE) is True
