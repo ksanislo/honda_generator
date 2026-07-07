@@ -189,6 +189,10 @@ class ModelSpec:
     guest_mode: bool
     control_sequence: bytes | None
     architecture: Architecture = Architecture.POLL
+    # Identifier that selects this model's diagnostic register map (see
+    # ENGINE_PROFILES). Different models with the same controller share a map;
+    # a wrong map reads inert registers (all-zero) or the wrong quantity.
+    engine_unit: str = "Z44A"
     can_set_password: bool = False
     # Whether the user must supply a credential. The EU2200i has no settable PIN
     # and no factory Bluetooth code, so it always uses the default - we can skip
@@ -208,10 +212,20 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         False,
         bytes([0x01, 0x50, 0x3C, 0x00, 0x00]),
         Architecture.POLL,
+        engine_unit="Z44A",
         requires_password=False,
     ),
     "EU3200i": ModelSpec(
-        "EU3200i", 3200, 4.7, False, True, False, False, None, Architecture.PUSH
+        "EU3200i",
+        3200,
+        4.7,
+        False,
+        True,
+        False,
+        False,
+        None,
+        Architecture.PUSH,
+        engine_unit="Z45A",
     ),
     "EM5000SX": ModelSpec(
         "EM5000SX",
@@ -223,6 +237,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x03, 0x3C, 0x28, 0x3C, 0x28]),
         Architecture.POLL,
+        engine_unit="Z23W",
         can_set_password=True,
     ),
     "EM6500SX": ModelSpec(
@@ -235,6 +250,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x03, 0x3C, 0x28, 0x3C, 0x28]),
         Architecture.POLL,
+        engine_unit="Z23W",
         can_set_password=True,
     ),
     "EU7000is": ModelSpec(
@@ -247,6 +263,7 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         True,
         bytes([0x02, 0x3C, 0x28, 0x28, 0x3C]),
         Architecture.POLL,
+        engine_unit="Z37A",
         can_set_password=True,
     ),
 }
@@ -313,14 +330,18 @@ class DeviceType(StrEnum):
 
 
 class DiagnosticCategory(StrEnum):
-    """Categories of diagnostic reads that can be independently skipped."""
+    """Categories of diagnostic reads that can be independently skipped.
 
-    WARNINGS_FAULTS = "warnings_faults"  # C'10, D'10, D'11
-    RUNTIME_HOURS = "runtime_hours"  # B'00, B'01
-    CURRENT = "current"  # B'13, B'14
-    POWER = "power"  # B'17, B'18
-    ECO_MODE = "eco_mode"  # B'19
-    FUEL = "fuel"  # B'40, B'41, B'42 (EU7000is only)
+    Registers vary per ECU; see ENGINE_PROFILES for the actual addresses. The
+    examples below are the EU2200i (Z44A) registers for reference only.
+    """
+
+    WARNINGS_FAULTS = "warnings_faults"  # e.g. C'10, D'10, D'11
+    RUNTIME_HOURS = "runtime_hours"  # e.g. B'00, B'01
+    CURRENT = "current"  # e.g. B'13, B'14
+    POWER = "power"  # e.g. B'17, B'18
+    ECO_MODE = "eco_mode"  # e.g. B'19
+    FUEL = "fuel"  # EU7000is only (Z37A: B'40, B'41, B'42)
 
 
 # Map DeviceType to DiagnosticCategory (only for types that require reads)
@@ -384,6 +405,216 @@ DEVICE_TYPES_PUSH: list[DeviceType] = [
 
 # All device types (for backwards compatibility)
 DEVICE_TYPES: list[DeviceType] = DEVICE_TYPES_POLL
+
+
+# ---------------------------------------------------------------------------
+# Per-controller diagnostic register maps ("engine profiles")
+#
+# Each poll model's diagnostics live at model-specific (group, register)
+# addresses with model-specific decoders. Earlier revisions applied a single
+# map to every poll model, which is why the EU7000is reported 0 A / 0 VA (it
+# read registers that are inert on its controller) and mis-scaled fuel. These
+# profiles give each controller its own correct map.
+#
+# Profiles in use: Z44A (EU2200i), Z37A (EU7000is), Z23W (EM5000SX /
+# EM6500SX). The EU3200i is CAN/push and handled by PushAPI, not here.
+# ---------------------------------------------------------------------------
+
+# EU7000is fuel tank capacity (liters); fuel level register is liters * 10.
+Z37A_FUEL_TANK_LITERS = 19.31
+
+
+def _u16(data: bytes, offset: int = 0) -> int:
+    """Unsigned big-endian 16-bit value from data[offset:offset + 2]."""
+    return int.from_bytes(data[offset : offset + 2], "big")
+
+
+def _s16(data: bytes, offset: int = 0) -> int:
+    """Signed big-endian 16-bit value from data[offset:offset + 2]."""
+    return int.from_bytes(data[offset : offset + 2], "big", signed=True)
+
+
+def _decode_z37a_current(data: bytes) -> float:
+    """EU7000is output current: sum of the two 120 V legs, in amps.
+
+    Registers B10/B11 and B20/B21 are two big-endian legs; they are summed
+    and scaled by 0.1, then readings below 0.6 A are floored to 0.
+    """
+    amps = (_u16(data, 0) + _u16(data, 2)) * 0.1
+    return 0.0 if amps < 0.6 else round(amps, 1)
+
+
+def _decode_z37a_power(data: bytes) -> int:
+    """EU7000is output power (B36/B37): big-endian watts, floored below 300 W."""
+    watts = _u16(data)
+    return 0 if watts < 300 else watts
+
+
+def _decode_z37a_fuel_level(data: bytes) -> int | None:
+    """EU7000is fuel level (B40): raw byte * 0.1 = liters, reported as percent.
+
+    0xFF is the "no data" sentinel (not full) and maps to unknown.
+    """
+    if data[0] == 0xFF:
+        return None
+    liters = data[0] * 0.1
+    return round(liters / Z37A_FUEL_TANK_LITERS * 100)
+
+
+def _decode_z37a_fuel_remaining(data: bytes) -> int | None:
+    """EU7000is fuel remaining (B41/B42): big-endian tenths-of-hours -> minutes.
+
+    0xFFFF is the "unavailable" sentinel and maps to unknown.
+    """
+    raw = _u16(data)
+    if raw == 0xFFFF:
+        return None
+    return round(raw * 0.1 * 60)
+
+
+def _decode_z23w_hours(data: bytes) -> int:
+    """EM5000SX/EM6500SX engine hours (0/50..0/53): BE32 * 0.256 / 3600 hours."""
+    return round(int.from_bytes(data[:4], "big") * 0.256 / 3600)
+
+
+def _z23w_amps(current_raw: int) -> float:
+    """Convert a Z23W raw current reading to amps."""
+    return current_raw * 5 * 49.915 / 1024
+
+
+def _decode_z23w_current(data: bytes) -> float:
+    """EM output current (0/D2, 0/D3): derived from the raw current word."""
+    return round(_z23w_amps(_u16(data)), 1)
+
+
+def _decode_z23w_power(data: bytes) -> int:
+    """EM output power: computed V x I from two voltage legs and a current word.
+
+    Registers 0/00..0/03 are two voltage legs (raw * 5 / 64 volts); 0/D2, 0/D3
+    are the raw current word. Power = mean(leg voltages) * amps, floored at 50 W.
+    """
+    v1 = _u16(data, 0) * 5 / 64
+    v2 = _u16(data, 2) * 5 / 64
+    amps = _z23w_amps(_u16(data, 4))
+    watts = (v1 + v2) / 2 * amps
+    return 0 if watts < 50 else round(watts)
+
+
+@dataclass(frozen=True)
+class DiagnosticRead:
+    """How to read and decode one diagnostic quantity on one engine unit."""
+
+    registers: tuple[tuple[str, str], ...]
+    decode: Callable[[bytes], int | float | bool | None]
+    bounds: tuple[float, float] | None = None
+
+
+@dataclass(frozen=True)
+class EngineProfile:
+    """Diagnostic register map for one ECU (engine unit).
+
+    ``warning_registers`` / ``fault_registers`` are read big-endian in the
+    order listed and packed into the raw bitfield (this reproduces the legacy
+    Z44A ``>H`` faults / single-byte warnings read exactly). Multi-byte bit
+    order for the wider Z37A tables follows the same convention; if a real
+    fault report ever shows mislabeled codes, the byte order here is the first
+    thing to revisit.
+    """
+
+    diagnostics: dict[DeviceType, DiagnosticRead]
+    warning_registers: tuple[tuple[str, str], ...] = ()
+    fault_registers: tuple[tuple[str, str], ...] = ()
+
+
+ENGINE_PROFILES: dict[str, EngineProfile] = {
+    # EU2200i — the original/legacy map. Preserved exactly (big-endian over
+    # ascending registers == the previous struct(">h")/[0] reads).
+    "Z44A": EngineProfile(
+        diagnostics={
+            DeviceType.RUNTIME_HOURS: DiagnosticRead(
+                (("B", "00"), ("B", "01")), _s16, BOUNDS_RUNTIME_HOURS
+            ),
+            DeviceType.CURRENT: DiagnosticRead(
+                (("B", "13"), ("B", "14")),
+                lambda d: _s16(d) / 10,
+                BOUNDS_CURRENT,
+            ),
+            DeviceType.POWER: DiagnosticRead(
+                (("B", "17"), ("B", "18")),
+                lambda d: _s16(d) * 10,
+                BOUNDS_POWER,
+            ),
+            DeviceType.ECO_MODE: DiagnosticRead(
+                (("B", "19"),), lambda d: not bool(d[0] & 1)
+            ),
+        },
+        warning_registers=(("C", "10"),),
+        fault_registers=(("D", "10"), ("D", "11")),
+    ),
+    # EU7000is
+    "Z37A": EngineProfile(
+        diagnostics={
+            DeviceType.RUNTIME_HOURS: DiagnosticRead(
+                (("B", "00"), ("B", "01")), _u16, BOUNDS_RUNTIME_HOURS
+            ),
+            DeviceType.CURRENT: DiagnosticRead(
+                (("B", "10"), ("B", "11"), ("B", "20"), ("B", "21")),
+                _decode_z37a_current,
+                BOUNDS_CURRENT,
+            ),
+            DeviceType.POWER: DiagnosticRead(
+                (("B", "36"), ("B", "37")), _decode_z37a_power, BOUNDS_POWER
+            ),
+            DeviceType.ECO_MODE: DiagnosticRead(
+                (("B", "16"),), lambda d: d[0] in (0, 2)
+            ),
+            DeviceType.FUEL_LEVEL: DiagnosticRead(
+                (("B", "40"),), _decode_z37a_fuel_level, BOUNDS_FUEL_LEVEL
+            ),
+            DeviceType.FUEL_REMAINING_TIME: DiagnosticRead(
+                (("B", "41"), ("B", "42")),
+                _decode_z37a_fuel_remaining,
+                BOUNDS_FUEL_REMAINING,
+            ),
+        },
+        warning_registers=(("C", "10"), ("C", "11")),
+        fault_registers=(
+            ("D", "10"),
+            ("D", "11"),
+            ("D", "12"),
+            ("D", "13"),
+            ("D", "14"),
+            ("D", "15"),
+            ("D", "16"),
+        ),
+    ),
+    # EM5000SX / EM6500SX — group 0, computed power, no fuel or alert tables.
+    "Z23W": EngineProfile(
+        diagnostics={
+            DeviceType.RUNTIME_HOURS: DiagnosticRead(
+                (("0", "50"), ("0", "51"), ("0", "52"), ("0", "53")),
+                _decode_z23w_hours,
+                BOUNDS_RUNTIME_HOURS,
+            ),
+            DeviceType.POWER: DiagnosticRead(
+                (
+                    ("0", "00"),
+                    ("0", "01"),
+                    ("0", "02"),
+                    ("0", "03"),
+                    ("0", "D2"),
+                    ("0", "D3"),
+                ),
+                _decode_z23w_power,
+                BOUNDS_POWER,
+            ),
+            DeviceType.CURRENT: DiagnosticRead(
+                (("0", "D2"), ("0", "D3")), _decode_z23w_current, BOUNDS_CURRENT
+            ),
+            DeviceType.ECO_MODE: DiagnosticRead((("0", "E6"),), lambda d: d[0] == 1),
+        },
+    ),
+}
 
 
 @dataclass
@@ -1073,18 +1304,37 @@ class PollAPI(GeneratorAPIProtocol):
             enabled_categories = set(DiagnosticCategory)
 
         try:
-            # Pre-fetch warning/fault data for binary sensors (only if enabled)
+            # Pre-fetch warning/fault data for binary sensors (only if enabled).
+            # Register addresses and widths are per-ECU; the EM series (Z23W)
+            # has no warning/fault tables and skips these reads entirely.
             if DiagnosticCategory.WARNINGS_FAULTS in enabled_categories:
-                self._warnings_raw = (await self._read_diagnostic("C", "10"))[0]
+                profile = self._engine_profile()
+
+                if profile.warning_registers:
+                    warning_bytes = b"".join(
+                        [
+                            await self._read_diagnostic(group, pos)
+                            for group, pos in profile.warning_registers
+                        ]
+                    )
+                    self._warnings_raw = int.from_bytes(warning_bytes, "big")
+                else:
+                    self._warnings_raw = 0
                 if self._shutting_down:
                     raise APIConnectionError("API is shutting down")
 
-                faults_bytes = await self._read_diagnostic(
-                    "D", "10"
-                ) + await self._read_diagnostic("D", "11")
-                self._faults_raw = struct.unpack(">H", faults_bytes)[0]
+                if profile.fault_registers:
+                    fault_bytes = b"".join(
+                        [
+                            await self._read_diagnostic(group, pos)
+                            for group, pos in profile.fault_registers
+                        ]
+                    )
+                    self._faults_raw = int.from_bytes(fault_bytes, "big")
+                else:
+                    self._faults_raw = 0
                 _LOGGER.debug(
-                    "Warnings/faults read: warnings=0x%02X, faults=0x%04X",
+                    "Warnings/faults read: warnings=0x%X, faults=0x%X",
                     self._warnings_raw,
                     self._faults_raw,
                 )
@@ -1116,6 +1366,16 @@ class PollAPI(GeneratorAPIProtocol):
             self.connected = False
             raise APIConnectionError("BLE connection lost") from exc
 
+    def _engine_profile(self) -> EngineProfile:
+        """Return the diagnostic register map for this generator's ECU.
+
+        Falls back to the Z44A (EU2200i) map for unknown models, preserving the
+        integration's historical behavior before per-model maps existed.
+        """
+        spec = get_model_spec(self._model) if self._model else None
+        unit = spec.engine_unit if spec else "Z44A"
+        return ENGINE_PROFILES.get(unit, ENGINE_PROFILES["Z44A"])
+
     async def _get_value(
         self,
         device_type: DeviceType,
@@ -1145,108 +1405,41 @@ class PollAPI(GeneratorAPIProtocol):
                 return False
             return 0
 
+        # Values sourced from the engine drive-status notification frame rather
+        # than a diagnostic register read.
         match device_type:
-            case DeviceType.RUNTIME_HOURS:
-                data = await self._read_diagnostic(
-                    "B", "00"
-                ) + await self._read_diagnostic("B", "01")
-                value = struct.unpack(">h", data)[0]
-                if not BOUNDS_RUNTIME_HOURS[0] <= value <= BOUNDS_RUNTIME_HOURS[1]:
-                    _LOGGER.warning(
-                        "Runtime hours value %d out of bounds %s, marking unavailable",
-                        value,
-                        BOUNDS_RUNTIME_HOURS,
-                    )
-                    return None
-                _LOGGER.debug("Runtime hours: %d", value)
-                return value
-
-            case DeviceType.CURRENT:
-                data = await self._read_diagnostic(
-                    "B", "13"
-                ) + await self._read_diagnostic("B", "14")
-                value = struct.unpack(">h", data)[0] / 10
-                if not BOUNDS_CURRENT[0] <= value <= BOUNDS_CURRENT[1]:
-                    _LOGGER.warning(
-                        "Output current value %.1f out of bounds %s, marking unavailable",
-                        value,
-                        BOUNDS_CURRENT,
-                    )
-                    return None
-                _LOGGER.debug("Output current: %.1f A", value)
-                return value
-
-            case DeviceType.POWER:
-                data = await self._read_diagnostic(
-                    "B", "17"
-                ) + await self._read_diagnostic("B", "18")
-                value = struct.unpack(">h", data)[0] * 10
-                if not BOUNDS_POWER[0] <= value <= BOUNDS_POWER[1]:
-                    _LOGGER.warning(
-                        "Output power value %d out of bounds %s, marking unavailable",
-                        value,
-                        BOUNDS_POWER,
-                    )
-                    return None
-                _LOGGER.debug("Output power: %d VA", value)
-                return value
-
-            case DeviceType.ECO_MODE:
-                data = await self._read_diagnostic("B", "19")
-                value = not bool(data[0] & 1)
-                _LOGGER.debug("ECO mode: %s", value)
-                return value
-
             case DeviceType.ENGINE_EVENT:
                 return self._engine_event
-
             case DeviceType.ENGINE_RUNNING:
                 return self._engine_running
-
             case DeviceType.ENGINE_ERROR:
                 return self._engine_error
-
             case DeviceType.OUTPUT_VOLTAGE:
                 return self._output_voltage
 
-            case DeviceType.FUEL_LEVEL:
-                # Fuel level is only available on EU7000is (B'40)
-                model_spec = get_model_spec(self._model) if self._model else None
-                if not model_spec or not model_spec.fuel_sensor:
-                    return None  # Not supported on this model
-                data = await self._read_diagnostic("B", "40")
-                value = data[0]
-                if not BOUNDS_FUEL_LEVEL[0] <= value <= BOUNDS_FUEL_LEVEL[1]:
-                    _LOGGER.warning(
-                        "Fuel level value %d out of bounds %s, marking unavailable",
-                        value,
-                        BOUNDS_FUEL_LEVEL,
-                    )
-                    return None
-                _LOGGER.debug("Fuel level: %d%%", value)
-                return value
+        # Everything else is a register read decoded per the model's ECU map.
+        spec = self._engine_profile().diagnostics.get(device_type)
+        if spec is None:
+            # Not exposed on this model's ECU (e.g. fuel on the EM series).
+            return None
 
-            case DeviceType.FUEL_REMAINING_TIME:
-                # Fuel remaining time is only available on EU7000is (B'41, B'42)
-                model_spec = get_model_spec(self._model) if self._model else None
-                if not model_spec or not model_spec.fuel_sensor:
-                    return None  # Not supported on this model
-                data = await self._read_diagnostic(
-                    "B", "41"
-                ) + await self._read_diagnostic("B", "42")
-                value = struct.unpack(">H", data)[0]
-                if not BOUNDS_FUEL_REMAINING[0] <= value <= BOUNDS_FUEL_REMAINING[1]:
-                    _LOGGER.warning(
-                        "Fuel remaining time value %d out of bounds %s, marking unavailable",
-                        value,
-                        BOUNDS_FUEL_REMAINING,
-                    )
-                    return None
-                _LOGGER.debug("Fuel remaining time: %d minutes", value)
-                return value
-
-            case _:
-                return 0
+        data = b"".join(
+            [await self._read_diagnostic(group, pos) for group, pos in spec.registers]
+        )
+        value = spec.decode(data)
+        if value is None:
+            _LOGGER.debug("%s: no data (sentinel), marking unavailable", device_type)
+            return None
+        if spec.bounds is not None and not (spec.bounds[0] <= value <= spec.bounds[1]):
+            _LOGGER.warning(
+                "%s value %s out of bounds %s, marking unavailable",
+                device_type,
+                value,
+                spec.bounds,
+            )
+            return None
+        _LOGGER.debug("%s: %s", device_type, value)
+        return value
 
     def get_warning_bit(self, bit: int) -> bool:
         """Get the state of a warning bit."""

@@ -238,7 +238,7 @@ EU7000IS_FAULT_CODES: list[AlertCode] = [
     AlertCode(bit=52, code="E-2C"),
 ]
 
-# EM5000SX/EM6500SX codes (not documented in protocol - placeholder)
+# EM5000SX/EM6500SX codes (none defined yet - placeholder)
 EM5000SX_WARNING_CODES: list[AlertCode] = []
 EM5000SX_FAULT_CODES: list[AlertCode] = []
 EM6500SX_WARNING_CODES: list[AlertCode] = []

@@ -20,6 +20,7 @@ from custom_components.honda_generator.api import (
     DEVICE_TYPE_TO_DIAGNOSTIC,
     DEVICE_TYPES_POLL,
     DEVICE_TYPES_PUSH,
+    ENGINE_PROFILES,
     FUNC_START_ECO,
     FUNC_STOP_ECO,
     MODEL_SPECS,
@@ -32,11 +33,19 @@ from custom_components.honda_generator.api import (
     ChangePasswordFlag,
     DeviceType,
     DiagnosticCategory,
+    EngineProfile,
     GeneratorAPIProtocol,
     Permission,
     PollAPI,
     PushAPI,
     build_change_password_frame,
+    _decode_z23w_current,
+    _decode_z23w_hours,
+    _decode_z23w_power,
+    _decode_z37a_current,
+    _decode_z37a_fuel_level,
+    _decode_z37a_fuel_remaining,
+    _decode_z37a_power,
     build_unlock_frame,
     create_api,
     get_architecture_from_device_name,
@@ -1069,3 +1078,143 @@ class TestPushFrameDispatch:
         assert 17 in mock_push_api._state["ecu_errors"]
         assert mock_push_api.get_warning_bit(17) is True
         assert mock_push_api.get_fault_bit(17) is True
+
+
+class TestEngineProfileDecoders:
+    """Unit tests for the per-ECU diagnostic decoders."""
+
+    # --- Z37A (EU7000is) ---
+
+    def test_z37a_power_scales_be16_watts(self) -> None:
+        # 3700 VA from the issue log => raw 0x0E74 at B36/B37
+        assert _decode_z37a_power(bytes([0x0E, 0x74])) == 3700
+
+    def test_z37a_power_floor_below_300(self) -> None:
+        assert _decode_z37a_power(bytes([0x00, 0xFF])) == 0  # 255 W -> 0
+        assert _decode_z37a_power(bytes([0x01, 0x2C])) == 300  # exactly 300 kept
+
+    def test_z37a_current_sums_two_legs(self) -> None:
+        # leg1 = 0x0064 (100) + leg2 = 0x0032 (50) = 150 * 0.1 = 15.0 A
+        data = bytes([0x00, 0x64, 0x00, 0x32])
+        assert _decode_z37a_current(data) == 15.0
+
+    def test_z37a_current_floor_below_0_6(self) -> None:
+        # 0x0002 + 0x0002 = 4 * 0.1 = 0.4 A -> floored to 0
+        assert _decode_z37a_current(bytes([0x00, 0x02, 0x00, 0x02])) == 0.0
+
+    def test_z37a_fuel_level_percent(self) -> None:
+        # raw 131 -> 13.1 L / 19.31 L ~= 68 %
+        assert _decode_z37a_fuel_level(bytes([131])) == 68
+        assert _decode_z37a_fuel_level(bytes([130])) == 67
+
+    def test_z37a_fuel_level_sentinel(self) -> None:
+        assert _decode_z37a_fuel_level(bytes([0xFF])) is None
+
+    def test_z37a_fuel_remaining_minutes(self) -> None:
+        # 0x0035 = 53 tenths-of-hours = 5.3 h = 318 minutes
+        assert _decode_z37a_fuel_remaining(bytes([0x00, 0x35])) == 318
+
+    def test_z37a_fuel_remaining_sentinel(self) -> None:
+        assert _decode_z37a_fuel_remaining(bytes([0xFF, 0xFF])) is None
+
+    # --- Z23W (EM5000SX / EM6500SX) ---
+
+    def test_z23w_hours_be32_scaled(self) -> None:
+        # BE32 * 0.256 / 3600. 0x0014A050 (1352272) -> ~96 h
+        raw = round(96 * 3600 / 0.256)
+        assert _decode_z23w_hours(raw.to_bytes(4, "big")) == 96
+
+    def test_z23w_current_from_raw(self) -> None:
+        # raw 200 -> 200 * 5 * 49.915 / 1024 ~= 48.7 A
+        assert _decode_z23w_current(bytes([0x00, 0xC8])) == pytest.approx(48.7, abs=0.1)
+
+    def test_z23w_power_computed_v_times_i(self) -> None:
+        # two legs raw 0x05DC (1500 -> ~117.2 V each), current raw 100
+        data = bytes([0x05, 0xDC, 0x05, 0xDC, 0x00, 0x64])
+        v = 1500 * 5 / 64
+        amps = 100 * 5 * 49.915 / 1024
+        assert _decode_z23w_power(data) == round(v * amps)
+
+    def test_z23w_power_floor_below_50(self) -> None:
+        # tiny current -> under 50 W -> 0
+        data = bytes([0x05, 0xDC, 0x05, 0xDC, 0x00, 0x01])
+        assert _decode_z23w_power(data) == 0
+
+
+class TestEngineProfileDispatch:
+    """Test that _get_value routes through the correct per-model register map."""
+
+    def test_profiles_registered(self) -> None:
+        for unit in ("Z44A", "Z37A", "Z23W"):
+            assert unit in ENGINE_PROFILES
+            assert isinstance(ENGINE_PROFILES[unit], EngineProfile)
+
+    def test_model_specs_have_engine_units(self) -> None:
+        assert MODEL_SPECS["EU2200i"].engine_unit == "Z44A"
+        assert MODEL_SPECS["EU7000is"].engine_unit == "Z37A"
+        assert MODEL_SPECS["EM5000SX"].engine_unit == "Z23W"
+        assert MODEL_SPECS["EM6500SX"].engine_unit == "Z23W"
+
+    def test_unknown_model_falls_back_to_z44a(self, mock_api: PollAPI) -> None:
+        mock_api._model = None
+        assert mock_api._engine_profile() is ENGINE_PROFILES["Z44A"]
+
+    def test_eu7000is_selects_z37a(self, mock_api: PollAPI) -> None:
+        mock_api._model = "EU7000is"
+        assert mock_api._engine_profile() is ENGINE_PROFILES["Z37A"]
+
+    @pytest.mark.asyncio
+    async def test_eu7000is_power_reads_b36_b37(self, mock_api: PollAPI) -> None:
+        mock_api._model = "EU7000is"
+        reads: list[tuple[str, str]] = []
+
+        async def fake_read(group: str, pos: str) -> bytes:
+            reads.append((group, pos))
+            return {"36": b"\x0e", "37": b"\x74"}[pos]
+
+        mock_api._read_diagnostic = fake_read  # type: ignore[assignment]
+        result = await mock_api._get_value(DeviceType.POWER, {DiagnosticCategory.POWER})
+        assert result == 3700
+        assert reads == [("B", "36"), ("B", "37")]
+
+    @pytest.mark.asyncio
+    async def test_eu7000is_current_reads_both_legs(self, mock_api: PollAPI) -> None:
+        mock_api._model = "EU7000is"
+        reads: list[tuple[str, str]] = []
+
+        async def fake_read(group: str, pos: str) -> bytes:
+            reads.append((group, pos))
+            return b"\x00\x64"[1:] if pos in ("11", "21") else b"\x00"
+
+        mock_api._read_diagnostic = fake_read  # type: ignore[assignment]
+        await mock_api._get_value(DeviceType.CURRENT, {DiagnosticCategory.CURRENT})
+        assert reads == [("B", "10"), ("B", "11"), ("B", "20"), ("B", "21")]
+
+    @pytest.mark.asyncio
+    async def test_em_series_has_no_fuel(self, mock_api: PollAPI) -> None:
+        mock_api._model = "EM5000SX"
+        # FUEL category enabled, but Z23W has no fuel register -> unavailable
+        result = await mock_api._get_value(
+            DeviceType.FUEL_LEVEL, {DiagnosticCategory.FUEL}
+        )
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_em_series_power_uses_group_zero(self, mock_api: PollAPI) -> None:
+        mock_api._model = "EM6500SX"
+        reads: list[tuple[str, str]] = []
+
+        async def fake_read(group: str, pos: str) -> bytes:
+            reads.append((group, pos))
+            return b"\x00"
+
+        mock_api._read_diagnostic = fake_read  # type: ignore[assignment]
+        await mock_api._get_value(DeviceType.POWER, {DiagnosticCategory.POWER})
+        assert reads == [
+            ("0", "00"),
+            ("0", "01"),
+            ("0", "02"),
+            ("0", "03"),
+            ("0", "D2"),
+            ("0", "D3"),
+        ]
